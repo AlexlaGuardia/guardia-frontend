@@ -54,6 +54,7 @@ interface ContentReviewPost {
   platform: string;
   image_url: string;
   mission_type: string;
+  holiday?: string | null;
   source: "upload" | "ai_generated";
   created_at: string;
 }
@@ -797,6 +798,11 @@ export default function GalleryTab({ client, jwt, onMessage, onSwitchToGio }: Ga
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1.5">
                           <PlatformBadge platform={currentPost.platform} />
+                          {currentPost.holiday && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                              {currentPost.holiday}
+                            </span>
+                          )}
                           {currentPost.source === "ai_generated" && (
                             <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-violet-50 text-violet-600">
                               AI Generated
