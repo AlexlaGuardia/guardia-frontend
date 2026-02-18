@@ -868,11 +868,13 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
           {calendarDays.map((day, i) => {
             const display = day ? getDayDisplay(day) : { type: "off" as const };
             const dayPosts = day ? getPostsForDay(day) : [];
+            const filledPosts = dayPosts.filter(p => !isUnfilledSlot(p) && (p.thumbnail_url || p.preview_url));
             const isSelected = day === selectedDay;
             const row = Math.floor(i / 7);
             const col = i % 7;
             const isTodayCell = day ? isToday(day) : false;
             const isFutureCell = day ? isFuture(day) : false;
+            const isPastCell = day ? isPast(day) : false;
             
             return (
               <button
@@ -886,8 +888,8 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
                     : isTodayCell
                       ? 'rgba(232, 160, 96, 0.05)'
                       : 'transparent',
-                  borderRight: col < 6 ? '1px solid var(--border-subtle)' : 'none',
-                  borderBottom: row < numRows - 1 ? '1px solid var(--border-subtle)' : 'none',
+                  borderRight: col < 6 ? '1px solid var(--border)' : 'none',
+                  borderBottom: row < numRows - 1 ? '1px solid var(--border)' : 'none',
                   boxShadow: isSelected 
                     ? 'inset 0 0 12px var(--accent-muted)' 
                     : 'none'
@@ -907,12 +909,46 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
                     
                     {/* Today indicator ring */}
                     {isTodayCell && (
-                      <div 
+                      <div
                         className="absolute top-0.5 right-0.5 w-6 h-6 rounded-full pointer-events-none"
                         style={{ border: '1px solid var(--accent-muted)' }}
                       />
                     )}
-                    
+
+                    {/* Thumbnail previews */}
+                    {filledPosts.length > 0 && (
+                      <div
+                        className="absolute inset-1 flex flex-col items-center justify-center gap-0.5 pointer-events-none"
+                        style={{ opacity: isPastCell ? 0.35 : 0.7 }}
+                      >
+                        {filledPosts.slice(0, 2).map((post, idx) => (
+                          <img
+                            key={post.id}
+                            src={post.thumbnail_url || post.preview_url}
+                            alt=""
+                            className="rounded object-cover"
+                            style={{
+                              width: filledPosts.length === 1 ? '85%' : '80%',
+                              height: filledPosts.length === 1 ? '70%' : '45%',
+                              opacity: idx === 1 ? 0.6 : 1,
+                            }}
+                          />
+                        ))}
+                        {filledPosts.length > 2 && (
+                          <span
+                            className="absolute bottom-0 right-0 text-[8px] font-bold rounded-full px-1"
+                            style={{
+                              background: 'var(--bg-elevated)',
+                              color: 'var(--text-secondary)',
+                              border: '1px solid var(--border)',
+                            }}
+                          >
+                            +{filledPosts.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     {/* Checkmark */}
                     {display.type === "checkmark" && (
                       <div className="absolute inset-0 flex items-center justify-center">
