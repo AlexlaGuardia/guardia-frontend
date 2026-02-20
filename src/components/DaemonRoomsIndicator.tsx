@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { Zap, Check, AlertTriangle, Clock } from "lucide-react";
 
 // ══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -41,11 +42,11 @@ const STATUS_COLORS = {
   timeout: { bg: "bg-red-500/20", border: "border-red-500/50", text: "text-red-400", dot: "bg-red-500" },
 };
 
-const STATUS_ICONS = {
-  active: "⚡",
-  completed: "✓",
-  escalated: "⚠",
-  timeout: "⏱",
+const STATUS_ICON_COMPONENTS: Record<string, React.ComponentType<any>> = {
+  active: Zap,
+  completed: Check,
+  escalated: AlertTriangle,
+  timeout: Clock,
 };
 
 export default function DaemonRoomsIndicator() {
@@ -192,7 +193,7 @@ export default function DaemonRoomsIndicator() {
                   className={`p-2.5 rounded-lg border ${colors.bg} ${colors.border} flex items-center justify-between`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-base">{STATUS_ICONS[room.status]}</span>
+                    {(() => { const Icon = STATUS_ICON_COMPONENTS[room.status] || Zap; return <Icon size={16} />; })()}
                     <div>
                       <div className={`text-sm font-medium ${colors.text}`}>Room #{room.room_id}</div>
                       {room.metadata?.project && (
@@ -224,7 +225,7 @@ export default function DaemonRoomsIndicator() {
                   className={`p-2 rounded-lg border ${colors.bg} ${colors.border} flex items-center justify-between opacity-70`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">{STATUS_ICONS[room.status]}</span>
+                    {(() => { const Icon = STATUS_ICON_COMPONENTS[room.status] || Zap; return <Icon size={14} />; })()}
                     <div>
                       <div className={`text-xs font-medium ${colors.text}`}>
                         Room #{room.room_id} • {room.status}

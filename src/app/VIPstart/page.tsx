@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Send, Sparkles, Globe, Share2, MapPin } from "lucide-react";
+import { Check, Send, Sparkles, Globe, Share2, MapPin, ExternalLink } from "lucide-react";
 import Image from 'next/image';
 
 export default function VIPStartPage() {
@@ -75,7 +75,7 @@ export default function VIPStartPage() {
             </span>
           </h1>
           <p className="text-[#a1a1a1] text-lg md:text-xl max-w-2xl mx-auto">
-            Website. Social media. Google Business. All handled for you — so you can focus on what you do best.
+            Website. Social media. Google Business. One team, one monthly partnership.
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export default function VIPStartPage() {
               <div>
                 <p className="text-white font-medium mb-1">Hey, I'm Gio!</p>
                 <p className="text-[#a1a1a1] text-sm leading-relaxed">
-                  I help local businesses look incredible online. Fill out the form and we'll personally reach out to understand your vision — no generic templates, no cookie-cutter solutions.
+                  I help local businesses look great online. Fill out the form and we'll reach out to understand your vision and put together a plan.
                 </p>
               </div>
             </div>
@@ -135,6 +135,33 @@ export default function VIPStartPage() {
                     <p className="text-[#6b6b6b] text-xs sm:text-sm">Setup, optimization, photos, posts, review management</p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Demo showcase */}
+            <div className="space-y-4">
+              <h3 className="text-white font-semibold text-lg">Sites We've Built</h3>
+              <p className="text-[#6b6b6b] text-xs sm:text-sm">Tap to preview — these are real sites we created for local businesses.</p>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { niche: 'Pet Grooming', emoji: '🐾', href: '/demo/grooming', gradient: 'from-amber-800/40 to-orange-900/40' },
+                  { niche: 'Barbershop', emoji: '✂️', href: '/demo/barbershop', gradient: 'from-slate-700/40 to-slate-900/40' },
+                  { niche: 'Luxury Salon', emoji: '💇', href: '/demo/salon', gradient: 'from-violet-800/40 to-purple-900/40' },
+                  { niche: 'Print Shop', emoji: '🖨️', href: '/demo/printshop', gradient: 'from-teal-800/40 to-teal-950/40' },
+                ].map((demo) => (
+                  <a
+                    key={demo.niche}
+                    href={demo.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br ${demo.gradient} border border-[#1a1a1a] hover:border-amber-500/30 transition-all hover:scale-[1.02]`}
+                  >
+                    <span className="text-2xl">{demo.emoji}</span>
+                    <p className="text-white text-xs sm:text-sm font-medium mt-2">{demo.niche}</p>
+                    <ExternalLink className="w-3 h-3 text-[#6b6b6b] group-hover:text-amber-500 absolute top-3 right-3 transition-colors" />
+                  </a>
+                ))}
               </div>
             </div>
 

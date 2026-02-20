@@ -342,6 +342,12 @@ export default function AthernyxPage() {
                 Threads
               </button>
             </div>
+            <Link
+              href="/hq/athernyx/editor"
+              className="px-3 py-1 text-xs rounded bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors"
+            >
+              Editor
+            </Link>
             <span className="hidden sm:inline text-[#555] text-xs font-mono">{total} entries</span>
           </div>
         </div>

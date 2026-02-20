@@ -1,1543 +1,755 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Quality Print Shop — Northumberland, PA | Printing Since the 1930s</title>
-<meta name="description" content="Business cards, brochures, banners, and more. Quality Print Shop has been serving Northumberland County for over 90 years. Stop in at 123 Duke St or call (570) 473-1122.">
-<meta property="og:title" content="Quality Print Shop — Northumberland, PA">
-<meta property="og:description" content="Over 90 years of quality printing. Business cards, banners, brochures, and everything in between.">
-<meta property="og:type" content="website">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Bitter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/lenis@1.1.20/dist/lenis.css">
-<style>
-/* ===================================================
-   QUALITY PRINT SHOP — Guardia Intelligence
-   "90 Years of Putting Ink to Paper"
-   GSAP + Lenis scroll storytelling
-   =================================================== */
-
-:root {
-  --ink: #1A1A2E;
-  --ink-soft: #2D2D44;
-  --ink-muted: #4A4A5E;
-  --paper: #F8F5F0;
-  --paper-warm: #F2EDE5;
-  --paper-aged: #E8DFD0;
-  --paper-dark: #D4C9B8;
-  --process-blue: #1C3D5A;
-  --process-blue-light: #2A5578;
-  --process-blue-muted: #3A6888;
-  --walnut: #5C4033;
-  --walnut-light: #7A5E4F;
-  --walnut-muted: #8B7668;
-  --brass: #B8922A;
-  --brass-light: #CCA73F;
-  --brass-muted: #A68325;
-  --seal-red: #8B2500;
-  --seal-red-light: #A63D1A;
-  --charcoal: #2A2A2A;
-  --warmgray: #7A7068;
-  --warmgray-light: #9A938B;
-  --shadow-soft: 0 4px 20px rgba(26, 26, 46, 0.08);
-  --shadow-medium: 0 8px 40px rgba(26, 26, 46, 0.12);
-  --shadow-press: 0 2px 0px rgba(26, 26, 46, 0.15);
-  --radius: 3px;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-/* Lenis overrides */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-stopped { overflow: hidden; }
-
-html { font-size: 16px; }
-
-body {
-  font-family: 'Source Serif 4', Georgia, serif;
-  background: var(--paper);
-  color: var(--ink);
-  line-height: 1.8;
-  overflow-x: hidden;
-}
-
-/* === PAPER GRAIN OVERLAY === */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.04;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
-}
-
-/* === NAVIGATION === */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  padding: 0 2rem;
-  transition: background 0.4s ease, -webkit-backdrop-filter 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
-  background: transparent;
-}
-nav.scrolled {
-  background: rgba(248, 245, 240, 0.95);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 1px 0 var(--paper-dark);
-}
-
-.nav-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 70px;
-}
-
-.nav-wordmark {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--paper);
-  text-decoration: none;
-  transition: color 0.4s;
-  white-space: nowrap;
-}
-nav.scrolled .nav-wordmark { color: var(--ink); }
-
-.nav-links {
-  display: none;
-  gap: 2rem;
-  list-style: none;
-  align-items: center;
-}
-.nav-links a {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(248, 245, 240, 0.85);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-nav.scrolled .nav-links a { color: var(--ink-muted); }
-.nav-links a:hover { color: var(--brass); }
-
-.nav-phone {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--paper);
-  text-decoration: none;
-  padding: 0.65rem 1.4rem;
-  border: 1px solid rgba(248, 245, 240, 0.3);
-  border-radius: 2px;
-  transition: all 0.3s;
-  white-space: nowrap;
-}
-nav.scrolled .nav-phone {
-  color: var(--process-blue);
-  border-color: var(--process-blue-muted);
-}
-.nav-phone:hover {
-  background: var(--brass);
-  color: var(--ink);
-  border-color: var(--brass);
-}
-
-.menu-toggle {
-  display: block;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-  min-width: 44px;
-  min-height: 44px;
-}
-.menu-toggle span {
-  display: block;
-  width: 22px;
-  height: 1.5px;
-  background: var(--paper);
-  margin: 5px 0;
-  transition: all 0.3s;
-}
-nav.scrolled .menu-toggle span { background: var(--ink); }
-
-/* Nav dropdown (all screen sizes) */
-.nav-links.open {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: 70px;
-  left: 0;
-  right: 0;
-  background: rgba(26, 26, 46, 0.98);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  padding: 1.5rem 2rem 2rem;
-  gap: 0.8rem;
-  max-height: calc(100dvh - 70px);
-  overflow-y: auto;
-}
-nav.scrolled .nav-links.open {
-  background: rgba(248, 245, 240, 0.98);
-}
-.nav-links.open a {
-  padding: 12px 0;
-  display: block;
-}
-
-/* === SKIP LINK === */
-.skip-link {
-  position: absolute;
-  top: -50px;
-  left: 0;
-  background: var(--process-blue);
-  color: var(--paper);
-  padding: 10px 18px;
-  z-index: 1000;
-  text-decoration: none;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
-  transition: top 0.2s;
-}
-.skip-link:focus { top: 0; }
-
-/* === FOCUS STATES === */
-a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--brass);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-.hero a:focus-visible,
-.gallery a:focus-visible,
-.cta-footer a:focus-visible,
-footer a:focus-visible {
-  outline-color: var(--paper);
-}
-
-/* === SECTION HELPERS === */
-section { position: relative; z-index: 1; }
-.section-pad { padding: 6rem 2rem; }
-.container { max-width: 1100px; margin: 0 auto; }
-
-.section-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-}
-.section-title {
-  font-family: 'Libre Baskerville', serif;
-  font-weight: 700;
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  line-height: 1.25;
-  margin-bottom: 1.5rem;
-}
-.section-brief {
-  font-size: 1.05rem;
-  font-weight: 300;
-  color: var(--warmgray);
-  max-width: 550px;
-  margin-bottom: 3rem;
-}
-
-/* Registration mark divider */
-.reg-mark {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2.5rem;
-  color: var(--warmgray);
-}
-.reg-mark svg { opacity: 0.3; }
-
-/* Halftone overlay */
-.halftone-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, var(--ink) 0.5px, transparent 0.5px);
-  background-size: 12px 12px;
-  opacity: 0.025;
-  pointer-events: none;
-}
-
-/* === HERO === */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  position: relative;
-  background: var(--ink);
-  overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 30% 70%, rgba(28, 61, 90, 0.2) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 20%, rgba(184, 146, 42, 0.08) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.hero-inner {
-  position: relative;
-  z-index: 2;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 4rem;
-  width: 100%;
-}
-
-.hero-text { flex: 1; }
-
-.hero-location {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(248, 245, 240, 0.65);
-  margin-bottom: 1.5rem;
-  opacity: 0;
-}
-
-.hero h1 {
-  font-family: 'Libre Baskerville', serif;
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
-  font-weight: 700;
-  color: var(--paper);
-  line-height: 1.15;
-  margin-bottom: 1.5rem;
-  opacity: 0;
-}
-.hero h1 em {
-  font-style: italic;
-  color: var(--brass-light);
-}
-
-.hero-sub {
-  font-family: 'Source Serif 4', serif;
-  font-size: 1.1rem;
-  font-weight: 300;
-  color: rgba(248, 245, 240, 0.75);
-  line-height: 1.8;
-  max-width: 520px;
-  margin-bottom: 2.5rem;
-  opacity: 0;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.hero-actions a { opacity: 0; }
-
-.btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  padding: 1rem 2rem;
-  border-radius: var(--radius);
-  transition: all 0.3s;
-  cursor: pointer;
-  border: none;
-  display: inline-block;
-}
-.btn-primary {
-  background: var(--process-blue);
-  color: var(--paper);
-}
-.btn-primary:hover {
-  background: var(--process-blue-light);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(28, 61, 90, 0.3);
-}
-.btn-outline {
-  background: transparent;
-  color: var(--paper);
-  border: 1px solid rgba(248, 245, 240, 0.3);
-}
-.btn-outline:hover {
-  border-color: var(--paper);
-  background: rgba(248, 245, 240, 0.05);
-}
-
-/* EST Seal */
-.hero-seal {
-  flex-shrink: 0;
-  width: 180px;
-  height: 180px;
-  border: 2px solid var(--brass);
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(-8deg);
-  position: relative;
-  opacity: 0;
-}
-.hero-seal::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(184, 146, 42, 0.4);
-  border-radius: 50%;
-}
-.hero-seal .seal-est {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--brass);
-}
-.hero-seal .seal-year {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 2.8rem;
-  font-weight: 700;
-  color: var(--paper);
-  line-height: 1;
-  margin: 0.25rem 0;
-}
-.hero-seal .seal-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.5rem;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--brass-muted);
-}
-
-/* Scroll indicator */
-.scroll-indicator {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  opacity: 0;
-}
-.scroll-indicator span {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(248, 245, 240, 0.55);
-}
-.scroll-line {
-  width: 1px;
-  height: 36px;
-  background: linear-gradient(to bottom, rgba(248, 245, 240, 0.4), transparent);
-  animation: scrollPulse 2s ease-in-out infinite;
-}
-@keyframes scrollPulse {
-  0%, 100% { transform: scaleY(1); opacity: 1; }
-  50% { transform: scaleY(0.5); opacity: 0.5; }
-}
-
-/* === SERVICES === */
-.services {
-  background: var(--paper-warm);
-  position: relative;
-}
-
-.services .section-label { color: var(--process-blue); }
-.services .section-title { color: var(--ink); }
-.services-header { text-align: center; }
-.services-header .section-brief {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-
-.service-card {
-  background: var(--paper);
-  border: 1px solid var(--paper-dark);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.6),
-    0 2px 0 var(--paper-dark),
-    var(--shadow-soft);
-  border-radius: var(--radius);
-  padding: 2.5rem 2rem;
-  text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.service-card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.6),
-    0 2px 0 var(--paper-dark),
-    var(--shadow-medium);
-}
-
-.service-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 1.5rem;
-  color: var(--process-blue);
-}
-.service-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.service-card h3 {
-  font-family: 'Bitter', serif;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 0.75rem;
-}
-.service-card p {
-  font-size: 0.95rem;
-  font-weight: 300;
-  color: var(--warmgray);
-  line-height: 1.7;
-}
-
-/* === HERITAGE STORY === */
-.heritage {
-  background: var(--paper);
-}
-.heritage .section-label { color: var(--walnut); }
-.heritage .section-title { color: var(--ink); }
-
-.heritage-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: start;
-}
-
-.heritage-text p {
-  font-size: 1.05rem;
-  font-weight: 400;
-  color: var(--ink-soft);
-  margin-bottom: 1.5rem;
-  line-height: 1.8;
-}
-.heritage-text p strong {
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.heritage-image {
-  aspect-ratio: 4/3;
-  border: 2px dashed var(--paper-dark);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--paper-warm);
-  position: relative;
-}
-.heritage-image span {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--warmgray-light);
-}
-
-/* Stats strip */
-.stats-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-top: 4rem;
-  padding-top: 3rem;
-  border-top: 1px solid var(--paper-dark);
-  text-align: center;
-}
-.stat-number {
-  font-family: 'Libre Baskerville', serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  color: var(--process-blue);
-  line-height: 1;
-  margin-bottom: 0.5rem;
-}
-.stat-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--warmgray);
-}
-
-/* === GALLERY === */
-.gallery {
-  background: var(--ink);
-  position: relative;
-  overflow: hidden;
-}
-.gallery::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.04;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-}
-
-.gallery .section-label { color: var(--brass); }
-.gallery .section-title { color: var(--paper); }
-.gallery .section-brief { color: rgba(248, 245, 240, 0.65); }
-.gallery-header { position: relative; z-index: 1; }
-
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-.gallery-item {
-  aspect-ratio: 4/3;
-  border: 2px dashed rgba(248, 245, 240, 0.12);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--ink-soft);
-  transition: transform 0.3s, box-shadow 0.3s;
-  cursor: default;
-}
-.gallery-item:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 30px rgba(184, 146, 42, 0.15);
-}
-.gallery-item span {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(248, 245, 240, 0.35);
-}
-
-/* === TESTIMONIALS === */
-.testimonials {
-  background: var(--paper);
-}
-.testimonials .section-label { color: var(--brass); }
-.testimonials .section-title { color: var(--ink); }
-.testimonials-header { text-align: center; margin-bottom: 3rem; }
-
-.testimonials-stack {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.testimonial-item {
-  padding: 2.5rem 0;
-  border-bottom: 1px solid rgba(184, 146, 42, 0.2);
-  position: relative;
-}
-.testimonial-item:last-child { border-bottom: none; }
-
-.testimonial-item::before {
-  content: '\201C';
-  font-family: 'Libre Baskerville', serif;
-  font-size: 5rem;
-  color: var(--brass);
-  opacity: 0.15;
-  position: absolute;
-  top: 1rem;
-  left: -0.5rem;
-  line-height: 1;
-}
-
-.testimonial-item blockquote {
-  font-family: 'Libre Baskerville', serif;
-  font-style: italic;
-  font-size: 1.15rem;
-  color: var(--ink-soft);
-  line-height: 1.7;
-  margin-bottom: 1rem;
-  padding-left: 1.5rem;
-  border-left: 3px solid var(--ink);
-  box-shadow: -4px 0 8px -2px rgba(26, 26, 46, 0.1);
-}
-
-.testimonial-item cite {
-  display: block;
-  font-family: 'IBM Plex Mono', monospace;
-  font-style: normal;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--warmgray);
-  padding-left: 1.5rem;
-}
-
-/* === LOCATION & HOURS === */
-.location {
-  background: var(--paper-warm);
-  position: relative;
-}
-
-.location .section-label { color: var(--process-blue); }
-.location .section-title { color: var(--ink); }
-
-.location-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: start;
-}
-
-.address-block {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.8rem;
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink);
-  line-height: 2;
-  margin-bottom: 2rem;
-}
-
-.location-phone {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--process-blue);
-  text-decoration: none;
-  display: block;
-  margin-bottom: 2rem;
-  transition: color 0.3s;
-}
-.location-phone:hover { color: var(--brass); }
-
-.map-placeholder {
-  aspect-ratio: 16/9;
-  border: 2px dashed var(--paper-dark);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--paper);
-}
-.map-placeholder span {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--warmgray-light);
-}
-
-.hours-table {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.8rem;
-  width: 100%;
-  border-collapse: collapse;
-}
-.hours-table caption {
-  font-weight: 500;
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--process-blue);
-  text-align: left;
-  margin-bottom: 1rem;
-  caption-side: top;
-}
-.hours-table tr {
-  border-bottom: 1px solid var(--paper-dark);
-}
-.hours-table th,
-.hours-table td {
-  padding: 0.6rem 0;
-  color: var(--ink-soft);
-  font-weight: 400;
-  text-align: left;
-}
-.hours-table th {
-  font-weight: 500;
-}
-.hours-table td:last-child {
-  text-align: right;
-  color: var(--ink);
-  font-weight: 500;
-}
-.hours-table .closed td:last-child {
-  color: var(--warmgray-light);
-  font-weight: 300;
-}
-
-.location-note {
-  margin-top: 1.5rem;
-  font-family: 'Source Serif 4', serif;
-  font-size: 0.9rem;
-  font-style: italic;
-  color: var(--warmgray);
-}
-
-/* === CTA FOOTER === */
-.cta-footer {
-  background: var(--process-blue);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.cta-footer::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(248,245,240,0.03) 0.5px, transparent 0.5px);
-  background-size: 14px 14px;
-  pointer-events: none;
-}
-
-.cta-footer-content { position: relative; z-index: 1; }
-
-.cta-footer h2 {
-  font-family: 'Libre Baskerville', serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  font-weight: 700;
-  color: var(--paper);
-  margin-bottom: 1rem;
-}
-.cta-footer .cta-sub {
-  font-size: 1.05rem;
-  font-weight: 300;
-  color: rgba(248, 245, 240, 0.8);
-  margin-bottom: 2.5rem;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.btn-brass {
-  display: inline-block;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: var(--brass);
-  color: var(--ink);
-  padding: 1.1rem 2.5rem;
-  border-radius: var(--radius);
-  text-decoration: none;
-  transition: all 0.3s;
-}
-.btn-brass:hover {
-  background: var(--brass-light);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(184, 146, 42, 0.3);
-}
-
-.cta-meta {
-  margin-top: 1.5rem;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  color: rgba(248, 245, 240, 0.5);
-}
-
-/* === FOOTER === */
-footer {
-  background: var(--ink);
-  padding: 3rem 2rem;
-  text-align: center;
-}
-.footer-name {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--paper);
-  margin-bottom: 0.75rem;
-}
-.footer-info {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: rgba(248, 245, 240, 0.6);
-  line-height: 2;
-}
-.footer-info a {
-  color: rgba(248, 245, 240, 0.6);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-.footer-info a:hover { color: var(--brass); }
-
-.footer-legacy {
-  font-family: 'Source Serif 4', serif;
-  font-style: italic;
-  font-size: 0.9rem;
-  color: rgba(248, 245, 240, 0.4);
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(248, 245, 240, 0.06);
-}
-
-.footer-bottom {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.footer-bottom span {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  color: rgba(248, 245, 240, 0.3);
-}
-.guardia-badge {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(248, 245, 240, 0.25);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-.guardia-badge:hover { color: rgba(248, 245, 240, 0.5); }
-
-/* === STICKY MOBILE CTA === */
-.sticky-cta {
-  display: none;
-}
-
-/* === RESPONSIVE === */
-@media (min-width: 769px) {
-  .nav-links {
-    display: flex;
-  }
-  .menu-toggle { display: none; }
-  .nav-links.open {
-    display: flex;
-    flex-direction: row;
-    position: static;
-    background: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    padding: 0;
-    gap: 2rem;
-    max-height: none;
-    overflow-y: visible;
-  }
-  .nav-links.open a {
-    padding: 0;
-    display: inline;
-  }
-}
-
-@media (max-width: 768px) {
-  .section-pad { padding: 3.5rem 1.5rem; }
-
-  .hero-inner {
-    flex-direction: column;
-    text-align: center;
-    gap: 2rem;
-    padding: 6rem 1.5rem 2rem;
-  }
-  .hero-sub { margin-left: auto; margin-right: auto; }
-  .hero-actions { justify-content: center; }
-  .hero-seal {
-    width: 140px;
-    height: 140px;
-    order: -1;
-  }
-  .hero-seal .seal-year { font-size: 2.2rem; }
-
-  .services-grid { grid-template-columns: 1fr; gap: 1.25rem; }
-  .service-card { padding: 2rem 1.5rem; }
-
-  .heritage-grid { grid-template-columns: 1fr; gap: 2rem; }
-
-  .gallery-grid { grid-template-columns: 1fr; gap: 1rem; }
-
-  .location-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-
-  .stats-strip { gap: 1rem; }
-  .stat-number { font-size: 2rem; }
-
-  .footer-bottom {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  /* Sticky CTA */
-  .sticky-cta {
-    display: block;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    z-index: 99;
-    background: var(--process-blue);
-    transform: translateY(100%);
-    transition: transform 0.4s ease;
-    box-shadow: 0 -2px 12px rgba(26, 26, 46, 0.2);
-  }
-  .sticky-cta.visible { transform: translateY(0); }
-  .sticky-cta-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1.5rem;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-  .sticky-cta-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.08em;
-    color: rgba(248, 245, 240, 0.7);
-  }
-  .sticky-cta a.call-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: var(--brass);
-    color: var(--ink);
-    padding: 0.7rem 1.5rem;
-    border-radius: var(--radius);
-    text-decoration: none;
-    min-height: 44px;
-    transition: background 0.3s;
-  }
-  .sticky-cta a.call-btn:hover { background: var(--brass-light); }
-
-  footer { padding-bottom: 5rem; }
-}
-
-@media (max-width: 480px) {
-  .hero h1 { font-size: 2rem; }
-  .hero-actions { flex-direction: column; align-items: center; }
-  .btn { width: 100%; max-width: 300px; text-align: center; }
-  .services-grid { gap: 1rem; }
-  .stats-strip { grid-template-columns: 1fr; gap: 1.5rem; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quality Print Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --parchment: #f0e1c4;
+      --parchment-dark: #d4c4a0;
+      --parchment-light: #f7eed6;
+      --ink: #2a1f14;
+      --ink-light: #5c4a3a;
+      --navy: #1a2a3a;
+      --navy-deep: #0f1a26;
+      --gold: #b8942e;
+      --gold-muted: #a08030;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--parchment);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== HERO — FULL PARCHMENT MAP ========== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--parchment);
+      /* Aged paper texture via layered gradients */
+      background-image:
+        /* Stain patches */
+        radial-gradient(ellipse at 15% 25%, rgba(160,130,80,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 60%, rgba(140,115,70,0.08) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 85%, rgba(170,140,90,0.06) 0%, transparent 45%),
+        /* Subtle fiber direction */
+        repeating-linear-gradient(
+          2deg,
+          transparent 0px,
+          transparent 3px,
+          rgba(160,140,100,0.03) 3px,
+          rgba(160,140,100,0.03) 4px
+        );
+      overflow: hidden;
+    }
+
+    /* Aged edge vignette — darkened borders like old paper */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow:
+        inset 0 0 120px 40px rgba(120,90,50,0.15),
+        inset 0 0 300px 80px rgba(80,60,30,0.08);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Faint fold crease down center */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 5%,
+        rgba(120,90,50,0.08) 20%,
+        rgba(120,90,50,0.12) 50%,
+        rgba(120,90,50,0.08) 80%,
+        transparent 95%
+      );
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+
+    /* Hero content layout */
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 60px;
+      max-width: 900px;
+      width: 90%;
+      padding: 40px 0;
+    }
+
+    /* Ship — drawn on the map */
+    .ship {
+      flex-shrink: 0;
+      width: 240px;
+      position: relative;
+      animation: fade-up 1.2s ease forwards;
+    }
+
+    .ship img {
+      width: 100%;
+      height: auto;
+      position: relative;
+      z-index: 1;
+      mix-blend-mode: multiply;
+      opacity: 0.82;
+      filter: sepia(0.25) contrast(1.15) brightness(0.9);
+      -webkit-mask-image: radial-gradient(ellipse 92% 88% at 50% 48%, black 55%, transparent 100%);
+      mask-image: radial-gradient(ellipse 92% 88% at 50% 48%, black 55%, transparent 100%);
+      animation: gentle-drift 6s ease-in-out infinite;
+    }
+
+    /* Cartographic water lines — static horizon so the bob is visible */
+    .ship::after {
+      content: '';
+      position: absolute;
+      bottom: 18%;
+      left: -35%;
+      width: 170%;
+      height: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 28'%3E%3Cpath d='M0,7 Q12,3 24,7 Q36,11 48,7 Q60,3 72,7 Q84,11 96,7 Q108,3 120,7 Q132,11 144,7 Q156,3 168,7 Q180,11 192,7 Q198,5 200,7' fill='none' stroke='%238b7860' stroke-width='3' opacity='0.25' stroke-linecap='round'/%3E%3Cpath d='M0,7 Q12,3 24,7 Q36,11 48,7 Q60,3 72,7 Q84,11 96,7 Q108,3 120,7 Q132,11 144,7 Q156,3 168,7 Q180,11 192,7 Q198,5 200,7' fill='none' stroke='%238b7860' stroke-width='1' stroke-linecap='round'/%3E%3Cpath d='M0,15 Q15,11 30,15 Q45,19 60,15 Q75,11 90,15 Q105,19 120,15 Q135,11 150,15 Q165,19 180,15 Q195,11 200,15' fill='none' stroke='%238b7860' stroke-width='2.5' opacity='0.2' stroke-linecap='round'/%3E%3Cpath d='M0,15 Q15,11 30,15 Q45,19 60,15 Q75,11 90,15 Q105,19 120,15 Q135,11 150,15 Q165,19 180,15 Q195,11 200,15' fill='none' stroke='%238b7860' stroke-width='0.7' stroke-linecap='round'/%3E%3Cpath d='M0,22 Q18,19 36,22 Q54,25 72,22 Q90,19 108,22 Q126,25 144,22 Q162,19 180,22 Q198,25 200,22' fill='none' stroke='%238b7860' stroke-width='2' opacity='0.15' stroke-linecap='round'/%3E%3Cpath d='M0,22 Q18,19 36,22 Q54,25 72,22 Q90,19 108,22 Q126,25 144,22 Q162,19 180,22 Q198,25 200,22' fill='none' stroke='%238b7860' stroke-width='0.4' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: 200px 28px;
+      background-repeat: repeat-x;
+      opacity: 0.3;
+      z-index: 0;
+      /* Hide lines behind the hull — only show on the sides */
+      -webkit-mask-image: linear-gradient(to right, black 0%, black 18%, transparent 33%, transparent 67%, black 82%, black 100%);
+      mask-image: linear-gradient(to right, black 0%, black 18%, transparent 33%, transparent 67%, black 82%, black 100%);
+    }
+
+    @keyframes gentle-drift {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* Shop info */
+    .shop-info {
+      flex: 1;
+      text-align: center;
+      animation: fade-up 1.2s ease 0.3s both;
+    }
+
+    .shop-info .est {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--ink-light);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .shop-info h1 {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      color: var(--ink);
+      line-height: 1.1;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .shop-info .divider {
+      width: 80px;
+      height: 2px;
+      background: var(--gold);
+      margin: 16px auto;
+    }
+
+    .shop-info .tagline {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--ink-light);
+      margin-bottom: 24px;
+    }
+
+    .shop-info .cta-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--parchment);
+      border: 2px solid var(--ink);
+    }
+    .btn-primary:hover {
+      background: var(--gold-muted);
+      border-color: var(--gold-muted);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 2px solid var(--ink-light);
+    }
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold-muted);
+    }
+
+    /* Compass rose — just sitting on the map */
+    .compass {
+      position: absolute;
+      bottom: 40px;
+      right: 60px;
+      width: 100px;
+      height: 100px;
+      opacity: 0.14;
+      z-index: 3;
+    }
+
+    /* Cartographic water line at bottom of hero — edge of the known world */
+    .hero-waterline {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1;
+      opacity: 0.2;
+    }
+
+    /* Ornamental section divider */
+    .section-break {
+      text-align: center;
+      padding: 30px 0 10px;
+      background: var(--parchment);
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-break svg {
+      width: 200px;
+      height: 20px;
+      opacity: 0.25;
+    }
+
+    /* ========== TIMELINE SECTION ========== */
+    .timeline-section {
+      background: var(--parchment);
+      background-image:
+        radial-gradient(ellipse at 30% 20%, rgba(180,160,120,0.1) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(160,140,100,0.08) 0%, transparent 50%);
+      padding: 60px 20px 100px;
+      position: relative;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--ink-light);
+      font-size: 1.1rem;
+    }
+
+    /* Timeline */
+    .timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--gold), var(--ink-light), var(--gold));
+      transform: translateX(-50%);
+    }
+
+    .era {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 80px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .era.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .era:nth-child(odd) { flex-direction: row; }
+    .era:nth-child(even) { flex-direction: row-reverse; }
+
+    .era-content {
+      width: calc(50% - 40px);
+      padding: 30px;
+      background: rgba(255,250,240,0.6);
+      border: 1px solid rgba(180,160,120,0.3);
+      border-radius: 6px;
+      backdrop-filter: blur(4px);
+    }
+
+    .era:nth-child(odd) .era-content { text-align: right; }
+    .era:nth-child(even) .era-content { text-align: left; }
+
+    .era-year {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.85rem;
+      color: var(--gold-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .era-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .era-desc {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--ink-light);
+    }
+
+    .era-dot {
+      position: absolute;
+      left: 50%;
+      top: 30px;
+      width: 16px;
+      height: 16px;
+      background: var(--gold);
+      border: 3px solid var(--parchment);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 0 3px var(--gold-muted);
+      z-index: 2;
+    }
+
+    .era-icon {
+      width: calc(50% - 40px);
+      display: flex;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .era:nth-child(odd) .era-icon { justify-content: flex-start; }
+    .era:nth-child(even) .era-icon { justify-content: flex-end; }
+
+    .era-icon img {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid rgba(180,160,120,0.3);
+      mix-blend-mode: multiply;
+      filter: sepia(0.1) contrast(1.05);
+      box-shadow: 0 3px 12px rgba(42,31,20,0.12);
+    }
+
+    .era-final .era-content {
+      background: rgba(42,31,20,0.05);
+      border-color: var(--gold);
+      box-shadow: 0 4px 20px rgba(184,148,46,0.1);
+    }
+
+    .era-final .era-dot {
+      width: 22px;
+      height: 22px;
+      background: var(--ink);
+      box-shadow: 0 0 0 4px var(--gold), 0 0 20px rgba(184,148,46,0.3);
+    }
+
+    /* ========== SERVICES ========== */
+    .services-section {
+      background: var(--navy-deep);
+      padding: 100px 20px;
+      text-align: center;
+    }
+
+    .services-section h2 {
+      color: var(--parchment);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      margin-bottom: 12px;
+    }
+
+    .services-section > p {
+      color: rgba(240,225,196,0.6);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      margin-bottom: 60px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .service-card {
+      background: rgba(240,225,196,0.05);
+      border: 1px solid rgba(240,225,196,0.1);
+      border-radius: 8px;
+      padding: 40px 30px;
+      transition: all 0.3s ease;
+    }
+
+    .service-card:hover {
+      background: rgba(240,225,196,0.08);
+      border-color: var(--gold-muted);
+      transform: translateY(-4px);
+    }
+
+    .service-card h3 {
+      color: var(--parchment);
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+    }
+
+    .service-card p {
+      color: rgba(240,225,196,0.5);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .service-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 20px;
+      opacity: 0.7;
+    }
+
+    /* ========== FOOTER / CTA ========== */
+    .footer-cta {
+      background: var(--parchment);
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .footer-cta h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    .footer-cta p {
+      color: var(--ink-light);
+      margin-bottom: 30px;
+      font-size: 1rem;
+    }
+
+    .footer-bar {
+      background: var(--ink);
+      color: var(--parchment-dark);
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+      .hero-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 30px;
+      }
+
+      .ship { width: 180px; }
+
+      .compass { bottom: 20px; right: 20px; width: 70px; height: 70px; }
+
+      .timeline::before { left: 20px; }
+
+      .era {
+        flex-direction: column !important;
+        margin-bottom: 50px;
+        padding-left: 50px;
+      }
+
+      .era-content {
+        width: 100%;
+        text-align: left !important;
+      }
+
+      .era-dot {
+        left: 20px;
+        top: 0;
+      }
+
+      .era-icon {
+        width: 100%;
+        justify-content: flex-start !important;
+        padding: 0;
+        margin-bottom: 12px;
+        order: -1;
+      }
+
+      .era-icon img {
+        width: 100px;
+        height: 100px;
+      }
+
+      .section-header { margin-bottom: 50px; }
+      .era-content { padding: 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- Skip Link -->
-<a href="#services" class="skip-link">Skip to main content</a>
+  <!-- ===== HERO — THE MAP ===== -->
+  <section class="hero">
 
-<!-- ═══ NAVIGATION ═══ -->
-<nav id="navbar">
-  <div class="nav-inner">
-    <a href="#" class="nav-wordmark">Quality Print Shop</a>
-    <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-    <ul class="nav-links">
-      <li><a href="#services">Services</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#gallery">Gallery</a></li>
-      <li><a href="#visit">Visit</a></li>
-    </ul>
-    <a href="tel:5704731122" class="nav-phone">(570) 473-1122</a>
-  </div>
-</nav>
+    <div class="hero-content">
+      <!-- Ship drawn on the map -->
+      <div class="ship">
+        <img src="images/ship_nobg.png" alt="Sailing ship illustration" />
+      </div>
 
-<!-- ═══ STICKY MOBILE CTA ═══ -->
-<div class="sticky-cta" id="stickyCta">
-  <div class="sticky-cta-inner">
-    <span class="sticky-cta-label">Quality Print Shop</span>
-    <a href="tel:5704731122" class="call-btn">Call Now</a>
-  </div>
-</div>
-
-<!-- ═══ HERO ═══ -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-text">
-      <p class="hero-location">Northumberland, Pennsylvania</p>
-      <h1>Ninety Years of Putting <em>Ink to Paper</em></h1>
-      <p class="hero-sub">Business cards. Banners. Brochures. Whatever you need printed &mdash; we've been doing it since your grandparents needed wedding invitations.</p>
-      <div class="hero-actions">
-        <a href="tel:5704731122" class="btn btn-primary">Call (570) 473-1122</a>
-        <a href="#visit" class="btn btn-outline">Stop In &mdash; 123 Duke St</a>
+      <!-- Shop identity -->
+      <div class="shop-info">
+        <p class="est">Established 1985</p>
+        <h1>Quality<br>Print Shop</h1>
+        <div class="divider"></div>
+        <p class="tagline">Where craftsmanship meets the page</p>
+        <div class="cta-row">
+          <a href="#services" class="btn btn-primary">Our Services</a>
+          <a href="#story" class="btn btn-secondary">Our Story</a>
+        </div>
       </div>
     </div>
-    <div class="hero-seal" aria-hidden="true">
-      <span class="seal-est">Est.</span>
-      <span class="seal-year">1930</span>
-      <span class="seal-label">Northumberland, PA</span>
-    </div>
-  </div>
-  <div class="scroll-indicator" id="scrollIndicator" aria-hidden="true">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
-</section>
 
-<!-- ═══ SERVICES ═══ -->
-<section id="services" class="services section-pad halftone-bg">
-  <div class="container">
-    <div class="reg-mark" aria-hidden="true">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><line x1="20" y1="0" x2="20" y2="40" stroke="currentColor" stroke-width="0.5"/><line x1="0" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="0.5"/><circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="0.5" fill="none"/></svg>
+    <!-- Compass rose -->
+    <svg class="compass" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="none" stroke="#2a1f14" stroke-width="1" opacity="0.4"/>
+      <circle cx="50" cy="50" r="35" fill="none" stroke="#2a1f14" stroke-width="0.5" opacity="0.2"/>
+      <path d="M50,8 L54,46 L50,50 L46,46 Z" fill="#2a1f14" opacity="0.6"/>
+      <path d="M50,92 L54,54 L50,50 L46,54 Z" fill="#2a1f14" opacity="0.3"/>
+      <path d="M8,50 L46,46 L50,50 L46,54 Z" fill="#2a1f14" opacity="0.3"/>
+      <path d="M92,50 L54,46 L50,50 L54,54 Z" fill="#2a1f14" opacity="0.3"/>
+      <text x="50" y="6" text-anchor="middle" font-size="7" font-family="Playfair Display" fill="#2a1f14" opacity="0.5">N</text>
+      <text x="50" y="99" text-anchor="middle" font-size="7" font-family="Playfair Display" fill="#2a1f14" opacity="0.5">S</text>
+      <text x="4" y="53" text-anchor="middle" font-size="7" font-family="Playfair Display" fill="#2a1f14" opacity="0.5">W</text>
+      <text x="96" y="53" text-anchor="middle" font-size="7" font-family="Playfair Display" fill="#2a1f14" opacity="0.5">E</text>
+    </svg>
+
+    <!-- Cartographic waterline at bottom edge -->
+    <svg class="hero-waterline" viewBox="0 0 1440 60" preserveAspectRatio="none">
+      <path d="M0,35 Q60,25 120,35 Q180,45 240,35 Q300,25 360,35 Q420,45 480,35 Q540,25 600,35 Q660,45 720,35 Q780,25 840,35 Q900,45 960,35 Q1020,25 1080,35 Q1140,45 1200,35 Q1260,25 1320,35 Q1380,45 1440,35" fill="none" stroke="#2a1f14" stroke-width="1.2"/>
+      <path d="M0,45 Q80,35 160,45 Q240,55 320,45 Q400,35 480,45 Q560,55 640,45 Q720,35 800,45 Q880,55 960,45 Q1040,35 1120,45 Q1200,55 1280,45 Q1360,35 1440,45" fill="none" stroke="#2a1f14" stroke-width="0.8" opacity="0.5"/>
+    </svg>
+  </section>
+
+  <!-- Ornamental break -->
+  <div class="section-break">
+    <svg viewBox="0 0 200 20">
+      <line x1="0" y1="10" x2="80" y2="10" stroke="#2a1f14" stroke-width="0.5"/>
+      <circle cx="90" cy="10" r="2" fill="#2a1f14"/>
+      <circle cx="100" cy="10" r="3" fill="none" stroke="#2a1f14" stroke-width="0.8"/>
+      <circle cx="110" cy="10" r="2" fill="#2a1f14"/>
+      <line x1="120" y1="10" x2="200" y2="10" stroke="#2a1f14" stroke-width="0.5"/>
+    </svg>
+  </div>
+
+  <!-- ===== TIMELINE: EVOLUTION OF PRINT ===== -->
+  <section class="timeline-section" id="story">
+    <div class="section-header">
+      <h2>The Evolution of Print</h2>
+      <p>From ancient craft to modern mastery</p>
     </div>
-    <div class="services-header">
-      <p class="section-label">What We Print</p>
-      <h2 class="section-title">If It Takes Ink and Paper, We Do It</h2>
-      <p class="section-brief">From a single rubber stamp to a thousand full-color brochures &mdash; every job gets the same care.</p>
+
+    <div class="timeline">
+
+      <div class="era">
+        <div class="era-content">
+          <p class="era-year">200 AD</p>
+          <h3 class="era-title">Woodblock Printing</h3>
+          <p class="era-desc">The earliest known form of printing. Artisans carved entire pages into wooden blocks, inked them, and pressed them onto cloth and paper. Each block was a work of art in itself.</p>
+        </div>
+        <div class="era-dot"></div>
+        <div class="era-icon">
+          <img src="images/woodblock.png" alt="Woodblock printing artisan" />
+        </div>
+      </div>
+
+      <div class="era">
+        <div class="era-content">
+          <p class="era-year">1440</p>
+          <h3 class="era-title">The Gutenberg Press</h3>
+          <p class="era-desc">Johannes Gutenberg's movable type revolutionized civilization. For the first time, knowledge could be reproduced at scale. The printed word changed the world forever.</p>
+        </div>
+        <div class="era-dot"></div>
+        <div class="era-icon">
+          <img src="images/gutenberg.png" alt="The Gutenberg printing press" />
+        </div>
+      </div>
+
+      <div class="era">
+        <div class="era-content">
+          <p class="era-year">1800s</p>
+          <h3 class="era-title">The Letterpress</h3>
+          <p class="era-desc">Raised metal type pressed directly into paper, leaving a distinctive impression you could feel with your fingertips. The craft of print became tactile art.</p>
+        </div>
+        <div class="era-dot"></div>
+        <div class="era-icon">
+          <img src="images/letterpress.png" alt="Victorian letterpress typesetting" />
+        </div>
+      </div>
+
+      <div class="era">
+        <div class="era-content">
+          <p class="era-year">1900s</p>
+          <h3 class="era-title">Offset Lithography</h3>
+          <p class="era-desc">The image transfers from plate to rubber blanket to paper. Cleaner, faster, more precise. Print became accessible to every business and household.</p>
+        </div>
+        <div class="era-dot"></div>
+        <div class="era-icon">
+          <img src="images/offset.png" alt="Offset lithography press" />
+        </div>
+      </div>
+
+      <div class="era">
+        <div class="era-content">
+          <p class="era-year">Today</p>
+          <h3 class="era-title">Digital Precision</h3>
+          <p class="era-desc">Modern print combines centuries of knowledge with digital exactness. Vibrant color, razor-sharp detail, and infinite possibility on every substrate imaginable.</p>
+        </div>
+        <div class="era-dot"></div>
+        <div class="era-icon">
+          <img src="images/digital.png" alt="Modern digital printing" />
+        </div>
+      </div>
+
+      <div class="era era-final">
+        <div class="era-content">
+          <p class="era-year">Since 1985</p>
+          <h3 class="era-title">Quality Print Shop</h3>
+          <p class="era-desc">Four decades of putting ink to paper with pride. We carry the full weight of this tradition into every job that crosses our shop floor. Your vision, our craft.</p>
+        </div>
+        <div class="era-dot"></div>
+        <div class="era-icon">
+          <img src="images/quality_print.png" alt="Quality Print Shop storefront" />
+        </div>
+      </div>
+
     </div>
+  </section>
+
+  <!-- ===== SERVICES ===== -->
+  <section class="services-section" id="services">
+    <h2>What We Print</h2>
+    <p>Crafted with care, delivered with pride</p>
+
     <div class="services-grid">
       <div class="service-card">
-        <div class="service-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="10" width="36" height="24" rx="2"/><line x1="12" y1="18" x2="28" y2="18"/><line x1="12" y1="22" x2="22" y2="22"/><line x1="12" y1="26" x2="18" y2="26"/></svg>
-        </div>
+        <svg class="service-icon" viewBox="0 0 48 48"><rect x="8" y="6" width="32" height="36" rx="2" fill="none" stroke="#f0e1c4" stroke-width="1.5"/><line x1="14" y1="14" x2="34" y2="14" stroke="#f0e1c4" stroke-width="1" opacity="0.5"/><line x1="14" y1="20" x2="34" y2="20" stroke="#f0e1c4" stroke-width="1" opacity="0.5"/><line x1="14" y1="26" x2="28" y2="26" stroke="#f0e1c4" stroke-width="1" opacity="0.5"/></svg>
         <h3>Business Cards &amp; Stationery</h3>
-        <p>Cards, letterheads, envelopes, forms. The printed materials that run your business.</p>
+        <p>First impressions that last. Premium cardstock, expert finishing.</p>
       </div>
       <div class="service-card">
-        <div class="service-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8h32v32H8z"/><path d="M16 8v32"/><line x1="22" y1="16" x2="34" y2="16"/><line x1="22" y1="22" x2="34" y2="22"/><line x1="22" y1="28" x2="30" y2="28"/></svg>
-        </div>
-        <h3>Brochures &amp; Flyers</h3>
-        <p>Brochures, flyers, postcards, rack cards, newsletters. Get the word out.</p>
+        <svg class="service-icon" viewBox="0 0 48 48"><rect x="4" y="10" width="40" height="28" rx="2" fill="none" stroke="#f0e1c4" stroke-width="1.5"/><line x1="4" y1="18" x2="44" y2="18" stroke="#f0e1c4" stroke-width="1" opacity="0.5"/><rect x="8" y="22" width="16" height="12" rx="1" fill="none" stroke="#f0e1c4" stroke-width="0.8" opacity="0.4"/></svg>
+        <h3>Banners &amp; Signage</h3>
+        <p>From storefronts to trade shows. Bold, durable, impossible to ignore.</p>
       </div>
       <div class="service-card">
-        <div class="service-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="6" width="28" height="36" rx="1"/><line x1="10" y1="12" x2="38" y2="12"/><path d="M20 6V2M28 6V2"/></svg>
-        </div>
-        <h3>Banners &amp; Yard Signs</h3>
-        <p>Full-color banners, yard signs with stakes, posters. Big or small, indoor or out.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14l16-8 16 8v4L24 22 8 18v-4z"/><path d="M8 18v12l16 8 16-8V18"/><line x1="24" y1="22" x2="24" y2="42"/></svg>
-        </div>
-        <h3>Invitations &amp; Announcements</h3>
-        <p>Wedding invitations, graduation announcements, greeting cards, church bulletins.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="32" height="32" rx="2"/><rect x="12" y="12" width="24" height="24" rx="1"/><line x1="18" y1="20" x2="30" y2="20"/><line x1="18" y1="26" x2="26" y2="26"/></svg>
-        </div>
-        <h3>Copies &amp; Finishing</h3>
-        <p>Black &amp; white and color copies, laminating, folding, hole punching, binding.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="6" width="24" height="14" rx="2"/><rect x="16" y="24" width="16" height="6" rx="1"/><line x1="24" y1="20" x2="24" y2="24"/><line x1="20" y1="34" x2="20" y2="42"/><line x1="28" y1="34" x2="28" y2="42"/><line x1="16" y1="30" x2="32" y2="30"/></svg>
-        </div>
-        <h3>Rubber Stamps &amp; More</h3>
-        <p>Custom rubber stamps, labels, tags, magnets, raffle tickets, scratch pads.</p>
+        <svg class="service-icon" viewBox="0 0 48 48"><path d="M6,38 L6,10 Q6,6 10,6 L34,6 L42,14 L42,38 Q42,42 38,42 L10,42 Q6,42 6,38 Z" fill="none" stroke="#f0e1c4" stroke-width="1.5"/><path d="M34,6 L34,14 L42,14" fill="none" stroke="#f0e1c4" stroke-width="1.2"/></svg>
+        <h3>Brochures &amp; Catalogs</h3>
+        <p>Tell your story with fold and color. Design that people keep.</p>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══ HERITAGE STORY ═══ -->
-<section id="about" class="heritage section-pad">
-  <div class="container">
-    <div class="reg-mark" aria-hidden="true">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><line x1="20" y1="0" x2="20" y2="40" stroke="currentColor" stroke-width="0.5"/><line x1="0" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="0.5"/><circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="0.5" fill="none"/></svg>
-    </div>
-    <div class="heritage-grid">
-      <div class="heritage-text">
-        <p class="section-label">Our Story</p>
-        <h2 class="section-title">The Shop on Duke Street</h2>
-        <p>For over ninety years, Quality Print Shop has been right here on Duke Street in Northumberland. Through world wars and recessions, through the digital revolution and everything after &mdash; we've kept the presses running.</p>
-        <p>The job hasn't changed much. Someone walks in with an idea &mdash; a business card, a wedding invitation, a banner for the church fundraiser &mdash; and we make it real. <strong>Ink on paper. Done right, done fast, at a fair price.</strong></p>
-        <p>We're not the biggest shop. We're not the flashiest. But when your business cards need to be perfect and you need them Tuesday &mdash; you know where to find us.</p>
-      </div>
-      <div class="heritage-image" aria-hidden="true">
-        <span>Shop Photo &mdash; Interior / Press</span>
-      </div>
-    </div>
-    <div class="stats-strip">
-      <div>
-        <div class="stat-number" data-count="90">0</div>
-        <div class="stat-label">Years in Business</div>
-      </div>
-      <div>
-        <div class="stat-number">1000s</div>
-        <div class="stat-label">Local Businesses Served</div>
-      </div>
-      <div>
-        <div class="stat-number">4.5 &#9733;</div>
-        <div class="stat-label">Customer Rating</div>
-      </div>
-    </div>
-  </div>
-</section>
+  <!-- ===== FOOTER CTA ===== -->
+  <section class="footer-cta">
+    <h2>Ready to Put Your Vision on Paper?</h2>
+    <p>Stop by the shop or give us a call. We'd love to talk about your next project.</p>
+    <a href="tel:+1234567890" class="btn btn-primary">Call Us Today</a>
+  </section>
 
-<!-- ═══ GALLERY ═══ -->
-<section id="gallery" class="gallery section-pad">
-  <div class="container">
-    <div class="gallery-header">
-      <p class="section-label">Our Work</p>
-      <h2 class="section-title">Fresh Off the Press</h2>
-      <p class="section-brief">A look at some of what's come through the shop.</p>
-    </div>
-    <div class="gallery-grid">
-      <div class="gallery-item"><span>Business Cards</span></div>
-      <div class="gallery-item"><span>Banners</span></div>
-      <div class="gallery-item"><span>Wedding Suite</span></div>
-      <div class="gallery-item"><span>Brochures</span></div>
-      <div class="gallery-item"><span>Yard Signs</span></div>
-      <div class="gallery-item"><span>Custom Forms</span></div>
-    </div>
-  </div>
-</section>
+  <footer class="footer-bar">
+    Quality Print Shop &bull; Sunbury, PA &bull; Est. 1985
+  </footer>
 
-<!-- ═══ TESTIMONIALS ═══ -->
-<section class="testimonials section-pad">
-  <div class="container">
-    <div class="reg-mark" aria-hidden="true">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><line x1="20" y1="0" x2="20" y2="40" stroke="currentColor" stroke-width="0.5"/><line x1="0" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="0.5"/><circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="0.5" fill="none"/></svg>
-    </div>
-    <div class="testimonials-header">
-      <p class="section-label">Testimonials</p>
-      <h2 class="section-title">What Our Customers Say</h2>
-    </div>
-    <div class="testimonials-stack">
-      <div class="testimonial-item">
-        <blockquote>I use Quality Print Shop for my business cards. He does a great job at a great price. He also gets them done very quickly. Highly recommend.</blockquote>
-        <cite>&mdash; Local Business Owner</cite>
-      </div>
-      <div class="testimonial-item">
-        <blockquote>Great work, everything is always perfect!</blockquote>
-        <cite>&mdash; Repeat Customer</cite>
-      </div>
-      <div class="testimonial-item">
-        <blockquote>I stopped in to see if Carl could help me with my printing needs and he went above and beyond. Everything looks perfect! I won't go anywhere else.</blockquote>
-        <cite>&mdash; Satisfied Customer</cite>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ LOCATION & HOURS ═══ -->
-<section id="visit" class="location section-pad halftone-bg">
-  <div class="container">
-    <div class="reg-mark" aria-hidden="true">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><line x1="20" y1="0" x2="20" y2="40" stroke="currentColor" stroke-width="0.5"/><line x1="0" y1="20" x2="40" y2="20" stroke="currentColor" stroke-width="0.5"/><circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="0.5" fill="none"/></svg>
-    </div>
-    <p class="section-label">Visit Us</p>
-    <h2 class="section-title">Come See Us</h2>
-    <div class="location-grid">
-      <div>
-        <div class="address-block">
-          Quality Print Shop Inc<br>
-          123 Duke Street<br>
-          Northumberland, PA 17857
-        </div>
-        <a href="tel:5704731122" class="location-phone">(570) 473-1122</a>
-        <div class="map-placeholder" aria-hidden="true">
-          <span>Map &mdash; 123 Duke St, Northumberland</span>
-        </div>
-      </div>
-      <div>
-        <table class="hours-table">
-          <caption>Hours</caption>
-          <tr><th scope="row">Monday</th><td>9am &ndash; 5pm</td></tr>
-          <tr><th scope="row">Tuesday</th><td>9am &ndash; 5pm</td></tr>
-          <tr><th scope="row">Wednesday</th><td>9am &ndash; 5pm</td></tr>
-          <tr><th scope="row">Thursday</th><td>9am &ndash; 5pm</td></tr>
-          <tr><th scope="row">Friday</th><td>9am &ndash; 5pm</td></tr>
-          <tr class="closed"><th scope="row">Saturday</th><td>Closed</td></tr>
-          <tr class="closed"><th scope="row">Sunday</th><td>Closed</td></tr>
-        </table>
-        <p class="location-note">Walk-ins welcome. No appointment needed.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ CTA FOOTER ═══ -->
-<section class="cta-footer section-pad">
-  <div class="cta-footer-content">
-    <h2>Ready to Print?</h2>
-    <p class="cta-sub">Stop in, give us a call, or just swing by Duke Street. We'll take care of the rest.</p>
-    <a href="tel:5704731122" class="btn-brass">Call (570) 473-1122</a>
-    <p class="cta-meta">123 Duke St, Northumberland, PA &middot; Mon&ndash;Fri 9&ndash;5</p>
-  </div>
-</section>
-
-<!-- ═══ FOOTER ═══ -->
-<footer>
-  <p class="footer-name">Quality Print Shop Inc</p>
-  <p class="footer-info">
-    123 Duke Street &middot; Northumberland, PA 17857 &middot; <a href="tel:5704731122">(570) 473-1122</a>
-  </p>
-  <p class="footer-legacy">Serving Northumberland County for over 90 years.</p>
-  <div class="footer-bottom">
-    <span>&copy; 2026 Quality Print Shop Inc</span>
-    <a href="https://guardiacontent.com" class="guardia-badge" target="_blank" rel="noopener">Powered by Guardia</a>
-  </div>
-</footer>
-
-<!-- ═══ SCRIPTS ═══ -->
-<script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-<script>
-// ═══════════════════════════════════════════
-// Quality Print Shop — Scroll Engine
-// GSAP + ScrollTrigger + Lenis
-// ═══════════════════════════════════════════
-
-// ─── Lenis Smooth Scroll ───
-const lenis = new Lenis({
-  duration: 1.2,
-  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-  lerp: 0.1,
-  wheelMultiplier: 1,
-});
-
-lenis.on('scroll', ScrollTrigger.update);
-gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-gsap.ticker.lagSmoothing(0);
-gsap.registerPlugin(ScrollTrigger);
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-// ─── Mobile Menu Toggle ───
-const menuToggle = document.querySelector('.menu-toggle');
-const navLinks = document.querySelector('.nav-links');
-
-if (menuToggle && navLinks) {
-  menuToggle.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    menuToggle.setAttribute('aria-expanded', isOpen);
-  });
-
-  document.addEventListener('click', (e) => {
-    if (navLinks.classList.contains('open') &&
-        !navLinks.contains(e.target) &&
-        !menuToggle.contains(e.target)) {
-      navLinks.classList.remove('open');
-      menuToggle.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && navLinks.classList.contains('open')) {
-      navLinks.classList.remove('open');
-      menuToggle.setAttribute('aria-expanded', 'false');
-    }
-  });
-}
-
-// ─── Smooth scroll for anchor links ───
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const href = a.getAttribute('href');
-    if (!href || href === '#') return;
-
-    e.preventDefault();
-    const target = document.querySelector(href);
-    if (target) {
-      window.history.pushState({}, '', href);
-      lenis.scrollTo(target, { offset: -70 });
-      navLinks?.classList.remove('open');
-    }
-  });
-});
-
-// ─── Nav: transparent → solid ───
-const navbar = document.querySelector('nav');
-ScrollTrigger.create({
-  trigger: '.hero',
-  start: 'top top',
-  end: '80% top',
-  onLeave: () => navbar?.classList.add('scrolled'),
-  onEnterBack: () => navbar?.classList.remove('scrolled'),
-});
-
-// ─── Hero Entrance ───
-if (!prefersReducedMotion) {
-  const heroTl = gsap.timeline({ delay: 0.3 });
-  heroTl
-    .to('.hero-location', { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
-    .fromTo('.hero h1', { opacity: 0, scale: 1.02 }, { opacity: 1, scale: 1, duration: 0.9, ease: 'power2.out' }, '-=0.2')
-    .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.3')
-    .fromTo('.hero-actions a', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.15, duration: 0.5, ease: 'power2.out' }, '-=0.2')
-    .fromTo('.hero-seal', { opacity: 0, rotation: -20, scale: 0.8 }, { opacity: 1, rotation: -8, scale: 1, duration: 0.8, ease: 'back.out(1.4)' }, '-=0.4')
-    .to('#scrollIndicator', { opacity: 1, duration: 0.5 }, '-=0.2');
-
-  // ─── Scroll indicator fade ───
-  ScrollTrigger.create({
-    trigger: '.hero',
-    start: '10% top',
-    end: '30% top',
-    onEnter: () => gsap.to('#scrollIndicator', { opacity: 0, duration: 0.3 }),
-    onLeaveBack: () => gsap.to('#scrollIndicator', { opacity: 1, duration: 0.3 }),
-  });
-} else {
-  // Show everything immediately when motion is reduced
-  gsap.set('.hero-location, .hero h1, .hero-sub, .hero-actions a, .hero-seal, #scrollIndicator', { opacity: 1 });
-}
-
-// ─── Sticky Mobile CTA ───
-const stickyCta = document.getElementById('stickyCta');
-const heroEl = document.querySelector('.hero');
-if (stickyCta && heroEl) {
-  ScrollTrigger.create({
-    trigger: '.hero',
-    start: 'bottom top',
-    onEnter: () => stickyCta.classList.add('visible'),
-    onLeaveBack: () => stickyCta.classList.remove('visible'),
-  });
-}
-
-if (!prefersReducedMotion) {
-  // ─── Services Cards ───
-  gsap.from('.service-card', {
-    scrollTrigger: { trigger: '.services-grid', start: 'top 80%' },
-    opacity: 0,
-    y: 40,
-    scale: 0.95,
-    stagger: 0.1,
-    duration: 0.7,
-    ease: 'power2.out'
-  });
-
-  gsap.from('.services-header', {
-    scrollTrigger: { trigger: '.services', start: 'top 75%' },
-    opacity: 0, y: 30, duration: 0.7, ease: 'power2.out'
-  });
-
-  // ─── Heritage Story ───
-  gsap.from('.heritage-text .section-label, .heritage-text .section-title', {
-    scrollTrigger: { trigger: '.heritage', start: 'top 75%' },
-    opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
-  });
-
-  gsap.from('.heritage-text p', {
-    scrollTrigger: { trigger: '.heritage-text', start: 'top 65%' },
-    opacity: 0, y: 20, stagger: 0.15, duration: 0.6, ease: 'power2.out'
-  });
-
-  gsap.from('.heritage-image', {
-    scrollTrigger: { trigger: '.heritage-image', start: 'top 80%' },
-    opacity: 0, scale: 0.95, duration: 0.8, ease: 'power2.out'
-  });
-
-  // Stats counter
-  const statEl = document.querySelector('[data-count]');
-  if (statEl) {
-    ScrollTrigger.create({
-      trigger: '.stats-strip',
-      start: 'top 80%',
-      once: true,
-      onEnter: () => {
-        gsap.fromTo(statEl, { innerText: 0 }, {
-          innerText: 90,
-          duration: 2,
-          snap: { innerText: 1 },
-          ease: 'power2.out',
-          onUpdate: function() {
-            statEl.textContent = Math.round(this.targets()[0].innerText) + '+';
-          }
-        });
-      }
+  <!-- ===== SCROLL REVEAL ===== -->
+  <script>
+    const eras = document.querySelectorAll('.era');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.2,
+      rootMargin: '0px 0px -50px 0px'
     });
-  }
 
-  gsap.from('.stats-strip > div', {
-    scrollTrigger: { trigger: '.stats-strip', start: 'top 85%' },
-    opacity: 0, y: 30, stagger: 0.15, duration: 0.6, ease: 'power2.out'
-  });
+    eras.forEach(era => observer.observe(era));
 
-  // ─── Gallery ───
-  gsap.from('.gallery-header', {
-    scrollTrigger: { trigger: '.gallery', start: 'top 75%' },
-    opacity: 0, y: 30, duration: 0.7, ease: 'power2.out'
-  });
-
-  gsap.from('.gallery-item', {
-    scrollTrigger: { trigger: '.gallery-grid', start: 'top 80%' },
-    opacity: 0, y: 20, stagger: 0.1, duration: 0.6, ease: 'power2.out'
-  });
-
-  // ─── Testimonials ───
-  gsap.from('.testimonials-header', {
-    scrollTrigger: { trigger: '.testimonials', start: 'top 75%' },
-    opacity: 0, y: 30, duration: 0.7, ease: 'power2.out'
-  });
-
-  gsap.from('.testimonial-item', {
-    scrollTrigger: { trigger: '.testimonials-stack', start: 'top 80%' },
-    opacity: 0, y: 30, stagger: 0.2, duration: 0.7, ease: 'power2.out'
-  });
-
-  // ─── Location ───
-  gsap.from('.location-grid > div', {
-    scrollTrigger: { trigger: '.location-grid', start: 'top 80%' },
-    opacity: 0, y: 30, stagger: 0.2, duration: 0.7, ease: 'power2.out'
-  });
-
-  // ─── CTA Footer ───
-  gsap.from('.cta-footer h2', {
-    scrollTrigger: { trigger: '.cta-footer', start: 'top 75%' },
-    opacity: 0, y: 40, duration: 0.8, ease: 'power2.out'
-  });
-  gsap.from('.cta-footer .cta-sub', {
-    scrollTrigger: { trigger: '.cta-footer', start: 'top 70%' },
-    opacity: 0, y: 20, duration: 0.6, delay: 0.15, ease: 'power2.out'
-  });
-  gsap.from('.cta-footer .btn-brass', {
-    scrollTrigger: { trigger: '.cta-footer', start: 'top 65%' },
-    opacity: 0, scale: 0.9, duration: 0.6, delay: 0.3, ease: 'power2.out'
-  });
-
-  // ─── Footer ───
-  gsap.from('footer > *', {
-    scrollTrigger: { trigger: 'footer', start: 'top 90%' },
-    opacity: 0, y: 20, stagger: 0.1, duration: 0.5, ease: 'power2.out'
-  });
-
-  // ─── Registration Marks ───
-  gsap.utils.toArray('.reg-mark').forEach(mark => {
-    gsap.from(mark, {
-      scrollTrigger: { trigger: mark, start: 'top 85%' },
-      opacity: 0, scale: 0.5, rotation: 90, duration: 0.6, ease: 'back.out(1.7)'
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
-  });
-}
-
-</script>
+  </script>
 </body>
 </html>

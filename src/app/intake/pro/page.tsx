@@ -117,9 +117,9 @@ export default function IntakeProPage() {
             style={{ borderColor: `${tierColor}30`, backgroundColor: `${tierColor}10` }}
           >
             <Star className="h-4 w-4" style={{ color: tierColor }} />
-            <span className="text-sm font-medium" style={{ color: tierColor }}>Pro • $149/month</span>
+            <span className="text-sm font-medium" style={{ color: tierColor }}>Pro • $25/month</span>
           </div>
-          <h1 className="mb-2 text-3xl font-bold md:text-4xl">Everything handled, nothing missed</h1>
+          <h1 className="mb-2 text-3xl font-bold md:text-4xl">Posts + 24-hour engagement</h1>
           <p className="text-[#9a9a9a]">Let&apos;s get you set up. Takes about 5 minutes.</p>
         </div>
 

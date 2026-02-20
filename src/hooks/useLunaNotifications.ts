@@ -8,6 +8,8 @@ export interface LunaNotification {
   room_id?: number;
   emoji?: string;
   color?: string;
+  audio_url?: string;
+  audio_duration_ms?: number;
 }
 
 interface UseLunaNotificationsOptions {
@@ -45,7 +47,7 @@ export function useLunaNotifications({
     if (!enabled || eventSourceRef.current) return;
 
     try {
-      const eventSource = new EventSource("/api/luna/notifications/stream");
+      const eventSource = new EventSource("https://api.guardiacontent.com/luna/notifications/stream");
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {

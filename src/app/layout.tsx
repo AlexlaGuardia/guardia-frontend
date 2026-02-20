@@ -16,19 +16,19 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL('https://guardiacontent.com'),
   openGraph: {
-    title: 'Guardia - Your Social Media, Handled',
-    description: 'AI-powered done-for-you social media management for local businesses.',
+    title: 'Guardia - Social Media That Works For You',
+    description: 'We style your photos, write every caption, schedule every post, and manage engagement for 24 hours.',
     url: 'https://guardiacontent.com',
     siteName: 'Guardia',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Guardia - Your Social Media, Handled',
-    description: 'AI-powered done-for-you social media management for local businesses.',
+    title: 'Guardia - Social Media That Works For You',
+    description: 'We style your photos, write every caption, schedule every post, and manage engagement for 24 hours.',
   },
-  title: "Guardia - Your Social Media, Handled",
-  description: "AI-powered done-for-you social media management for local businesses.",
+  title: "Guardia - Social Media That Works For You",
+  description: "We style your photos, write every caption, schedule every post, and manage engagement for 24 hours.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

@@ -993,7 +993,7 @@ export default function GalleryTab({ client, jwt, onMessage, onSwitchToGio }: Ga
                 </p>
                 <p className="text-xs text-amber-700 mt-0.5">
                   New uploads will be saved for next month.
-                  {client?.tier !== "unleashed" && " Upgrade your plan to unlock more."}
+                  {client?.tier === "spark" && " Upgrade to Pro to unlock more."}
                 </p>
               </div>
             </div>

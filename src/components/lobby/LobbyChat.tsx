@@ -11,9 +11,9 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-const INITIAL_MESSAGE = `Hey! I'm Giovanni, your concierge here at Guardia.
+const INITIAL_MESSAGE = `Hey! I'm Giovanni from Guardia.
 
-We help small businesses look incredible on social media — without lifting a finger. AI-styled posts, scheduled automatically, for a fraction of what agencies charge.
+We style your photos, write every caption, schedule your posts, and manage engagement for 24 hours after each one goes live.
 
 What brings you here today?`;
 
@@ -176,7 +176,7 @@ export default function LobbyChat() {
               </button>
             </div>
             <p className="text-center text-xs text-white/30 mt-3">
-              Giovanni is your AI concierge. Already a client?{' '}
+              Already a client?{' '}
               <a href="/client" className="text-blue-400 hover:underline">
                 Sign in here
               </a>

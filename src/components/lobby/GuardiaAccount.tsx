@@ -130,6 +130,28 @@ const Icons = {
       <path d="M18 6L6 18M6 6l12 12"/>
     </svg>
   ),
+  Lock: ({ size = 24, color }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5">
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0110 0v4"/>
+    </svg>
+  ),
+  Mail: ({ size = 24, color }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M22 7l-10 7L2 7"/>
+    </svg>
+  ),
+  ChevronDown: ({ size = 24, color }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+      <path d="M6 9l6 6 6-6"/>
+    </svg>
+  ),
+  Check: ({ size = 24, color }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+      <path d="M20 6L9 17l-5-5"/>
+    </svg>
+  ),
   Camera: ({ size = 24, color }: IconProps) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5">
       <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
@@ -813,6 +835,522 @@ const ConnectedAccountsSection = () => {
 };
 
 // =============================================================================
+// HELP & SUPPORT PANEL
+// =============================================================================
+const FAQ_ITEMS = [
+  { q: 'How do I upload photos?', a: 'Go to the Gallery tab and tap the upload button. You can select multiple images at once. Our AI will style them to match your brand.' },
+  { q: 'When will my posts go live?', a: 'Posts are scheduled based on optimal engagement times for your audience. Check the Calendar tab to see your upcoming schedule.' },
+  { q: 'How do I connect Instagram?', a: 'Go to Connected Accounts in your Account tab and tap Connect next to Instagram. You\'ll be guided through Facebook\'s authorization flow since Instagram publishing requires a linked Facebook Page.' },
+  { q: 'What\'s included in my plan?', a: 'Check the Manage Subscription section to see your current plan features and limits. You can upgrade anytime for more posts, images, and platform connections.' },
+  { q: 'How do I change my posting schedule?', a: 'Your posting schedule is automatically optimized, but you can adjust individual post times from the Calendar tab by tapping on any scheduled post.' },
+];
+
+function HelpSupportPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Help & Support</h2>
+          <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
+            <Icons.X size={18} color="var(--text-muted)" />
+          </button>
+        </div>
+
+        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 70px)' }}>
+          {/* FAQ */}
+          <div>
+            <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Frequently Asked Questions</h3>
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+              {FAQ_ITEMS.map((item, i) => (
+                <div key={i} className="border-b border-[var(--border-subtle)] last:border-0">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between p-4 text-left"
+                  >
+                    <span className="text-sm pr-4" style={{ color: tokens.text.primary }}>{item.q}</span>
+                    <div className={`transition-transform duration-200 flex-shrink-0 ${openFaq === i ? 'rotate-180' : ''}`}>
+                      <Icons.ChevronDown size={16} color={tokens.text.tertiary} />
+                    </div>
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-4 pb-4">
+                      <p className="text-sm leading-relaxed" style={{ color: tokens.text.secondary }}>{item.a}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact Support */}
+          <div>
+            <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Contact Support</h3>
+            <a
+              href="mailto:support@guardiacontent.com"
+              className="flex items-center gap-3 p-4 rounded-2xl transition-all active:scale-[0.99]"
+              style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--bg-elevated)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)' }}>
+                <Icons.Mail size={18} color={tokens.accent.primary} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium" style={{ color: tokens.text.primary }}>Email Support</p>
+                <p className="text-xs" style={{ color: tokens.text.tertiary }}>support@guardiacontent.com</p>
+              </div>
+              <Icons.ChevronRight size={18} color={tokens.text.tertiary} />
+            </a>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// =============================================================================
+// SECURITY PANEL
+// =============================================================================
+function SecurityPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [currentPin, setCurrentPin] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [pinSuccess, setPinSuccess] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [logins, setLogins] = useState<Array<{ ip_address: string; success: number; attempted_at: string }>>([]);
+  const [loginsLoading, setLoginsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setCurrentPin(''); setNewPin(''); setConfirmPin(''); setPinError(''); setPinSuccess('');
+    const fetchLogins = async () => {
+      setLoginsLoading(true);
+      const jwt = localStorage.getItem('guardia_jwt');
+      if (!jwt) { setLoginsLoading(false); return; }
+      try {
+        const res = await fetch(`${API_BASE}/lobby/client/login-history`, {
+          headers: { Authorization: `Bearer ${jwt}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setLogins(data.logins || []);
+        }
+      } catch (err) { console.error('Login history error:', err); }
+      setLoginsLoading(false);
+    };
+    fetchLogins();
+  }, [isOpen]);
+
+  const handleChangePin = async () => {
+    setPinError(''); setPinSuccess('');
+    if (!/^\d{4,6}$/.test(newPin)) { setPinError('PIN must be 4-6 digits'); return; }
+    if (newPin !== confirmPin) { setPinError('PINs do not match'); return; }
+    if (newPin === currentPin) { setPinError('New PIN must be different'); return; }
+
+    setSaving(true);
+    try {
+      const jwt = localStorage.getItem('guardia_jwt');
+      const res = await fetch(`${API_BASE}/lobby/client/change-pin`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_pin: currentPin, new_pin: newPin })
+      });
+      if (res.ok) {
+        setPinSuccess('PIN updated successfully');
+        setCurrentPin(''); setNewPin(''); setConfirmPin('');
+      } else {
+        const data = await res.json();
+        setPinError(data.detail || 'Failed to update PIN');
+      }
+    } catch (err) {
+      setPinError('Something went wrong');
+    }
+    setSaving(false);
+  };
+
+  const inputStyle = {
+    background: 'var(--bg-base)',
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.03)',
+    border: 'none'
+  };
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Privacy & Security</h2>
+          <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
+            <Icons.X size={18} color="var(--text-muted)" />
+          </button>
+        </div>
+
+        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 70px)' }}>
+          {/* Change PIN */}
+          <div>
+            <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Change PIN</h3>
+            <div className="rounded-2xl p-4 space-y-3" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+              <div>
+                <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2">Current PIN</label>
+                <input type="password" inputMode="numeric" maxLength={6} value={currentPin} onChange={e => setCurrentPin(e.target.value.replace(/\D/g, ''))}
+                  className="w-full px-4 py-3 rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none" style={inputStyle} placeholder="Enter current PIN" />
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2">New PIN</label>
+                <input type="password" inputMode="numeric" maxLength={6} value={newPin} onChange={e => setNewPin(e.target.value.replace(/\D/g, ''))}
+                  className="w-full px-4 py-3 rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none" style={inputStyle} placeholder="4-6 digits" />
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2">Confirm New PIN</label>
+                <input type="password" inputMode="numeric" maxLength={6} value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                  className="w-full px-4 py-3 rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none" style={inputStyle} placeholder="Confirm new PIN" />
+              </div>
+
+              {pinError && <p className="text-xs text-red-400 px-1">{pinError}</p>}
+              {pinSuccess && <p className="text-xs text-green-400 px-1">{pinSuccess}</p>}
+
+              <button
+                onClick={handleChangePin}
+                disabled={!currentPin || !newPin || !confirmPin || saving}
+                className="w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] mt-2"
+                style={{
+                  background: currentPin && newPin && confirmPin
+                    ? 'linear-gradient(145deg, #f59e0b, #d97706)'
+                    : 'var(--bg-elevated)',
+                  boxShadow: currentPin && newPin && confirmPin
+                    ? '0 2px 8px rgba(245,158,11,0.3), inset 0 1px 1px rgba(255,255,255,0.2)'
+                    : 'inset 0 1px 2px rgba(0,0,0,0.3)',
+                  color: currentPin && newPin && confirmPin ? 'white' : 'var(--text-muted)'
+                }}
+              >
+                {saving ? 'Updating...' : 'Update PIN'}
+              </button>
+            </div>
+          </div>
+
+          {/* Login Activity */}
+          <div>
+            <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Recent Login Activity</h3>
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+              {loginsLoading ? (
+                <div className="flex justify-center py-6">
+                  <div className="w-5 h-5 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+                </div>
+              ) : logins.length === 0 ? (
+                <p className="p-4 text-sm text-center" style={{ color: tokens.text.tertiary }}>No login history</p>
+              ) : (
+                logins.slice(0, 10).map((login, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 border-b border-[var(--border-subtle)] last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${login.success ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <div>
+                        <p className="text-xs font-mono" style={{ color: tokens.text.secondary }}>
+                          {login.ip_address?.length > 20 ? login.ip_address.slice(0, 18) + '...' : login.ip_address}
+                        </p>
+                        <p className="text-xs" style={{ color: tokens.text.tertiary }}>
+                          {new Date(login.attempted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs" style={{ color: login.success ? '#22c55e' : '#ef4444' }}>
+                      {login.success ? 'Success' : 'Failed'}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// =============================================================================
+// BILLING HISTORY PANEL
+// =============================================================================
+const EVENT_LABELS: Record<string, string> = {
+  'checkout_session_created': 'Subscription Started',
+  'checkout.session.completed': 'Payment Completed',
+  'invoice.paid': 'Payment Received',
+  'invoice.payment_failed': 'Payment Failed',
+  'customer.subscription.updated': 'Plan Updated',
+  'customer.subscription.deleted': 'Subscription Cancelled',
+};
+
+function BillingHistoryPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [events, setEvents] = useState<Array<{ id: number; event_type: string; data: Record<string, unknown>; created_at: string }>>([]);
+  const [subscription, setSubscription] = useState<{ tier: string; status: string; current_period_end: string; cancel_at_period_end: number } | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const fetchBilling = async () => {
+      setLoading(true);
+      const jwt = localStorage.getItem('guardia_jwt');
+      if (!jwt) { setLoading(false); return; }
+      try {
+        const res = await fetch(`${API_BASE}/lobby/client/billing-history`, {
+          headers: { Authorization: `Bearer ${jwt}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setEvents(data.events || []);
+          setSubscription(data.subscription || null);
+        }
+      } catch (err) { console.error('Billing history error:', err); }
+      setLoading(false);
+    };
+    fetchBilling();
+  }, [isOpen]);
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Billing History</h2>
+          <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
+            <Icons.X size={18} color="var(--text-muted)" />
+          </button>
+        </div>
+
+        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 70px)' }}>
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-5 h-5 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+            </div>
+          ) : (
+            <>
+              {/* Current Subscription */}
+              {subscription && (
+                <div className="rounded-2xl p-4" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+                  <h3 className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: tokens.text.tertiary }}>Current Subscription</h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium capitalize" style={{ color: tokens.text.primary }}>{subscription.tier}</span>
+                        <div className="px-2 py-0.5 rounded-full text-xs" style={{
+                          backgroundColor: subscription.status === 'active' ? '#22c55e20' : '#f59e0b20',
+                          color: subscription.status === 'active' ? '#22c55e' : '#f59e0b'
+                        }}>
+                          {subscription.status}
+                        </div>
+                      </div>
+                      {subscription.current_period_end && (
+                        <p className="text-xs mt-1" style={{ color: tokens.text.tertiary }}>
+                          {subscription.cancel_at_period_end ? 'Ends' : 'Renews'} {new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Events */}
+              <div>
+                <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>History</h3>
+                {events.length === 0 ? (
+                  <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+                    <Icons.CreditCard size={32} color={tokens.text.tertiary} />
+                    <p className="text-sm mt-3" style={{ color: tokens.text.tertiary }}>No billing history yet</p>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+                    {events.map((event, i) => (
+                      <div key={event.id || i} className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)] last:border-0">
+                        <div>
+                          <p className="text-sm" style={{ color: tokens.text.primary }}>
+                            {EVENT_LABELS[event.event_type] || event.event_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                          </p>
+                          <p className="text-xs mt-0.5" style={{ color: tokens.text.tertiary }}>
+                            {new Date(event.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        </div>
+                        {typeof event.data?.tier === 'string' && (
+                          <div className="px-2 py-0.5 rounded-full text-xs capitalize" style={{
+                            backgroundColor: `${tokens.tier[event.data.tier as keyof typeof tokens.tier] || tokens.text.tertiary}20`,
+                            color: tokens.tier[event.data.tier as keyof typeof tokens.tier] || tokens.text.tertiary
+                          }}>
+                            {event.data.tier}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// =============================================================================
+// SUBSCRIPTION PANEL
+// =============================================================================
+const TIER_INFO: Record<string, { name: string; price: number; images: number; posts: number; platforms: number | string; videos: number; revisions: number; features: string[] }> = {
+  spark: { name: 'Spark', price: 79, images: 2, posts: 12, platforms: 2, videos: 0, revisions: 0, features: ['AI-styled images', 'Auto-captions & hashtags', 'Scheduled posting'] },
+  pro: { name: 'Pro', price: 149, images: 5, posts: 20, platforms: 3, videos: 2, revisions: 2, features: ['Everything in Spark', 'Video content', 'Engagement monitoring', 'GBP integration', 'Review responses'] },
+  unleashed: { name: 'Unleashed', price: 299, images: 10, posts: 30, platforms: 'Unlimited', videos: 8, revisions: 99, features: ['Everything in Pro', 'Unlimited platforms', 'Strategy calls', 'Priority support (4hr)'] },
+};
+
+function SubscriptionPanel({ isOpen, onClose, tier }: { isOpen: boolean; onClose: () => void; tier: string }) {
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const handleManagePlan = async () => {
+    setPortalLoading(true);
+    const jwt = localStorage.getItem('guardia_jwt');
+    try {
+      const res = await fetch(`${API_BASE}/lobby/client/billing-portal`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.portal_url) {
+        window.open(data.portal_url, '_blank');
+      } else {
+        window.location.href = 'mailto:support@guardiacontent.com?subject=Plan Change Request';
+      }
+    } catch (err) {
+      console.error('Portal error:', err);
+    }
+    setPortalLoading(false);
+  };
+
+  const currentTier = TIER_INFO[tier] || TIER_INFO.spark;
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Manage Subscription</h2>
+          <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
+            <Icons.X size={18} color="var(--text-muted)" />
+          </button>
+        </div>
+
+        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 140px)' }}>
+          {/* Current Plan */}
+          <div className="rounded-2xl p-4" style={{
+            background: 'var(--bg-surface)',
+            boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}`,
+            border: `1px solid ${tokens.tier[tier as keyof typeof tokens.tier] || tokens.text.tertiary}40`
+          }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="px-2.5 py-1 rounded-full text-xs font-medium capitalize" style={{
+                  backgroundColor: `${tokens.tier[tier as keyof typeof tokens.tier]}20`,
+                  color: tokens.tier[tier as keyof typeof tokens.tier]
+                }}>
+                  {currentTier.name}
+                </div>
+                <span className="text-xs" style={{ color: tokens.text.tertiary }}>Current Plan</span>
+              </div>
+              <span className="text-lg font-semibold" style={{ color: tokens.text.primary }}>${currentTier.price}<span className="text-xs font-normal" style={{ color: tokens.text.tertiary }}>/mo</span></span>
+            </div>
+            <div className="space-y-1.5">
+              {currentTier.features.map((f, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <Icons.Check size={14} color={tokens.tier[tier as keyof typeof tokens.tier]} />
+                  <span className="text-xs" style={{ color: tokens.text.secondary }}>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Plan Comparison */}
+          <div>
+            <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Plan Comparison</h3>
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+              {/* Header */}
+              <div className="grid grid-cols-4 p-3 border-b border-[var(--border-subtle)]">
+                <span className="text-xs" style={{ color: tokens.text.tertiary }}></span>
+                {Object.entries(TIER_INFO).map(([key, t]) => (
+                  <div key={key} className="text-center">
+                    <span className="text-xs font-medium" style={{ color: key === tier ? tokens.tier[key as keyof typeof tokens.tier] : tokens.text.secondary }}>{t.name}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Rows */}
+              {[
+                { label: 'Price', key: 'price', format: (v: number) => `$${v}` },
+                { label: 'Posts/mo', key: 'posts' },
+                { label: 'Images/mo', key: 'images' },
+                { label: 'Platforms', key: 'platforms' },
+                { label: 'Videos/mo', key: 'videos' },
+              ].map(row => (
+                <div key={row.label} className="grid grid-cols-4 p-3 border-b border-[var(--border-subtle)] last:border-0">
+                  <span className="text-xs" style={{ color: tokens.text.tertiary }}>{row.label}</span>
+                  {Object.entries(TIER_INFO).map(([key, t]) => {
+                    const val = t[row.key as keyof typeof t];
+                    const display = row.format ? row.format(val as number) : (val === 99 ? '∞' : String(val === 0 ? '-' : val));
+                    return (
+                      <div key={key} className="text-center">
+                        <span className="text-xs font-medium" style={{ color: key === tier ? tokens.text.primary : tokens.text.secondary }}>{display}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Manage Button */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[var(--border-subtle)]" style={{ background: 'var(--bg-base)' }}>
+          <button
+            onClick={handleManagePlan}
+            disabled={portalLoading}
+            className="w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(145deg, #f59e0b, #d97706)',
+              boxShadow: '0 2px 8px rgba(245,158,11,0.3), inset 0 1px 1px rgba(255,255,255,0.2)',
+              color: 'white'
+            }}
+          >
+            {portalLoading ? 'Opening...' : 'Manage Plan'}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// =============================================================================
 // MAIN COMPONENT
 // =============================================================================
 export default function GuardiaAccount() {
@@ -820,6 +1358,10 @@ export default function GuardiaAccount() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profilePanelOpen, setProfilePanelOpen] = useState(false);
+  const [subscriptionPanelOpen, setSubscriptionPanelOpen] = useState(false);
+  const [billingPanelOpen, setBillingPanelOpen] = useState(false);
+  const [securityPanelOpen, setSecurityPanelOpen] = useState(false);
+  const [helpPanelOpen, setHelpPanelOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -905,15 +1447,15 @@ export default function GuardiaAccount() {
 
         {/* Subscription */}
         <Section title="Subscription">
-          <MenuItem icon={Icons.CreditCard} label="Manage Subscription" onClick={() => {}} />
-          <MenuItem icon={Icons.BarChart} label="Billing History" onClick={() => {}} />
+          <MenuItem icon={Icons.CreditCard} label="Manage Subscription" onClick={() => setSubscriptionPanelOpen(true)} />
+          <MenuItem icon={Icons.BarChart} label="Billing History" onClick={() => setBillingPanelOpen(true)} />
         </Section>
 
         {/* Settings */}
         <Section title="Settings">
           <MenuItem icon={Icons.Bell} label="Push Notifications" toggle toggled={notifications} onClick={() => setNotifications(!notifications)} />
-          <MenuItem icon={Icons.Shield} label="Privacy & Security" onClick={() => {}} />
-          <MenuItem icon={Icons.HelpCircle} label="Help & Support" onClick={() => {}} />
+          <MenuItem icon={Icons.Shield} label="Privacy & Security" onClick={() => setSecurityPanelOpen(true)} />
+          <MenuItem icon={Icons.HelpCircle} label="Help & Support" onClick={() => setHelpPanelOpen(true)} />
         </Section>
 
         {/* Logout */}
@@ -934,6 +1476,10 @@ export default function GuardiaAccount() {
         profile={profile}
         onSave={handleSaveProfile}
       />
+      <SubscriptionPanel isOpen={subscriptionPanelOpen} onClose={() => setSubscriptionPanelOpen(false)} tier={profile?.tier || 'spark'} />
+      <BillingHistoryPanel isOpen={billingPanelOpen} onClose={() => setBillingPanelOpen(false)} />
+      <SecurityPanel isOpen={securityPanelOpen} onClose={() => setSecurityPanelOpen(false)} />
+      <HelpSupportPanel isOpen={helpPanelOpen} onClose={() => setHelpPanelOpen(false)} />
 
       <style jsx global>{`
         .pt-safe { padding-top: env(safe-area-inset-top, 12px); }

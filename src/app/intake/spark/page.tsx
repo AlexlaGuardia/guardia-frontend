@@ -87,7 +87,7 @@ export default function IntakeSparkPage() {
             style={{ borderColor: `${tierColor}30`, backgroundColor: `${tierColor}10` }}
           >
             <Zap className="h-4 w-4" style={{ color: tierColor }} />
-            <span className="text-sm font-medium" style={{ color: tierColor }}>Spark • $79/month</span>
+            <span className="text-sm font-medium" style={{ color: tierColor }}>Spark • $15/month</span>
           </div>
           <h1 className="mb-2 text-3xl font-bold md:text-4xl">Start showing up consistently</h1>
           <p className="text-[#9a9a9a]">Quick setup — you&apos;ll be posting in no time.</p>

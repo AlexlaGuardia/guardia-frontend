@@ -13,7 +13,7 @@ export interface ClientContext {
   id: string;
   business_name: string;
   contact_name: string;
-  tier: "spark" | "pro" | "unleashed";
+  tier: "spark" | "pro";
   preferred_style?: string;
   industry?: string;
   pending_uploads: number;
@@ -44,7 +44,6 @@ const API_BASE = "https://api.guardiacontent.com";
 export const tierColors = {
   spark: { bg: "bg-amber-500/20", text: "text-amber-300", accent: "amber-500" },
   pro: { bg: "bg-blue-500/20", text: "text-blue-300", accent: "blue-500" },
-  unleashed: { bg: "bg-purple-500/20", text: "text-purple-300", accent: "purple-500" },
 };
 
 // ============================================
@@ -173,7 +172,7 @@ export default function LobbyShell() {
     if (isSetup) {
       setMessages([{
         role: "assistant",
-        content: `Welcome to Guardia, ${clientData.contact_name || "there"}! I'm Giovanni, your dedicated concierge. Let's start by picking a visual style for your content. Tap the tablet icon above to explore your options.`,
+        content: `Welcome to Guardia, ${clientData.contact_name || "there"}! Let's start by picking a visual style for your content. Tap the tablet icon above to explore your options.`,
       }]);
       window.history.replaceState({}, "", "/client");
     } else {
@@ -348,7 +347,7 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
               </div>
               <div>
                 <div className="text-[var(--text-primary)] font-medium">Giovanni</div>
-                <div className="text-[var(--text-secondary)] text-sm">Your Concierge</div>
+                <div className="text-[var(--text-secondary)] text-sm">Guardia Assistant</div>
               </div>
             </div>
 
@@ -357,8 +356,8 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
               {mode === "setup" ? (
                 <>
                   <p className="text-[var(--text-primary)]">
-                    Welcome to Guardia, {setupData?.contact_name || "there"}! I'm Giovanni, your dedicated concierge for{" "}
-                    <span className="text-[var(--accent)] font-medium">{setupData?.business_name}</span>.
+                    Welcome to Guardia, {setupData?.contact_name || "there"}! I'm Giovanni, here to get{" "}
+                    <span className="text-[var(--accent)] font-medium">{setupData?.business_name}</span> set up.
                   </p>
                   <p className="text-[var(--text-secondary)] text-sm mt-2">
                     Let's set up your login credentials. Choose a username and 4-digit PIN.

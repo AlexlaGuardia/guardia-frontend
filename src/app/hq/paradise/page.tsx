@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import {
+  TrendingUp, Zap, Target, Archive, Shield, Eye, Scale,
+  RefreshCw, AlertTriangle, Clock, type LucideIcon
+} from "lucide-react";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -100,11 +103,17 @@ const CAT_COLORS: Record<string, string> = {
   jaguar: "#00CED1",
 };
 
-const CAT_EMOJI: Record<string, string> = {
-  lion: "\u{1F981}",
-  cheetah: "\u{1F406}",
-  tiger: "\u{1F42F}",
-  jaguar: "\u{1F406}",
+const CAT_ICONS: Record<string, LucideIcon> = {
+  lion: TrendingUp,
+  cheetah: Zap,
+  tiger: Target,
+  jaguar: Archive,
+};
+
+const BIRD_ICONS: Record<string, LucideIcon> = {
+  hawk: Shield,
+  eagle: Eye,
+  vulture: Scale,
 };
 
 const OUTCOME_COLORS: Record<string, string> = {
@@ -153,7 +162,12 @@ function useAuth() {
 // COMPONENTS
 // ══════════════════════════════════════════════════════════════════════════════
 
-function ParadiseHeader({ data }: { data: DashboardData }) {
+function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
+  data: DashboardData;
+  lastRefresh: Date | null;
+  refreshing: boolean;
+  onRefresh: () => void;
+}) {
   const totalPnl = (data.account.realized_pnl ?? 0) + (data.account.unrealized_pnl ?? 0);
   return (
     <header className="border-b border-[#1a1a1f] bg-gradient-to-b from-[#0c0a08] to-[#080706]">
@@ -163,6 +177,17 @@ function ParadiseHeader({ data }: { data: DashboardData }) {
             <span className="text-[#d4af37] font-serif text-xl tracking-wide">PARADISE FOREX</span>
             <span className="text-[10px] tracking-[0.2em] text-[#4a4535] font-mono border border-[#2a2a2f] px-2 py-0.5 rounded">PAPER</span>
           </div>
+          <button
+            onClick={onRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 text-[#555] hover:text-[#888] transition-colors disabled:opacity-50"
+            title="Refresh data"
+          >
+            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+            {lastRefresh && (
+              <span className="text-[10px] font-mono">{timeAgo(lastRefresh.toISOString().replace("Z", ""))}</span>
+            )}
+          </button>
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
@@ -197,7 +222,7 @@ function PricesTicker({ prices }: { prices: Record<string, PriceData> }) {
 
 function CatStatusCard({ name, cat }: { name: string; cat: CatData }) {
   const color = CAT_COLORS[name] || "#888";
-  const emoji = CAT_EMOJI[name] || "";
+  const Icon = CAT_ICONS[name] || TrendingUp;
   const perf = cat.performance;
   const v = cat.vulture;
 
@@ -205,7 +230,7 @@ function CatStatusCard({ name, cat }: { name: string; cat: CatData }) {
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5 hover:border-[#2a2a2f] transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{emoji}</span>
+          <Icon size={18} style={{ color }} />
           <span className="font-medium tracking-wide" style={{ color }}>{name.toUpperCase()}</span>
         </div>
         <span className="text-[#555] text-xs">{cat.strategy} &middot; {cat.timeframe}</span>
@@ -262,12 +287,12 @@ function CatStatusCard({ name, cat }: { name: string; cat: CatData }) {
 
 function OtherCatCard({ name, info }: { name: string; info: { strategy: string; status: string } }) {
   const color = CAT_COLORS[name] || "#888";
-  const emoji = CAT_EMOJI[name] || "";
+  const Icon = CAT_ICONS[name] || TrendingUp;
   return (
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-4 hover:border-[#2a2a2f] transition-colors opacity-60">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span>{emoji}</span>
+          <Icon size={14} style={{ color }} />
           <span className="text-sm font-medium" style={{ color }}>{name.toUpperCase()}</span>
         </div>
         <span className="text-[#444] text-xs">{info.strategy}</span>
@@ -422,6 +447,7 @@ function BirdGatesPanel({ birds }: { birds: Record<string, BirdStatus> }) {
                   className={`w-2 h-2 rounded-full ${!isNormal ? "animate-pulse" : ""}`}
                   style={{ backgroundColor: isNormal ? "#10b981" : "#ef4444" }}
                 />
+                {(() => { const BIcon = BIRD_ICONS[key]; return BIcon ? <BIcon size={14} className="text-[#666]" /> : null; })()}
                 <span className="text-[#aaa] text-sm">{label}</span>
                 <span className="text-[#444] text-xs">{desc}</span>
               </div>
@@ -454,8 +480,9 @@ function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
           return (
             <div key={name}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm" style={{ color: CAT_COLORS[name] }}>
-                  {CAT_EMOJI[name]} {name.charAt(0).toUpperCase() + name.slice(1)}
+                <span className="text-sm flex items-center gap-1.5" style={{ color: CAT_COLORS[name] }}>
+                  {(() => { const I = CAT_ICONS[name] || TrendingUp; return <I size={14} />; })()}
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
                 </span>
                 <span className={`font-mono text-sm ${p.total_pips >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
                   {formatPips(p.total_pips)}
@@ -519,6 +546,8 @@ export default function ParadisePage() {
   const { isAuthenticated, checking } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -526,6 +555,7 @@ export default function ParadisePage() {
       if (res.ok) {
         setData(await res.json());
         setError(false);
+        setLastRefresh(new Date());
       } else {
         setError(true);
       }
@@ -533,6 +563,12 @@ export default function ParadisePage() {
       setError(true);
     }
   }, []);
+
+  const manualRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  }, [fetchData]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -556,15 +592,33 @@ export default function ParadisePage() {
       <div className="fixed inset-0 bg-gradient-to-br from-[#d4af37]/[0.02] via-transparent to-[#d4af37]/[0.01] pointer-events-none" />
 
       <div className="relative">
-        <ParadiseHeader data={data} />
+        <ParadiseHeader data={data} lastRefresh={lastRefresh} refreshing={refreshing} onRefresh={manualRefresh} />
         <PricesTicker prices={data.prices} />
 
         <main className="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6">
           {error && (
-            <div className="bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg px-4 py-2 text-[#ef4444] text-sm">
+            <div className="bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg px-4 py-2 text-[#ef4444] text-sm flex items-center gap-2">
+              <AlertTriangle size={14} />
               Connection issue &mdash; retrying...
             </div>
           )}
+
+          {/* Stale signal warning */}
+          {(() => {
+            const allSignals = Object.values(data.cats)
+              .map(c => c.last_signal?.created_at)
+              .filter(Boolean) as string[];
+            if (allSignals.length === 0) return null;
+            const newest = Math.max(...allSignals.map(s => new Date(s + "Z").getTime()));
+            const hoursAgo = (Date.now() - newest) / 3600000;
+            if (hoursAgo < 12) return null;
+            return (
+              <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-lg px-4 py-2 text-[#f59e0b] text-sm flex items-center gap-2">
+                <Clock size={14} />
+                Signals stale &mdash; last scan was {Math.floor(hoursAgo)}h ago
+              </div>
+            );
+          })()}
 
           {/* Cat Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
