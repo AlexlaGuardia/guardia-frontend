@@ -42,7 +42,7 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050506] text-[#e8e8e8]">
+    <div className="min-h-screen bg-[#171513] text-[#e8e8e8]">
       <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>

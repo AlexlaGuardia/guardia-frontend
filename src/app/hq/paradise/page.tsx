@@ -189,9 +189,14 @@ function CatAvatar({ name, size = 36 }: { name: string; size?: number }) {
   return (
     <div
       className={`relative rounded-full overflow-hidden shrink-0 cursor-pointer border-2 transition-all ${
-        dragOver ? "border-white/40 scale-110" : src ? "border-transparent" : "border-dashed border-[#333]"
+        dragOver ? "scale-110" : ""
       }`}
-      style={{ width: size, height: size }}
+      style={{
+        width: size,
+        height: size,
+        borderColor: dragOver ? "#fff6" : src ? color : color + "40",
+        borderStyle: src ? "solid" : "dashed",
+      }}
       onClick={() => inputRef.current?.click()}
       onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
@@ -241,7 +246,7 @@ function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <span className="text-[#d4af37] font-serif text-xl tracking-wide">Paradice</span>
-            <span className="text-[10px] tracking-[0.2em] text-[#4a4535] font-mono border border-[#2a2a2f] px-2 py-0.5 rounded">PAPER</span>
+            <span className="text-xs tracking-[0.2em] text-[#4a4535] font-mono border border-[#2a2a2f] px-2 py-0.5 rounded">PAPER</span>
           </div>
           <button
             onClick={onRefresh}
@@ -257,11 +262,11 @@ function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <div className="text-[#555] text-[10px] tracking-[0.15em]">BALANCE</div>
+            <div className="text-[#555] text-xs tracking-[0.15em]">BALANCE</div>
             <div className="text-[#d4af37] font-mono text-lg">${data.account.balance.toFixed(2)}</div>
           </div>
           <div className="text-right">
-            <div className="text-[#555] text-[10px] tracking-[0.15em]">TOTAL P&L</div>
+            <div className="text-[#555] text-xs tracking-[0.15em]">TOTAL P&L</div>
             <div className={`font-mono text-lg ${totalPnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
               {formatMoney(totalPnl)}
             </div>
@@ -272,16 +277,67 @@ function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
   );
 }
 
-function PricesTicker({ prices }: { prices: Record<string, PriceData> }) {
+function ActivityTicker({ data }: { data: DashboardData }) {
+  const items: Array<{ key: string; color: string; text: string }> = [];
+
+  // Recent signals (most interesting)
+  for (const sig of data.signals.slice(0, 8)) {
+    const c = CAT_COLORS[sig.cat] || "#888";
+    const dir = sig.direction === "long" ? "\u2191" : sig.direction === "short" ? "\u2193" : "\u2014";
+    const outcome = sig.outcome?.toUpperCase() || (sig.direction === "neutral" ? "SCAN" : "PENDING");
+    const pips = sig.pnl_pips != null ? ` ${formatPips(sig.pnl_pips)}` : "";
+    items.push({
+      key: `sig-${sig.id}`,
+      color: c,
+      text: `${sig.cat.toUpperCase()} ${dir} ${sig.pair} ${outcome}${pips} \u00b7 ${timeAgo(sig.created_at)}`,
+    });
+  }
+
+  // Open positions
+  for (const pos of data.positions) {
+    const c = CAT_COLORS[pos.strategy] || "#888";
+    const dir = pos.direction === "long" ? "\u2191" : "\u2193";
+    const pnl = formatMoney(pos.unrealized_pnl);
+    items.push({
+      key: `pos-${pos.oanda_id}`,
+      color: c,
+      text: `${pos.strategy.toUpperCase()} ${dir} ${pos.pair} open ${pnl}`,
+    });
+  }
+
+  // Cat scan status for cats with no recent signal
+  for (const [name, cat] of Object.entries(data.cats)) {
+    if (!cat.last_signal || cat.last_signal.direction === "neutral") {
+      items.push({
+        key: `scan-${name}`,
+        color: CAT_COLORS[name] || "#888",
+        text: `${name.toUpperCase()} scanning...`,
+      });
+    }
+  }
+
+  // Account summary
+  items.push({
+    key: "account",
+    color: "#d4af37",
+    text: `BAL $${data.account.balance.toFixed(2)} \u00b7 ${data.account.open_count} open \u00b7 ${data.account.total_trades} total trades`,
+  });
+
+  if (items.length === 0) return null;
+
   return (
-    <div className="flex gap-4 overflow-x-auto px-6 py-2 border-b border-[#1a1a1f] bg-[#060607]">
-      {Object.entries(prices).map(([pair, p]) => (
-        <div key={pair} className="flex items-center gap-3 text-sm whitespace-nowrap">
-          <span className="text-[#888] font-mono">{pair}</span>
-          <span className="text-[#ccc] font-mono">{p.bid.toFixed(pair.includes("JPY") ? 3 : 5)}</span>
-          <span className="text-[#555] text-xs">{p.spread.toFixed(1)}sp</span>
-        </div>
-      ))}
+    <div className="border-b border-[#1a1a1f] bg-[#0a0908] overflow-hidden">
+      <div className="flex animate-ticker">
+        {[...items, ...items].map((item, i) => (
+          <div
+            key={`${item.key}-${i}`}
+            className="flex items-center gap-2 px-5 py-2 whitespace-nowrap shrink-0"
+          >
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+            <span className="text-sm text-[#999] font-mono">{item.text}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -295,8 +351,8 @@ function CatStatusCard({ name, cat }: { name: string; cat: CatData }) {
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5 hover:border-[#2a2a2f] transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <CatAvatar name={name} size={36} />
-          <span className="font-medium tracking-wide" style={{ color }}>{name.toUpperCase()}</span>
+          <CatAvatar name={name} size={108} />
+          <span className="text-lg font-medium tracking-wide" style={{ color }}>{name.toUpperCase()}</span>
         </div>
         <span className="text-[#555] text-xs">{cat.strategy} &middot; {cat.timeframe}</span>
       </div>
@@ -356,7 +412,7 @@ function OtherCatCard({ name, info }: { name: string; info: { strategy: string; 
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-4 hover:border-[#2a2a2f] transition-colors opacity-60">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <CatAvatar name={name} size={28} />
+          <CatAvatar name={name} size={84} />
           <span className="text-sm font-medium" style={{ color }}>{name.toUpperCase()}</span>
         </div>
         <span className="text-[#444] text-xs">{info.strategy}</span>
@@ -455,11 +511,11 @@ function SignalFeed({ signals }: { signals: Signal[] }) {
             }`}
           >
             <div className="flex items-center gap-3">
-              <span className="text-[#555] text-xs w-16">{timeAgo(sig.created_at)}</span>
+              <span className="text-[#555] text-sm w-16">{timeAgo(sig.created_at)}</span>
               <span className="text-xs capitalize" style={{ color: CAT_COLORS[sig.cat] || "#888" }}>
                 {sig.cat}
               </span>
-              <span className="text-[#aaa] font-mono text-sm">{sig.pair}</span>
+              <span className="text-[#aaa] font-mono text-base">{sig.pair}</span>
               {sig.direction === "neutral" ? (
                 <span className="text-[#555] text-xs">&mdash;</span>
               ) : (
@@ -498,7 +554,7 @@ function BirdGatesPanel({ birds }: { birds: Record<string, BirdStatus> }) {
 
   return (
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5">
-      <div className="text-[#555] text-[10px] tracking-[0.2em] font-medium mb-4">RISK GATES</div>
+      <div className="text-[#555] text-sm tracking-[0.2em] font-medium mb-4">RISK GATES</div>
       <div className="space-y-3">
         {birdList.map(({ key, label, desc }) => {
           const bird = birds[key];
@@ -535,7 +591,7 @@ function BirdGatesPanel({ birds }: { birds: Record<string, BirdStatus> }) {
 function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
   return (
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5">
-      <div className="text-[#555] text-[10px] tracking-[0.2em] font-medium mb-4">PERFORMANCE</div>
+      <div className="text-[#555] text-sm tracking-[0.2em] font-medium mb-4">PERFORMANCE</div>
       <div className="space-y-4">
         {Object.entries(cats).map(([name, cat]) => {
           const p = cat.performance;
@@ -545,7 +601,7 @@ function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
             <div key={name}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm flex items-center gap-1.5" style={{ color: CAT_COLORS[name] }}>
-                  <CatAvatar name={name} size={20} />
+                  <CatAvatar name={name} size={60} />
                   {name.charAt(0).toUpperCase() + name.slice(1)}
                 </span>
                 <span className={`font-mono text-sm ${p.total_pips >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
@@ -587,7 +643,7 @@ function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
 
 function LoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-[#050506] text-[#e8e4d9]">
+    <div className="min-h-screen bg-[#171513] text-[#e8e4d9]">
       <header className="border-b border-[#1a1a1f] bg-gradient-to-b from-[#0c0a08] to-[#080706] h-16" />
       <main className="max-w-[1400px] mx-auto p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -642,7 +698,7 @@ export default function ParadisePage() {
     }
   }, [isAuthenticated, fetchData]);
 
-  if (checking) return <div className="min-h-screen bg-[#050506]" />;
+  if (checking) return <div className="min-h-screen bg-[#171513]" />;
 
   if (!isAuthenticated) {
     if (typeof window !== "undefined") window.location.href = "/hq";
@@ -652,12 +708,12 @@ export default function ParadisePage() {
   if (!data) return <LoadingSkeleton />;
 
   return (
-    <div className="min-h-screen bg-[#050506] text-[#e8e4d9]">
-      <div className="fixed inset-0 bg-gradient-to-br from-[#d4af37]/[0.02] via-transparent to-[#d4af37]/[0.01] pointer-events-none" />
+    <div className="min-h-screen bg-[#171513] text-[#e8e4d9]">
+      <div className="fixed inset-0 bg-gradient-to-br from-[#d4af37]/[0.05] via-transparent to-[#d4af37]/[0.01] pointer-events-none" />
 
       <div className="relative">
         <ParadiseHeader data={data} lastRefresh={lastRefresh} refreshing={refreshing} onRefresh={manualRefresh} />
-        <PricesTicker prices={data.prices} />
+        <ActivityTicker data={data} />
 
         <main className="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6">
           {error && (
@@ -702,7 +758,7 @@ export default function ParadisePage() {
 
           {/* Open Positions */}
           <div>
-            <div className="text-[#555] text-[10px] tracking-[0.2em] font-medium mb-3">
+            <div className="text-[#9a8e7e] text-sm tracking-[0.2em] font-medium mb-3">
               OPEN POSITIONS
               {data.account.open_count > 0 && (
                 <span className="ml-2 text-[#888]">({data.account.open_count})</span>
@@ -713,7 +769,7 @@ export default function ParadisePage() {
 
           {/* Signal Feed */}
           <div>
-            <div className="text-[#555] text-[10px] tracking-[0.2em] font-medium mb-3">
+            <div className="text-[#9a8e7e] text-sm tracking-[0.2em] font-medium mb-3">
               SIGNAL FEED <span className="text-[#444]">last 20</span>
             </div>
             <SignalFeed signals={data.signals} />

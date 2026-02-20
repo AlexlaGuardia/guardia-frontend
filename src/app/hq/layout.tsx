@@ -8,7 +8,7 @@ export default function HQLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#050506]">
+    <div className="min-h-screen bg-[#171513]">
       <HQNav />
       {children}
     </div>

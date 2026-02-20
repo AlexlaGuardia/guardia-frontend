@@ -272,11 +272,11 @@ export default function ChapterEditorPage() {
   const wordCount = content.split(/\s+/).filter(Boolean).length;
 
   if (loading) {
-    return <div className="min-h-screen bg-[#050506] text-[#555] flex items-center justify-center">Loading editor...</div>;
+    return <div className="min-h-screen bg-[#171513] text-[#555] flex items-center justify-center">Loading editor...</div>;
   }
 
   return (
-    <div className="h-screen bg-[#050506] text-[#e8e8e8] flex flex-col overflow-hidden">
+    <div className="h-screen bg-[#171513] text-[#e8e8e8] flex flex-col overflow-hidden">
       {/* Hidden mirror for measuring word positions */}
       <div
         ref={mirrorRef}

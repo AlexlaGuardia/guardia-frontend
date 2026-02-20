@@ -6,7 +6,7 @@ import { Zap, Check, AlertTriangle, Clock, ArrowLeft } from "lucide-react";
 
 export default function DaemonRoomsDemoPage() {
   return (
-    <div className="min-h-screen bg-[#050506] p-8">
+    <div className="min-h-screen bg-[#171513] p-8">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <Link href="/hq/luna" className="text-[#888] text-sm hover:text-[#aaa] flex items-center gap-1">

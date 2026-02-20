@@ -578,7 +578,7 @@ function HQPageContent() {
 
   return (
     <RefreshContext.Provider value={refreshKey}>
-    <div className="min-h-screen bg-[#050506] text-[#e8e8e8]">
+    <div className="min-h-screen bg-[#171513] text-[#e8e8e8]">
       <main className="max-w-7xl mx-auto p-6">
         <div className="flex items-center justify-end gap-3 mb-4">
           <span className="text-[#333] text-[10px] font-mono">{ago}</span>
@@ -607,7 +607,7 @@ function HQPageContent() {
 
 export default function HQPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#050506]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#171513]" />}>
       <HQPageContent />
     </Suspense>
   );

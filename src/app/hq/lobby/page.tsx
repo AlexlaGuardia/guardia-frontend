@@ -227,7 +227,7 @@ export default function LobbyPage() {
   }
 
   return (
-    <div className="h-screen bg-[#050506] flex flex-col">
+    <div className="h-screen bg-[#171513] flex flex-col">
       {/* Header */}
       <div className="px-4 py-3 border-b border-[#1a1a1f] bg-[#0a0a0b] flex items-center justify-between">
         <div className="flex items-center gap-3">

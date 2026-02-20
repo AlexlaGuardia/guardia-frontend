@@ -15,126 +15,117 @@ export interface LunaNotification {
 interface UseLunaNotificationsOptions {
   enabled?: boolean;
   onMessage?: (notification: LunaNotification) => void;
-  onError?: (error: Event) => void;
+  onError?: (error: Error) => void;
   onConnectionChange?: (connected: boolean) => void;
-  reconnectDelay?: number;
-  maxReconnectAttempts?: number;
+  pollInterval?: number;
 }
 
+const API_BASE = "https://api.guardiacontent.com";
+
 /**
- * Hook for subscribing to Luna's proactive notifications via SSE
- * Features:
- * - Auto-reconnect on connection loss
- * - Exponential backoff for reconnection
- * - Connection status tracking
- * - Automatic cleanup
+ * Hook for subscribing to Luna's proactive notifications via polling.
+ * Polls /luna/notifications for undelivered messages and marks them delivered.
+ * Cloudflare-friendly — no long-lived connections.
  */
 export function useLunaNotifications({
   enabled = true,
   onMessage,
   onError,
   onConnectionChange,
-  reconnectDelay = 1000,
-  maxReconnectAttempts = 10,
+  pollInterval = 5000,
 }: UseLunaNotificationsOptions = {}) {
-  const eventSourceRef = useRef<EventSource | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttemptsRef = useRef(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const seenIdsRef = useRef<Set<number>>(new Set());
   const [isConnected, setIsConnected] = useState(false);
   const [lastNotification, setLastNotification] = useState<LunaNotification | null>(null);
 
-  const connect = useCallback(() => {
-    if (!enabled || eventSourceRef.current) return;
-
+  const poll = useCallback(async () => {
     try {
-      const eventSource = new EventSource("https://api.guardiacontent.com/luna/notifications/stream");
-      eventSourceRef.current = eventSource;
+      const res = await fetch(
+        `${API_BASE}/luna/notifications?undelivered_only=true&limit=10`
+      );
 
-      eventSource.onopen = () => {
-        console.log("[Luna SSE] Connected to notification stream");
+      if (!res.ok) {
+        if (isConnected) {
+          setIsConnected(false);
+          onConnectionChange?.(false);
+        }
+        return;
+      }
+
+      if (!isConnected) {
         setIsConnected(true);
         onConnectionChange?.(true);
-        reconnectAttemptsRef.current = 0; // Reset on successful connection
-      };
+      }
 
-      eventSource.onmessage = (event) => {
-        try {
-          const data: LunaNotification = JSON.parse(event.data);
+      const data = await res.json();
+      const notifications = data.notifications || [];
 
-          if (data.type === "luna_message") {
-            console.log("[Luna SSE] Received notification:", data);
-            setLastNotification(data);
-            onMessage?.(data);
-          }
-        } catch (error) {
-          console.error("[Luna SSE] Failed to parse notification:", error);
-        }
-      };
+      // Process new notifications (oldest first)
+      const deliveredIds: number[] = [];
+      for (const notif of notifications.reverse()) {
+        if (seenIdsRef.current.has(notif.id)) continue;
+        seenIdsRef.current.add(notif.id);
+        deliveredIds.push(notif.id);
 
-      eventSource.onerror = (error) => {
-        console.error("[Luna SSE] Connection error:", error);
+        const parsed: LunaNotification = {
+          type: "luna_message",
+          text: notif.message || "",
+          timestamp: notif.created_at || "",
+          speaker: notif.shadow || "luna",
+          room_id: notif.room_id,
+          audio_url: notif.audio_url,
+          audio_duration_ms: notif.audio_duration_ms,
+        };
+
+        setLastNotification(parsed);
+        onMessage?.(parsed);
+      }
+
+      // Mark delivered
+      for (const id of deliveredIds) {
+        fetch(`${API_BASE}/luna/notifications/${id}/delivered`, {
+          method: "POST",
+        }).catch(() => {});
+      }
+
+      // Cap seen set size
+      if (seenIdsRef.current.size > 500) {
+        const arr = Array.from(seenIdsRef.current);
+        seenIdsRef.current = new Set(arr.slice(-200));
+      }
+    } catch (err) {
+      if (isConnected) {
         setIsConnected(false);
         onConnectionChange?.(false);
-        onError?.(error);
-
-        // Close current connection
-        eventSource.close();
-        eventSourceRef.current = null;
-
-        // Attempt reconnection with exponential backoff
-        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-          const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current);
-          console.log(`[Luna SSE] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`);
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectAttemptsRef.current++;
-            connect();
-          }, delay);
-        } else {
-          console.error("[Luna SSE] Max reconnection attempts reached");
-        }
-      };
-    } catch (error) {
-      console.error("[Luna SSE] Failed to establish connection:", error);
-      setIsConnected(false);
-      onConnectionChange?.(false);
+      }
+      onError?.(err instanceof Error ? err : new Error(String(err)));
     }
-  }, [enabled, onMessage, onError, onConnectionChange, reconnectDelay, maxReconnectAttempts]);
+  }, [enabled, onMessage, onError, onConnectionChange, isConnected]);
 
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-
-    if (eventSourceRef.current) {
-      console.log("[Luna SSE] Disconnecting from notification stream");
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
-      setIsConnected(false);
-      onConnectionChange?.(false);
-    }
-
-    reconnectAttemptsRef.current = 0;
-  }, [onConnectionChange]);
-
-  // Connect on mount, disconnect on unmount
   useEffect(() => {
-    if (enabled) {
-      connect();
-    }
+    if (!enabled) return;
+
+    // Initial poll immediately
+    poll();
+
+    // Then poll on interval
+    intervalRef.current = setInterval(poll, pollInterval);
 
     return () => {
-      disconnect();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }, [enabled, connect, disconnect]);
+  }, [enabled, poll, pollInterval]);
 
   return {
     isConnected,
     lastNotification,
     reconnect: () => {
-      disconnect();
-      connect();
+      seenIdsRef.current.clear();
+      poll();
     },
   };
 }

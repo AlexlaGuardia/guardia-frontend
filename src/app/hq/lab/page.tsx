@@ -570,7 +570,7 @@ export default function LabPage() {
   const inboxImages = inbox.filter(f => f.type === "image");
 
   return (
-    <div className="min-h-screen bg-[#050506] text-[#e8e8e8]">
+    <div className="min-h-screen bg-[#171513] text-[#e8e8e8]">
       {/* Header */}
       <header className="border-b border-[#1a1a1f] bg-[#0a0a0b]/50 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">

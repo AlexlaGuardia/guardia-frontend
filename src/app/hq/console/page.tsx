@@ -878,7 +878,7 @@ function ConsoleApp() {
   };
 
   return (
-    <div className="h-screen bg-[#050506] flex">
+    <div className="h-screen bg-[#171513] flex">
       {/* Sidebar */}
       <SessionSidebar
         sessions={sessions}
