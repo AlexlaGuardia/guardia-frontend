@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Heart } from "lucide-react";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -168,7 +169,7 @@ export default function CommentsInbox({ clientId, jwt, onReply, onClose }: Comme
                   </div>
                   <div className="flex items-center gap-1">
                     {comment.liked && (
-                      <span className="text-xs text-rose-400">❤️</span>
+                      <Heart size={12} className="text-rose-400" fill="currentColor" />
                     )}
                     {comment.replied && (
                       <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full">Replied</span>

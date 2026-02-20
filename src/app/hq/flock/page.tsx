@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { Check, Building2 } from "lucide-react";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -260,7 +261,7 @@ function LeadCard({ lead, rank }: { lead: FlockLead; rank: number }) {
                       ...(currentStatus === action.status ? { ringColor: action.color } : {}),
                     }}
                   >
-                    {currentStatus === action.status ? `✓ ${action.label}` : action.label}
+                    {currentStatus === action.status ? <><Check size={12} className="inline mr-0.5" /> {action.label}</> : action.label}
                   </button>
                 ))}
               </div>
@@ -350,7 +351,7 @@ export default function FlockPage() {
         ) : filtered.length === 0 ? (
           <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-xl p-12 text-center">
             <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
-              <span className="text-blue-400 text-xl">🦅</span>
+              <Building2 size={20} className="text-blue-400" />
             </div>
             <p className="text-[#666] text-sm mb-1">No leads yet</p>
             <p className="text-[#444] text-xs">Flock agents are scanning. Check back after the next cycle.</p>

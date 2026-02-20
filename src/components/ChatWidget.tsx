@@ -1,10 +1,11 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { MessageCircle, Shield, X } from "lucide-react";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<{role: string, content: string}[]>([
-    {role: "assistant", content: "Hey! I'm Yami, Guardia's AI assistant. Ask me anything about our services, or just say hi 👋"}
+    {role: "assistant", content: "Hey! I'm Yami, Guardia's AI assistant. Ask me anything about our services, or just say hi."}
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function ChatWidget() {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-[9999]">
-        <span className="text-2xl">💬</span>
+        <MessageCircle size={24} className="text-white" />
       </button>
     );
   }
@@ -50,8 +51,8 @@ export default function ChatWidget() {
   return (
     <div className="fixed bottom-6 right-6 w-80 h-96 bg-slate-900 rounded-2xl shadow-2xl flex flex-col z-[9999] border border-purple-500/30">
       <div className="p-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-2xl flex justify-between items-center">
-        <span className="text-white font-semibold">Yami 🛡️</span>
-        <button onClick={() => setOpen(false)} className="text-white/80 hover:text-white">✕</button>
+        <span className="text-white font-semibold flex items-center gap-1.5">Yami <Shield size={14} /></span>
+        <button onClick={() => setOpen(false)} className="text-white/80 hover:text-white"><X size={16} /></button>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {messages.map((m, i) => (

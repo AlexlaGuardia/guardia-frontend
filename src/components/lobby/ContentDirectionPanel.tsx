@@ -501,7 +501,7 @@ export default function ContentDirectionPanel({
       if (res.ok) {
         setInitialStrategy(strategy);
         setHasChanges(false);
-        onMessage?.("Content direction saved! ✨");
+        onMessage?.("Content direction saved!");
         onSave?.();
       } else {
         onMessage?.("Couldn't save. Try again?");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { Moon, Hammer, Sparkles, Radio, Check, AlertTriangle } from "lucide-react";
 
 // ══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -42,7 +43,7 @@ const API_BASE = "https://api.guardiacontent.com";
 const SHADOW_CONFIG = {
   kage: {
     label: "Kage",
-    icon: "🌑",
+    icon: Moon,
     description: "Server orchestration",
     color: {
       bg: "bg-slate-500/20",
@@ -53,7 +54,7 @@ const SHADOW_CONFIG = {
   },
   forge: {
     label: "Forge",
-    icon: "⚒️",
+    icon: Hammer,
     description: "Backend architecture",
     color: {
       bg: "bg-orange-500/20",
@@ -64,7 +65,7 @@ const SHADOW_CONFIG = {
   },
   glass: {
     label: "Glass",
-    icon: "✨",
+    icon: Sparkles,
     description: "Frontend execution",
     color: {
       bg: "bg-violet-500/20",
@@ -75,7 +76,7 @@ const SHADOW_CONFIG = {
   },
   pulse: {
     label: "Pulse",
-    icon: "📡",
+    icon: Radio,
     description: "Integration & APIs",
     color: {
       bg: "bg-cyan-500/20",
@@ -84,7 +85,7 @@ const SHADOW_CONFIG = {
       dot: "bg-cyan-500",
     },
   },
-} as const;
+};
 
 const STATUS_COLORS = {
   idle: { bg: "bg-[#2a2a2f]", border: "border-[#3a3a3f]", text: "text-[#888]", dot: "bg-gray-500" },
@@ -299,7 +300,7 @@ export function ShadowStatusDashboard() {
             >
               {/* Shadow Header */}
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">{config.icon}</span>
+                <config.icon size={20} className={config.color.text} />
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm font-medium ${config.color.text}`}>{config.label}</div>
                   <div className="text-xs text-[#666] truncate">{config.description}</div>
@@ -342,7 +343,7 @@ export function ShadowStatusDashboard() {
                     {shadowState.recent_completions.slice(0, 2).map((completion, idx) => (
                       <div key={idx} className="text-xs text-[#666] truncate flex items-center gap-1">
                         <span className="flex-shrink-0">
-                          {completion.result === "completed" ? "✓" : "⚠"}
+                          {completion.result === "completed" ? <Check size={10} className="text-green-400" /> : <AlertTriangle size={10} className="text-yellow-400" />}
                         </span>
                         <span className="truncate flex-1" title={completion.task}>
                           {completion.task}

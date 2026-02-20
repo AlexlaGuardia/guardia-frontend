@@ -1007,7 +1007,7 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
           { element: <StatusLight state="ready" size={12} />, label: "Scheduled" },
           { element: <StatusLight state="failed" size={12} />, label: "Failed" },
           { element: <div className="w-3 h-3 rounded border border-dashed border-[var(--accent)] flex items-center justify-center"><ClockIcon size={8} className="text-[var(--accent)]" /></div>, label: "Slot" },
-          { element: <TodayCheckmark size={14} />, label: "Today ✓" },
+          { element: <TodayCheckmark size={14} />, label: "Today" },
           { element: <GuardiaSeal size={14} />, label: "Posted" },
         ].map(({ element, label }) => (
           <div key={label} className="flex items-center gap-1.5">
@@ -1122,7 +1122,7 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-6xl opacity-30">📝</span>
+                          <ClockIcon size={48} className="text-[var(--text-muted)] opacity-30" />
                         </div>
                       )}
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Zap, Terminal, MessageSquare } from "lucide-react";
 
 
 const API_BASE = "https://api.guardiacontent.com";
@@ -393,7 +394,7 @@ function MessageBubble({ message, projectColor }: { message: Message; projectCol
                 key={i}
                 className="text-xs bg-[#1a1a1f] text-[#888] px-2 py-0.5 rounded font-mono"
               >
-                ⚡ {tc.name}
+                <Zap size={10} className="inline mr-0.5" /> {tc.name}
               </span>
             ))}
           </div>
@@ -587,7 +588,7 @@ function ChatArea({
     return (
       <div className="flex-1 flex items-center justify-center text-[#333]">
         <div className="text-center">
-          <div className="text-6xl mb-4">⌘</div>
+          <Terminal size={56} className="text-[#333] mx-auto mb-4" />
           <div className="text-sm text-[#555]">Select or create a session</div>
         </div>
       </div>
@@ -632,7 +633,7 @@ function ChatArea({
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="text-center text-[#333] text-sm py-8">
-            <div className="text-2xl mb-2">👋</div>
+            <MessageSquare size={24} className="text-[#333] mx-auto mb-2" />
             Ready when you are.
           </div>
         ) : (

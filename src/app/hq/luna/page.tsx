@@ -222,7 +222,7 @@ export default function LunaPage() {
 
     const connect = () => {
       if (es) { es.close(); es = null; }
-      es = new EventSource(`${API_BASE}/luna/notifications/stream`);
+      es = new EventSource("https://5.161.217.38:8443/luna/notifications/stream");
 
       es.onopen = () => {
         console.log("[Luna SSE] Connected directly to backend");

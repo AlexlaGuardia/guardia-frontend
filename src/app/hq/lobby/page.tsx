@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { Moon, Shield, Send } from "lucide-react";
 
 
 const API_BASE = "https://api.guardiacontent.com";
@@ -214,10 +215,10 @@ export default function LobbyPage() {
   const getSpeakerStyle = (speaker: string | null) => {
     switch (speaker) {
       case "serberus":
-        return { emoji: "🤖", color: "#f97316", name: "Serberus" };
+        return { icon: Shield, color: "#f97316", name: "Serberus" };
       case "luna":
       default:
-        return { emoji: "🌙", color: "#a78bfa", name: "Luna" };
+        return { icon: Moon, color: "#a78bfa", name: "Luna" };
     }
   };
 
@@ -231,7 +232,7 @@ export default function LobbyPage() {
       <div className="px-4 py-3 border-b border-[#1a1a1f] bg-[#0a0a0b] flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🌙</span>
+            <Moon size={20} className="text-violet-400" />
             <span className="text-violet-400 font-medium">Luna</span>
             <span className="text-[#444] text-sm">/ Lobby</span>
           </div>
@@ -269,7 +270,7 @@ export default function LobbyPage() {
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full text-[#333]">
             <div className="text-center">
-              <div className="text-6xl mb-4">🌙</div>
+              <Moon size={56} className="text-violet-400/30 mx-auto mb-4" />
               <div className="text-[#555] text-sm mb-2">Talk to Luna</div>
               <div className="text-[#444] text-xs">She knows what's happening and can delegate to Serb when needed</div>
             </div>
@@ -294,7 +295,7 @@ export default function LobbyPage() {
               >
                 {!isUser && (
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <span>{style.emoji}</span>
+                    <style.icon size={14} style={{ color: style.color }} />
                     <span className="text-xs font-medium" style={{ color: style.color }}>
                       {style.name}
                     </span>
@@ -317,9 +318,9 @@ export default function LobbyPage() {
         {sending && (
           <div className="flex justify-start">
             <div className="bg-[#0d0d0e] border border-[#1a1a1f] rounded-lg p-3 flex items-center gap-2">
-              <span>🌙</span>
+              {delegating ? <Shield size={16} className="text-orange-400" /> : <Moon size={16} className="text-violet-400" />}
               <span className="text-[#666] text-sm">
-                {delegating ? "🤖 Serb working..." : "thinking..."}
+                {delegating ? "Serb working..." : "thinking..."}
               </span>
               <div className="flex gap-1">
                 <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -357,10 +358,7 @@ export default function LobbyPage() {
                 <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
+              <Send size={20} />
             )}
           </button>
         </div>

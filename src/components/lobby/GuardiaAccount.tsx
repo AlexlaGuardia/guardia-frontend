@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 /**
  * GUARDIA ACCOUNT — Settings & Profile
@@ -622,10 +623,10 @@ const ConnectedAccount = ({ platform, icon: Icon, connection, onConnect }: Conne
   const isConnected = status === 'connected' || status === 'needs_refresh' || status === 'limited';
 
   const statusConfig = {
-    connected: { color: tokens.status.connected, label: 'Connected', icon: '🟢' },
-    needs_refresh: { color: tokens.status.needs_refresh, label: 'Reconnect', icon: '🟡' },
-    limited: { color: tokens.status.limited, label: 'Limited', icon: '🟡' },
-    disconnected: { color: tokens.status.disconnected, label: 'Disconnected', icon: '⚪' },
+    connected: { color: tokens.status.connected, label: 'Connected', icon: 'connected' },
+    needs_refresh: { color: tokens.status.needs_refresh, label: 'Reconnect', icon: 'needs_refresh' },
+    limited: { color: tokens.status.limited, label: 'Limited', icon: 'limited' },
+    disconnected: { color: tokens.status.disconnected, label: 'Disconnected', icon: 'disconnected' },
   };
   const config = statusConfig[status];
 
@@ -665,7 +666,7 @@ const ConnectedAccount = ({ platform, icon: Icon, connection, onConnect }: Conne
         
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs">{config.icon}</span>
+            <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: config.color }} />
             <span className="text-xs" style={{ color: config.color }}>{config.label}</span>
           </div>
           
@@ -827,7 +828,7 @@ const ConnectedAccountsSection = () => {
       </div>
       {needsAttention && (
         <div className="mx-4 mb-4 p-3 rounded-xl text-xs" style={{ backgroundColor: `${tokens.status.needs_refresh}15`, color: tokens.status.needs_refresh }}>
-          ⚠️ Some connections need attention. Reconnect to maintain posting access.
+          <AlertTriangle size={14} className="inline mr-1 shrink-0" /> Some connections need attention. Reconnect to maintain posting access.
         </div>
       )}
     </Section>
