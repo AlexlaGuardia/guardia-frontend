@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   TrendingUp, Zap, Target, Archive, Shield, Eye, Scale,
-  RefreshCw, AlertTriangle, Clock, type LucideIcon
+  RefreshCw, AlertTriangle, Clock, ImagePlus, type LucideIcon
 } from "lucide-react";
 
 const API_BASE = "https://api.guardiacontent.com";
@@ -159,6 +159,72 @@ function useAuth() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// CAT AVATAR (drop zone + localStorage persistence)
+// ══════════════════════════════════════════════════════════════════════════════
+
+function CatAvatar({ name, size = 36 }: { name: string; size?: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const storageKey = `cat_avatar_${name}`;
+
+  useEffect(() => {
+    const stored = localStorage.getItem(storageKey);
+    if (stored) setSrc(stored);
+  }, [storageKey]);
+
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      localStorage.setItem(storageKey, result);
+      setSrc(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const color = CAT_COLORS[name] || "#888";
+
+  return (
+    <div
+      className={`relative rounded-full overflow-hidden shrink-0 cursor-pointer border-2 transition-all ${
+        dragOver ? "border-white/40 scale-110" : src ? "border-transparent" : "border-dashed border-[#333]"
+      }`}
+      style={{ width: size, height: size }}
+      onClick={() => inputRef.current?.click()}
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) handleFile(file);
+      }}
+      title={`Click or drag to set ${name} avatar`}
+    >
+      {src ? (
+        <img src={src} alt={name} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: color + "15" }}>
+          <ImagePlus size={size * 0.4} style={{ color }} className="opacity-40" />
+        </div>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFile(file);
+        }}
+      />
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // COMPONENTS
 // ══════════════════════════════════════════════════════════════════════════════
 
@@ -174,7 +240,7 @@ function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
       <div className="flex justify-between items-center px-6 py-4">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <span className="text-[#d4af37] font-serif text-xl tracking-wide">PARADISE FOREX</span>
+            <span className="text-[#d4af37] font-serif text-xl tracking-wide">Paradice</span>
             <span className="text-[10px] tracking-[0.2em] text-[#4a4535] font-mono border border-[#2a2a2f] px-2 py-0.5 rounded">PAPER</span>
           </div>
           <button
@@ -222,15 +288,14 @@ function PricesTicker({ prices }: { prices: Record<string, PriceData> }) {
 
 function CatStatusCard({ name, cat }: { name: string; cat: CatData }) {
   const color = CAT_COLORS[name] || "#888";
-  const Icon = CAT_ICONS[name] || TrendingUp;
   const perf = cat.performance;
   const v = cat.vulture;
 
   return (
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5 hover:border-[#2a2a2f] transition-colors">
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Icon size={18} style={{ color }} />
+        <div className="flex items-center gap-3">
+          <CatAvatar name={name} size={36} />
           <span className="font-medium tracking-wide" style={{ color }}>{name.toUpperCase()}</span>
         </div>
         <span className="text-[#555] text-xs">{cat.strategy} &middot; {cat.timeframe}</span>
@@ -287,12 +352,11 @@ function CatStatusCard({ name, cat }: { name: string; cat: CatData }) {
 
 function OtherCatCard({ name, info }: { name: string; info: { strategy: string; status: string } }) {
   const color = CAT_COLORS[name] || "#888";
-  const Icon = CAT_ICONS[name] || TrendingUp;
   return (
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-4 hover:border-[#2a2a2f] transition-colors opacity-60">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon size={14} style={{ color }} />
+          <CatAvatar name={name} size={28} />
           <span className="text-sm font-medium" style={{ color }}>{name.toUpperCase()}</span>
         </div>
         <span className="text-[#444] text-xs">{info.strategy}</span>
@@ -481,7 +545,7 @@ function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
             <div key={name}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm flex items-center gap-1.5" style={{ color: CAT_COLORS[name] }}>
-                  {(() => { const I = CAT_ICONS[name] || TrendingUp; return <I size={14} />; })()}
+                  <CatAvatar name={name} size={20} />
                   {name.charAt(0).toUpperCase() + name.slice(1)}
                 </span>
                 <span className={`font-mono text-sm ${p.total_pips >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
