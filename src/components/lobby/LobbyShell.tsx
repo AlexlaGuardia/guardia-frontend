@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import GioMode from "./GioMode";
 import TabletMode from "./TabletMode";
-import ChloeTab from "./ChloeTab";
+
 import WelcomeBubble from "./WelcomeBubble";
 import NotificationBubble from "./NotificationBubble";
 
@@ -62,7 +62,7 @@ export default function LobbyShell() {
   // Mode state
   const [mode, setMode] = useState<LobbyMode>("gio");
   const [activeTab, setActiveTab] = useState<TabletTab>("calendar");
-  const [chloeOpen, setChloeOpen] = useState(false);
+
 
   // Chat state (shared so it persists across mode switches)
   const [messages, setMessages] = useState<Message[]>([]);
@@ -159,12 +159,7 @@ export default function LobbyShell() {
       status += " To start posting automatically, connect your Facebook in the Account tab.";
     }
 
-    // Chloe discovery — subtle mention when there's nothing urgent
-    const chloeNudge = !ctx.needs_platform_setup && (ctx.posted_this_month || 0) > 0
-      ? " Looking to level up your brand? Try Chloe — your brand stylist."
-      : "";
-
-    return `${timeGreeting}, ${name}! Welcome back.${status}${chloeNudge} How can I help you today?`;
+    return `${timeGreeting}, ${name}! Welcome back.${status} How can I help you today?`;
   };
 
   // ============================================
@@ -178,9 +173,11 @@ export default function LobbyShell() {
     setAuthState("authenticated");
 
     if (isSetup) {
+      setMode("tablet");
+      setActiveTab("styles");
       setMessages([{
         role: "assistant",
-        content: `Welcome to Guardia, ${clientData.contact_name || "there"}! Let's start by picking a visual style for your content. Tap the tablet icon above to explore your options.`,
+        content: `Welcome to Guardia, ${clientData.contact_name || "there"}! I've opened your dashboard to get started. Pick a visual style, then upload some photos — your first posts go live this week.`,
       }]);
       window.history.replaceState({}, "", "/client");
     } else {
@@ -235,16 +232,15 @@ export default function LobbyShell() {
       
 
       {/* Gio Mode (base layer, always rendered for depth) */}
-      <div className={`relative z-10 ${mode === "tablet" || chloeOpen ? "pointer-events-none" : ""}`}>
+      <div className={`relative z-10 ${mode === "tablet" ? "pointer-events-none" : ""}`}>
         <GioMode
           client={client}
           jwt={jwt}
           messages={messages}
           setMessages={setMessages}
           onOpenTablet={() => setMode("tablet")}
-          onOpenChloe={() => setChloeOpen(true)}
           onLogout={handleLogout}
-          isBackground={mode === "tablet" || chloeOpen}
+          isBackground={mode === "tablet"}
         />
       </div>
 
@@ -260,53 +256,6 @@ export default function LobbyShell() {
             setMessages((m) => [...m, { role: "assistant", content: msg }]);
           }}
         />
-      )}
-
-      {/* Chloe Overlay */}
-      {chloeOpen && client && jwt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setChloeOpen(false)} />
-          <div className="relative w-full h-full max-w-[95vw] max-h-[95vh] bg-[var(--bg-base)] border border-violet-500/20 rounded-2xl overflow-hidden flex flex-col animate-chloe-open">
-            {/* Chloe header bar */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-violet-500/15 bg-gradient-to-r from-violet-500/5 to-fuchsia-500/5">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                  </svg>
-                </div>
-                <span className="text-sm font-semibold text-violet-300">Chloe &middot; Brand Studio</span>
-              </div>
-              <button
-                onClick={() => setChloeOpen(false)}
-                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded-lg transition-all"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <ChloeTab
-                clientId={client.id}
-                jwt={jwt}
-                onMessage={(msg) => {
-                  setMessages((m) => [...m, { role: "assistant", content: msg }]);
-                  setChloeOpen(false);
-                }}
-              />
-            </div>
-          </div>
-          <style jsx>{`
-            @keyframes chloe-open {
-              from { opacity: 0; transform: scale(0.95) translateY(20px); }
-              to { opacity: 1; transform: scale(1) translateY(0); }
-            }
-            .animate-chloe-open {
-              animation: chloe-open 0.3s ease-out forwards;
-            }
-          `}</style>
-        </div>
       )}
 
       {/* Welcome Bubble - appears 60s after auth */}
@@ -343,6 +292,28 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Recovery flow
+  const [recoveryMode, setRecoveryMode] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoverySent, setRecoverySent] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+
+  const handleRecovery = async () => {
+    if (!recoveryEmail.trim()) return;
+    setRecoveryLoading(true);
+    try {
+      await fetch(`${API_BASE}/client/request-reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoveryEmail.trim() }),
+      });
+      setRecoverySent(true);
+    } catch {
+      setRecoverySent(true); // Show success anyway (anti-enumeration)
+    }
+    setRecoveryLoading(false);
+  };
 
   const handleSubmit = async () => {
     if (!username.trim() || pin.length !== 4) {
@@ -410,14 +381,33 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
 
             {/* Message */}
             <div className="bg-[var(--bg-elevated)] rounded-xl p-4 mb-6">
-              {mode === "setup" ? (
+              {recoveryMode ? (
+                recoverySent ? (
+                  <div className="text-center">
+                    <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-[var(--text-primary)] font-medium">Check your email!</p>
+                    <p className="text-[var(--text-secondary)] text-sm mt-1">
+                      If that email is on file, a new setup link is on the way. Check your spam folder too.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-[var(--text-primary)]">No worries! Enter the email on your account and we&rsquo;ll send a fresh setup link.</p>
+                    <p className="text-[var(--text-secondary)] text-sm mt-2">You&rsquo;ll create a new username and PIN from the link.</p>
+                  </>
+                )
+              ) : mode === "setup" ? (
                 <>
                   <p className="text-[var(--text-primary)]">
-                    Welcome to Guardia, {setupData?.contact_name || "there"}! I'm Giovanni, here to get{" "}
+                    Welcome to Guardia, {setupData?.contact_name || "there"}! I&rsquo;m Giovanni, here to get{" "}
                     <span className="text-[var(--accent)] font-medium">{setupData?.business_name}</span> set up.
                   </p>
                   <p className="text-[var(--text-secondary)] text-sm mt-2">
-                    Let's set up your login credentials. Choose a username and 4-digit PIN.
+                    Let&rsquo;s set up your login credentials. Choose a username and 4-digit PIN.
                   </p>
                 </>
               ) : (
@@ -427,55 +417,112 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
 
             {/* Form */}
             <div className="space-y-4">
-              <div>
-                <label className="block text-[var(--text-secondary)] text-sm mb-2">Username</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))}
-                  placeholder={mode === "setup" ? "e.g. sunnybakery" : "Your username"}
-                  className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)] transition-all"
-                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[var(--text-secondary)] text-sm mb-2">{mode === "setup" ? "4-Digit PIN" : "PIN"}</label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={4}
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                  placeholder="••••"
-                  className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)] transition-all text-center tracking-[0.5em] text-xl"
-                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  disabled={loading}
-                />
-              </div>
-
-              {error && (
-                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">
-                  {error}
-                </div>
-              )}
-
-              <button
-                onClick={handleSubmit}
-                disabled={loading || !username.trim() || pin.length !== 4}
-                className="w-full py-3 bg-[var(--accent)] text-white font-semibold rounded-xl hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    {mode === "setup" ? "Setting up..." : "Signing in..."}
-                  </>
+              {recoveryMode ? (
+                recoverySent ? (
+                  <button
+                    onClick={() => { setRecoveryMode(false); setRecoverySent(false); setRecoveryEmail(""); }}
+                    className="w-full py-3 bg-[var(--accent)] text-white font-semibold rounded-xl hover:bg-[var(--accent-hover)] transition-all"
+                  >
+                    Back to Login
+                  </button>
                 ) : (
-                  mode === "setup" ? "Continue" : "Sign In"
-                )}
-              </button>
+                  <>
+                    <div>
+                      <label className="block text-[var(--text-secondary)] text-sm mb-2">Email Address</label>
+                      <input
+                        type="email"
+                        value={recoveryEmail}
+                        onChange={(e) => setRecoveryEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)] transition-all"
+                        onKeyDown={(e) => e.key === "Enter" && handleRecovery()}
+                        disabled={recoveryLoading}
+                      />
+                    </div>
+                    <button
+                      onClick={handleRecovery}
+                      disabled={recoveryLoading || !recoveryEmail.trim()}
+                      className="w-full py-3 bg-[var(--accent)] text-white font-semibold rounded-xl hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                    >
+                      {recoveryLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        "Send Reset Link"
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setRecoveryMode(false)}
+                      className="w-full text-center text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                    >
+                      Back to login
+                    </button>
+                  </>
+                )
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-[var(--text-secondary)] text-sm mb-2">Username</label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))}
+                      placeholder={mode === "setup" ? "e.g. sunnybakery" : "Your username"}
+                      className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)] transition-all"
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[var(--text-secondary)] text-sm mb-2">{mode === "setup" ? "4-Digit PIN" : "PIN"}</label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                      placeholder="••••"
+                      className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)] transition-all text-center tracking-[0.5em] text-xl"
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading || !username.trim() || pin.length !== 4}
+                    className="w-full py-3 bg-[var(--accent)] text-white font-semibold rounded-xl hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        {mode === "setup" ? "Setting up..." : "Signing in..."}
+                      </>
+                    ) : (
+                      mode === "setup" ? "Continue" : "Sign In"
+                    )}
+                  </button>
+
+                  {mode === "login" && (
+                    <button
+                      onClick={() => setRecoveryMode(true)}
+                      className="w-full text-center text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+                    >
+                      Forgot your PIN?
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
 

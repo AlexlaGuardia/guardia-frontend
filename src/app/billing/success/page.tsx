@@ -61,8 +61,9 @@ export default function BillingSuccessPage() {
               mounted ? "opacity-100" : "opacity-0"
             }`}
           >
-            Check your email for a setup link from Giovanni. Click it, pick
-            your style, and your first posts go live this week.
+            Your welcome email with a setup link is on the way &mdash; it
+            usually arrives within 2 minutes. Check your spam folder if you
+            don&rsquo;t see it.
           </p>
 
           {/* Steps */}
@@ -78,7 +79,7 @@ export default function BillingSuccessPage() {
             <Step
               icon={<Inbox className="w-4 h-4 text-[#C9A227]" />}
               number={1}
-              text="Check your inbox for the welcome email"
+              text="Check your inbox (and spam) for the welcome email — arrives within 2 minutes"
             />
             <Step
               icon={<Mail className="w-4 h-4 text-[#C9A227]" />}
@@ -103,6 +104,9 @@ export default function BillingSuccessPage() {
             Go to Lobby
             <ArrowRight className="w-4 h-4" />
           </Link>
+          <p className="text-xs text-[var(--text-muted)] mt-3">
+            You&rsquo;ll need the email link to create your login first.
+          </p>
         </div>
 
         {/* Back link */}
