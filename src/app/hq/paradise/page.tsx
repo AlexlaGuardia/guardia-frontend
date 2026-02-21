@@ -326,7 +326,7 @@ function ActivityTicker({ data }: { data: DashboardData }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="border-b border-[#1a1a1f] bg-[#0a0908] overflow-hidden">
+    <div className="border-b border-[#1a1a1f] bg-[#0a0908] overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)" }}>
       <div className="flex animate-ticker">
         {[...items, ...items].map((item, i) => (
           <div

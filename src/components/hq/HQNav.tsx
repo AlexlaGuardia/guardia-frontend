@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { label: "Paradise", href: "/hq/paradise", color: "#d4af37" },
   { label: "Factory", href: "/hq/factory", color: "#10b981" },
   { label: "Cortex", href: "/hq/cortex", color: "#8b5cf6" },
-  { label: "Clients", href: "/clients", color: "#f59e0b" },
+  { label: "Clients", href: "/hq/clients", color: "#f59e0b" },
   { label: "Atlas", href: "/hq/atlas", color: "#06b6d4" },
   { label: "Lab", href: "/hq/lab", color: "#14b8a6" },
   { label: "Athernyx", href: "/hq/athernyx", color: "#a855f7" },

@@ -304,7 +304,7 @@ function ClientsWidget() {
   const starving = data.filter(c => c.scheduled === 0 && c.posted === 0).length;
 
   return (
-    <Widget title="Clients" color="#f59e0b" href="/clients" loading={loading} error={error} alert={starving > 0}>
+    <Widget title="Clients" color="#f59e0b" href="/hq/clients" loading={loading} error={error} alert={starving > 0}>
       <div className="space-y-2">
         <div className="flex items-baseline gap-3">
           <p className="text-amber-400 font-mono text-lg">{data.length}</p>

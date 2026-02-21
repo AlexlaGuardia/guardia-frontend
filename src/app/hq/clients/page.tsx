@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import HQNav from "@/components/hq/HQNav";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -171,49 +170,45 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050506] text-[#e8e8e8]">
-      <HQNav />
-
-      <main className="max-w-4xl mx-auto p-6">
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-[#555] text-sm">Loading...</div>
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-red-400/60 text-sm">{error}</div>
-          </div>
-        ) : clients.length === 0 ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-[#444] text-sm">No clients yet</div>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {grouped.map(({ tier, clients: tierClients }) => (
-              <div key={tier}>
-                <div className="flex items-center gap-2 mb-4">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: TIER_COLORS[tier] || "#666" }}
-                  />
-                  <h2
-                    className="text-xs font-semibold tracking-wider uppercase"
-                    style={{ color: TIER_COLORS[tier] || "#666" }}
-                  >
-                    {tier}
-                  </h2>
-                  <span className="text-[#444] text-xs font-mono ml-2">{tierClients.length}</span>
-                </div>
-                <div className="space-y-3">
-                  {tierClients.map(client => (
-                    <ClientCard key={client.id} client={client} />
-                  ))}
-                </div>
+    <main className="max-w-4xl mx-auto p-4 sm:p-6">
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-[#555] text-sm">Loading...</div>
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-red-400/60 text-sm">{error}</div>
+        </div>
+      ) : clients.length === 0 ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-[#444] text-sm">No clients yet</div>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {grouped.map(({ tier, clients: tierClients }) => (
+            <div key={tier}>
+              <div className="flex items-center gap-2 mb-4">
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: TIER_COLORS[tier] || "#666" }}
+                />
+                <h2
+                  className="text-xs font-semibold tracking-wider uppercase"
+                  style={{ color: TIER_COLORS[tier] || "#666" }}
+                >
+                  {tier}
+                </h2>
+                <span className="text-[#444] text-xs font-mono ml-2">{tierClients.length}</span>
               </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+              <div className="space-y-3">
+                {tierClients.map(client => (
+                  <ClientCard key={client.id} client={client} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
