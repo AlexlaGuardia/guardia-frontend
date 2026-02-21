@@ -8,7 +8,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] px-6 py-20">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
-        <p className="text-[var(--text-secondary)] mb-12">Last updated: December 30, 2024</p>
+        <p className="text-[var(--text-secondary)] mb-12">Last updated: February 21, 2026</p>
 
         <div className="space-y-8 text-[var(--text-secondary)] leading-relaxed">
 
@@ -86,12 +86,15 @@ export default function PrivacyPage() {
             <ul className="list-disc list-inside space-y-2 mt-4">
               <li><strong className="text-[var(--text-primary)]">pages_manage_posts:</strong> To publish content to your Facebook Pages</li>
               <li><strong className="text-[var(--text-primary)]">pages_read_engagement:</strong> To show you how your posts perform</li>
+              <li><strong className="text-[var(--text-primary)]">pages_show_list:</strong> To list your Facebook Pages for selection during setup</li>
               <li><strong className="text-[var(--text-primary)]">instagram_basic:</strong> To connect your Instagram Business account</li>
               <li><strong className="text-[var(--text-primary)]">instagram_content_publish:</strong> To publish posts to Instagram</li>
             </ul>
             <p className="mt-4">
               We only access and store information necessary to provide our services.
               We never post without your authorization and you can revoke access at any time.
+              You can also remove Guardia from your Facebook settings, which triggers
+              automatic deletion of your connected account data.
             </p>
           </section>
 
@@ -149,8 +152,8 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Contact Us</h2>
             <p>
               If you have questions about this Privacy Policy, please contact us at:{' '}
-              <a href="mailto:guardiacontent@gmail.com" className="text-[#C9A227] hover:underline">
-                guardiacontent@gmail.com
+              <a href="mailto:support@guardiacontent.com" className="text-[#C9A227] hover:underline">
+                support@guardiacontent.com
               </a>
             </p>
             <p className="mt-4 text-[var(--text-muted)] text-sm">

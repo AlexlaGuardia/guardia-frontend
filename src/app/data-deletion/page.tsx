@@ -20,7 +20,7 @@ export default function DataDeletionPage() {
           <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-6 space-y-4">
             <div className="flex gap-4">
               <span className="flex-shrink-0 w-8 h-8 bg-[#C9A227]/10 text-[#C9A227] rounded-full flex items-center justify-center font-semibold">1</span>
-              <p>Email <a href="mailto:guardiacontent@gmail.com" className="text-[#C9A227] hover:underline">guardiacontent@gmail.com</a> with the subject line &ldquo;Data Deletion Request&rdquo;</p>
+              <p>Email <a href="mailto:support@guardiacontent.com" className="text-[#C9A227] hover:underline">support@guardiacontent.com</a> with the subject line &ldquo;Data Deletion Request&rdquo;</p>
             </div>
             <div className="flex gap-4">
               <span className="flex-shrink-0 w-8 h-8 bg-[#C9A227]/10 text-[#C9A227] rounded-full flex items-center justify-center font-semibold">2</span>
@@ -57,8 +57,8 @@ export default function DataDeletionPage() {
           <div className="border-t border-[var(--border)] pt-8 mt-8">
             <p className="text-sm text-[var(--text-muted)]">
               Questions? Contact us at{' '}
-              <a href="mailto:guardiacontent@gmail.com" className="text-[#C9A227] hover:underline">
-                guardiacontent@gmail.com
+              <a href="mailto:support@guardiacontent.com" className="text-[#C9A227] hover:underline">
+                support@guardiacontent.com
               </a>
             </p>
           </div>

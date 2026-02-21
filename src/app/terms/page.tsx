@@ -8,7 +8,7 @@ export default function TermsPage() {
     <main className="min-h-screen bg-[var(--bg-base)] py-20 px-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-[var(--text-primary)] mb-4">Terms of Service</h1>
-        <p className="text-[var(--text-secondary)] mb-12">Last updated: December 23, 2024</p>
+        <p className="text-[var(--text-secondary)] mb-12">Last updated: February 21, 2026</p>
 
         <div className="space-y-8 text-[var(--text-secondary)] leading-relaxed">
 
@@ -57,11 +57,16 @@ export default function TermsPage() {
             <p>We may update these terms from time to time. Continued use of our services after changes constitutes acceptance. We will notify active subscribers of material changes via email.</p>
           </section>
 
+          <section>
+            <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-3">10. Third-Party Platforms</h2>
+            <p>Our services integrate with third-party platforms including Facebook, Instagram, and other social media networks. Your use of these integrations is subject to each platform&apos;s own terms of service and community standards. Guardia is not responsible for changes to third-party platform policies, service interruptions, or enforcement actions taken by those platforms. You are responsible for ensuring your content complies with the rules of each platform where it is published.</p>
+          </section>
+
           <section className="pt-8 border-t border-[var(--border)]">
             <p className="text-[var(--text-muted)] text-sm">
               Questions? Contact us at{' '}
-              <a href="mailto:hello@guardiacontent.com" className="text-[#C9A227] hover:underline">
-                hello@guardiacontent.com
+              <a href="mailto:support@guardiacontent.com" className="text-[#C9A227] hover:underline">
+                support@guardiacontent.com
               </a>
             </p>
           </section>
