@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 /**
  * INTAKE CONTENT STRATEGY STEP
- * 
+ *
  * Niche-aware questions for intake forms.
  * Extracts "viral DNA" through simple selections.
  */
@@ -217,16 +217,15 @@ function OptionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all ${
+      className={`flex items-center gap-2 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all border ${
         selected
-          ? 'border-[#e8a060]/50 bg-[#e8a060]/10 text-[#ebebeb]'
-          : 'border-white/10 bg-[#252527] text-[#9a9a9a] hover:border-white/20'
+          ? 'border-[#C9A227]/50 bg-[#C9A227]/10 text-[var(--text-primary)]'
+          : 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]'
       }`}
-      style={{ border: '1px solid' }}
     >
       <span className="flex-1">{label}</span>
       {selected && (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e8a060" strokeWidth="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A227" strokeWidth="2">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       )}
@@ -273,7 +272,7 @@ export default function IntakeContentStrategy({
     <div className="space-y-6">
       <div>
         <h2 className="mb-1 text-xl font-semibold">How should your content look?</h2>
-        <p className="text-sm text-[#9a9a9a]">Quick questions so we nail your style from day one.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Quick questions so we nail your style from day one.</p>
       </div>
 
       <div className="space-y-5">
@@ -285,7 +284,7 @@ export default function IntakeContentStrategy({
 
           return (
             <div key={q.id} className="space-y-3">
-              <label className="block text-sm font-medium text-[#ebebeb]">{q.label}</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)]">{q.label}</label>
               <div className="grid grid-cols-2 gap-2">
                 {q.options?.map((opt) => (
                   <OptionButton
@@ -303,10 +302,10 @@ export default function IntakeContentStrategy({
 
       {/* Preview */}
       {(data.text_overlay || data.hero_element) && (
-        <div className="rounded-xl border border-[#e8a060]/20 bg-[#e8a060]/5 p-4">
+        <div className="rounded-xl border border-[#C9A227]/20 bg-[#C9A227]/5 p-4">
           <div className="flex items-start gap-3">
-            <div className="text-sm text-[#9a9a9a]">
-              <span className="text-[#ebebeb] font-medium">Your content will: </span>
+            <div className="text-sm text-[var(--text-secondary)]">
+              <span className="text-[var(--text-primary)] font-medium">Your content will: </span>
               {data.text_overlay === 'never' && 'focus on clean, striking images'}
               {data.text_overlay === 'always' && `include ${data.font_style || 'styled'} text overlays`}
               {data.text_overlay === 'sometimes' && 'mix clean images with occasional text'}

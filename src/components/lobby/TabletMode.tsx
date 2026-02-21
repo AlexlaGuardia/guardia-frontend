@@ -43,7 +43,7 @@ export default function TabletMode({
       />
 
       {/* Tablet container */}
-      <div className="relative w-full h-full max-w-[95vw] max-h-[95vh] bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col animate-tablet-open">
+      <div className="relative w-full h-full max-w-[95vw] max-h-[95vh] bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl flex flex-col animate-tablet-open" style={{ overflow: 'clip' }}>
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface)]">
           {/* Left: Tabs */}

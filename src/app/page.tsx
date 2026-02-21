@@ -62,18 +62,18 @@ const tiers = [
 const steps = [
   {
     icon: Camera,
-    title: "Send us your photos.",
-    desc: "Snap photos of your shop, food, team — whatever you've got. Send them our way.",
+    title: "You send photos.",
+    desc: "Your shop, your food, your team. Snap it on your phone and send it over — we take it from there.",
   },
   {
     icon: Palette,
-    title: "We style, write, and schedule.",
-    desc: "Your photos get styled. We write the caption and hashtags. It gets scheduled at the right time.",
+    title: "We make them post-ready.",
+    desc: "Professional styling, captions that sound like you, hashtags that work. Scheduled for when your audience is online.",
   },
   {
     icon: MessageCircle,
-    title: "We manage it for 24 hours.",
-    desc: "After every post goes live, we reply to comments and engage with your audience for a full day.",
+    title: "We manage the engagement.",
+    desc: "After every post goes live, we reply to comments and keep the conversation going for a full day.",
   },
 ];
 
@@ -81,19 +81,19 @@ const steps = [
 const faqs = [
   {
     q: "How fast do I see results?",
-    a: "Your first styled post is live within 48 hours of signing up.",
+    a: "Your first styled post goes live within 48 hours. Most clients see increased engagement within the first two weeks as consistent, professional content starts building momentum.",
   },
   {
     q: "What does 24-hour post management mean?",
-    a: "After each post goes live, we monitor comments and reply on your behalf. When posts hit engagement milestones, we thank followers and keep the conversation going.",
+    a: "After each post goes live, we monitor comments and reply on your behalf. We thank new followers, answer questions, and keep the conversation going — so you don't have to.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. No contracts. Cancel with one click.",
+    a: "Yes. No contracts, no commitments. Cancel with one click whenever you want.",
   },
   {
     q: "What if I don't like the captions?",
-    a: "We learn your voice during onboarding. Most clients approve 90%+ on first pass. Pro includes revisions.",
+    a: "We learn your voice during onboarding. Most clients approve 90%+ of captions on the first pass. Pro includes unlimited revisions.",
   },
   {
     q: "What platforms do you post to?",
@@ -208,7 +208,7 @@ function Nav() {
       {mobileOpen && (
         <div className="md:hidden bg-[#FAF6F1] border-t border-[#E8DDD3] px-4 py-4 space-y-3">
           <a href="#how" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">How It Works</a>
-          <a href="#results" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Styles</a>
+          <a href="#results" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Results</a>
           <a href="#pricing" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Pricing</a>
           <a href="#faq" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">FAQ</a>
           <a href="/client" onClick={() => setMobileOpen(false)} className="block text-sm text-[#635C54] font-medium py-2">Client Login</a>
@@ -241,8 +241,8 @@ function Hero() {
 
         {/* Subhead */}
         <p className="text-lg md:text-xl text-[#635C54] mb-4 max-w-2xl mx-auto leading-relaxed">
-          We style your photos, write every caption, schedule every post,
-          and manage engagement for 24 hours after it goes live.
+          Send us your photos. We style them, write the captions,
+          post on schedule, and handle engagement — so you can run your business.
         </p>
 
         {/* CTAs */}
@@ -290,10 +290,10 @@ function HowItWorks() {
       <div ref={ref} className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            Here's what we do.
+            How it works.
           </h2>
           <p className="text-[#635C54] text-lg">
-            You send photos. We take care of the rest.
+            Three steps. Zero effort on your end.
           </p>
         </div>
 
@@ -335,13 +335,13 @@ function StyleShowcase() {
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-[#C9A227]/10 border border-[#C9A227]/20 rounded-full px-4 py-2 mb-6">
             <Sparkles className="w-4 h-4 text-[#C9A227]" />
-            <span className="text-sm font-medium text-[#C9A227]">Real transformations from our pipeline</span>
+            <span className="text-sm font-medium text-[#C9A227]">Styled by Guardia</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            See the Difference
+            From phone photo to post-ready.
           </h2>
           <p className="text-[#635C54] max-w-2xl mx-auto">
-            Your phone photos, professionally enhanced. Every niche. One standard.
+            Your photos, professionally styled and ready to post. Drag to compare.
           </p>
         </div>
 
@@ -351,7 +351,7 @@ function StyleShowcase() {
 
         <div className="text-center mt-12">
           <p className="text-[#635C54] mb-4">
-            Every business. Every vibe. Always professional.
+            Works for any business. Bakeries, salons, restaurants, fitness — you name it.
           </p>
           <a
             href="/intake/pro"
