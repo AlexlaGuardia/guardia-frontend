@@ -224,6 +224,11 @@ export default function ChloeTab({ clientId, jwt, onMessage }: ChloeTabProps) {
         </div>
       )}
 
+      {/* Payment Setup */}
+      {!studio.payment.has_card && (
+        <PaymentSetupBanner jwt={jwt} onRefresh={loadStudio} />
+      )}
+
       {/* Recommended Section */}
       {studio.recommended.length > 0 && (
         <div className="px-6 mb-8">
@@ -288,19 +293,7 @@ export default function ChloeTab({ clientId, jwt, onMessage }: ChloeTabProps) {
           </h3>
           <div className="space-y-2">
             {studio.purchases.map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center justify-between bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-4 py-3"
-              >
-                <div>
-                  <p className="text-sm text-[var(--text-primary)] font-medium">{p.product_name}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{new Date(p.created_at).toLocaleDateString()}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={p.asset_status || p.status} />
-                  <span className="text-sm font-semibold text-[var(--text-secondary)]">${(p.price_cents / 100).toFixed(0)}</span>
-                </div>
-              </div>
+              <PurchaseRow key={p.id} purchase={p} jwt={jwt} />
             ))}
           </div>
         </div>
@@ -758,5 +751,274 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${styles[status] || styles.paid}`}>
       {labels[status] || status}
     </span>
+  );
+}
+
+
+// ── Purchase Row (Expandable with Asset Delivery) ────────────
+
+interface AssetFile {
+  name: string;
+  type: string;
+  size_kb?: number;
+  label: string;
+  url: string;
+}
+
+interface AssetData {
+  status: string;
+  preview_url?: string;
+  files: AssetFile[];
+  hero?: string;
+  generated_at?: string;
+  asset_type?: string;
+}
+
+function PurchaseRow({ purchase, jwt }: { purchase: Purchase; jwt: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [assets, setAssets] = useState<AssetData | null>(null);
+  const [loadingAssets, setLoadingAssets] = useState(false);
+
+  const isReady = purchase.asset_status === "ready";
+  const isClickable = isReady || purchase.asset_status === "generating";
+
+  async function loadAssets() {
+    if (assets || loadingAssets) return;
+    setLoadingAssets(true);
+    try {
+      const res = await fetch(`${API_BASE}/chloe/assets/${purchase.id}`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) setAssets(await res.json());
+    } catch (e) {
+      console.error("Failed to load assets:", e);
+    }
+    setLoadingAssets(false);
+  }
+
+  function handleClick() {
+    if (!isClickable) return;
+    if (!expanded) loadAssets();
+    setExpanded(!expanded);
+  }
+
+  return (
+    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
+      {/* Header row */}
+      <button
+        onClick={handleClick}
+        className={`w-full flex items-center justify-between px-4 py-3 text-left ${
+          isClickable ? "hover:bg-[var(--bg-elevated)] cursor-pointer" : ""
+        } transition-colors`}
+      >
+        <div className="flex items-center gap-3">
+          {isClickable && (
+            <svg
+              className={`w-4 h-4 text-[var(--text-muted)] transition-transform ${expanded ? "rotate-90" : ""}`}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          )}
+          <div>
+            <p className="text-sm text-[var(--text-primary)] font-medium">{purchase.product_name}</p>
+            <p className="text-xs text-[var(--text-muted)]">{new Date(purchase.created_at).toLocaleDateString()}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusBadge status={purchase.asset_status || purchase.status} />
+          <span className="text-sm font-semibold text-[var(--text-secondary)]">
+            ${(purchase.price_cents / 100).toFixed(0)}
+          </span>
+        </div>
+      </button>
+
+      {/* Expanded asset panel */}
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-[var(--border)]">
+          {loadingAssets ? (
+            <div className="flex items-center gap-2 py-4 justify-center">
+              <div className="w-4 h-4 border-2 border-[var(--border)] border-t-violet-400 rounded-full animate-spin" />
+              <span className="text-sm text-[var(--text-muted)]">Loading assets...</span>
+            </div>
+          ) : assets?.status === "generating" ? (
+            <div className="flex items-center gap-2 py-4 justify-center">
+              <div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin" />
+              <span className="text-sm text-amber-300">Chloe is creating your assets...</span>
+            </div>
+          ) : assets?.files && assets.files.length > 0 ? (
+            <AssetGrid files={assets.files} assetType={assets.asset_type} />
+          ) : (
+            <p className="text-sm text-[var(--text-muted)] py-3 text-center">No assets yet</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ── Asset Grid ───────────────────────────────────────────────
+
+function AssetGrid({ files, assetType }: { files: AssetFile[]; assetType?: string }) {
+  const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+  const dataFiles = files.filter((f) => !f.type.startsWith("image/"));
+
+  return (
+    <div className="pt-3 space-y-3">
+      {/* Image grid */}
+      {imageFiles.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {imageFiles.map((file) => (
+            <a
+              key={file.name}
+              href={file.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative aspect-square bg-[var(--bg-elevated)] rounded-lg overflow-hidden border border-[var(--border)] hover:border-violet-500/40 transition-all"
+            >
+              <img
+                src={file.url}
+                alt={file.label}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end">
+                <div className="w-full px-2 py-1.5 bg-black/60 translate-y-full group-hover:translate-y-0 transition-transform">
+                  <p className="text-[10px] text-white truncate">{file.label}</p>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* Data files (JSON, HTML) */}
+      {dataFiles.map((file) => (
+        <a
+          key={file.name}
+          href={file.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 px-3 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg hover:border-violet-500/30 transition-all"
+        >
+          <div className="w-8 h-8 bg-violet-500/10 rounded-lg flex items-center justify-center shrink-0">
+            <svg className="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-[var(--text-primary)] font-medium truncate">{file.label}</p>
+            <p className="text-xs text-[var(--text-muted)]">{file.name}</p>
+          </div>
+          <svg className="w-4 h-4 text-[var(--text-muted)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      ))}
+
+      {/* Download all */}
+      {files.length > 1 && imageFiles.length > 0 && (
+        <button
+          onClick={() => {
+            files.forEach((f) => {
+              const a = document.createElement("a");
+              a.href = f.url;
+              a.download = f.name;
+              a.target = "_blank";
+              a.click();
+            });
+          }}
+          className="w-full py-2 text-sm text-violet-300 hover:text-violet-200 border border-violet-500/20 hover:border-violet-500/30 rounded-lg transition-all flex items-center justify-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download All ({files.length} files)
+        </button>
+      )}
+    </div>
+  );
+}
+
+
+// ── Payment Setup Banner ─────────────────────────────────────
+
+function PaymentSetupBanner({ jwt, onRefresh }: { jwt: string; onRefresh: () => void }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleSetup() {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/chloe/setup-payment`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      const data = await res.json();
+      if (data.portal_url) {
+        // Open billing portal in new tab, poll for card on return
+        window.open(data.portal_url, "_blank");
+        // Check for card every 3s for up to 2 minutes after opening portal
+        let checks = 0;
+        const interval = setInterval(async () => {
+          checks++;
+          if (checks > 40) { clearInterval(interval); setLoading(false); return; }
+          try {
+            const r = await fetch(`${API_BASE}/chloe/payment-info`, {
+              headers: { Authorization: `Bearer ${jwt}` },
+            });
+            const info = await r.json();
+            if (info.has_card) {
+              clearInterval(interval);
+              setLoading(false);
+              onRefresh();
+            }
+          } catch { /* ignore */ }
+        }, 3000);
+      } else {
+        setLoading(false);
+      }
+    } catch {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mx-6 mb-6 bg-violet-500/5 border border-violet-500/20 rounded-xl p-4">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 bg-violet-500/20 rounded-lg flex items-center justify-center shrink-0">
+          <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+            Set up payment to unlock brand upgrades
+          </p>
+          <p className="text-xs text-[var(--text-secondary)] mb-3">
+            Add a card to start purchasing from Chloe. Your card is stored securely with Stripe.
+          </p>
+          <button
+            onClick={handleSetup}
+            disabled={loading}
+            className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-lg transition-all disabled:opacity-50 flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Setting up...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Payment Method
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

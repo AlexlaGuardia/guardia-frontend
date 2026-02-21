@@ -66,6 +66,92 @@ interface DashboardData {
   posts: Post[];
 }
 
+// ── Floor 2 Types ──
+
+interface PipeConfig {
+  pipe_name: string;
+  mission_type: string;
+  schedule: "daily" | "weekly";
+  run_hour: number;
+  days_of_week?: string;
+}
+
+interface StyleConfig {
+  preferred_style: string;
+  lora_model?: string;
+  lora_trigger?: string;
+}
+
+interface RhythmConfig {
+  posts_per_week: number;
+  posting_days: string[];
+  stagger_hours: boolean;
+}
+
+interface PipelineTemplate {
+  id: string;
+  name: string;
+  description: string;
+  niche: string;
+  pipes_config: PipeConfig[];
+  style_config: StyleConfig;
+  rhythm_config: RhythmConfig;
+  preview_image_url: string | null;
+  status: "draft" | "active" | "archived";
+  store_product_id: string | null;
+  price_cents: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface AvailablePipe {
+  pipe_name: string;
+  client_id: string;
+  file_path: string;
+  mission_type: string;
+}
+
+interface ClientPipe {
+  id: number;
+  client_id: string;
+  pipe_name: string;
+  schedule: string;
+  run_hour: number;
+  days_of_week: string | null;
+  enabled: number;
+  last_run_at: string | null;
+  last_status: string | null;
+  total_runs: number;
+  total_successes: number;
+  consecutive_failures: number;
+}
+
+interface MedusaStatusData {
+  daemon_running: boolean;
+  total_pipes: number;
+  active_pipes: number;
+  paused_pipes: number;
+  failed_pipes: number;
+  last_run: string | null;
+}
+
+type FloorView = "floor1" | "floor2";
+
+const NICHES = [
+  "pet_services", "beauty_wellness", "fitness_health", "food_beverage",
+  "local_retail", "creative_services", "real_estate", "home_services",
+  "automotive", "professional_services", "healthcare", "local_business",
+];
+
+const MISSION_COLORS: Record<string, string> = {
+  heartbeat: "#f59e0b", showcase: "#8b5cf6", educate: "#3b82f6",
+  engage: "#10b981", trust: "#14b8a6", convert: "#ef4444",
+};
+
+const TEMPLATE_STATUS_COLORS: Record<string, string> = {
+  draft: "#6b7280", active: "#10b981", archived: "#555555",
+};
+
 // ── Helpers ──
 
 function relativeTime(dateStr: string | null): string {
@@ -486,6 +572,34 @@ function FactoryContent() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<PostFilter>((searchParams?.get("filter") as PostFilter) || "all");
   const [retrying, setRetrying] = useState<number | null>(null);
+  const [floor, setFloor] = useState<FloorView>("floor1");
+
+  // Floor 2 state
+  const [templates, setTemplates] = useState<PipelineTemplate[]>([]);
+  const [availablePipes, setAvailablePipes] = useState<AvailablePipe[]>([]);
+  const [medusaStatus, setMedusaStatus] = useState<MedusaStatusData | null>(null);
+  const [editTemplate, setEditTemplate] = useState<PipelineTemplate | null>(null);
+  const [creatingNew, setCreatingNew] = useState(false);
+  const [f2Loading, setF2Loading] = useState(false);
+
+  const fetchFloor2 = useCallback(async () => {
+    setF2Loading(true);
+    try {
+      const [tRes, pRes, mRes] = await Promise.all([
+        fetch(`${API_BASE}/hq/floor2/templates`),
+        fetch(`${API_BASE}/hq/floor2/pipes/available`),
+        fetch(`${API_BASE}/hq/floor2/medusa/status`),
+      ]);
+      if (tRes.ok) setTemplates((await tRes.json()).templates);
+      if (pRes.ok) setAvailablePipes((await pRes.json()).pipes);
+      if (mRes.ok) setMedusaStatus(await mRes.json());
+    } catch {}
+    setF2Loading(false);
+  }, []);
+
+  useEffect(() => {
+    if (floor === "floor2" && isAuthenticated) fetchFloor2();
+  }, [floor, isAuthenticated, fetchFloor2]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -536,9 +650,27 @@ function FactoryContent() {
       {/* Header */}
       <header className="border-b border-[#1a1a1f] bg-[#0a0a0b]/50 px-6 py-4">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-emerald-500" />
             <h1 className="text-[#10b981] font-semibold text-sm tracking-wider">THE FACTORY</h1>
+            <div className="flex bg-[#0a0a0a] border border-[#1a1a1f] rounded-lg overflow-hidden ml-2">
+              <button
+                onClick={() => setFloor("floor1")}
+                className={`text-[10px] px-2.5 py-1 transition-colors ${
+                  floor === "floor1" ? "bg-emerald-500/15 text-emerald-300" : "text-[#555] hover:text-[#888]"
+                }`}
+              >
+                Floor 1
+              </button>
+              <button
+                onClick={() => setFloor("floor2")}
+                className={`text-[10px] px-2.5 py-1 transition-colors ${
+                  floor === "floor2" ? "bg-emerald-500/15 text-emerald-300" : "text-[#555] hover:text-[#888]"
+                }`}
+              >
+                Floor 2
+              </button>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {lastRefresh && (
@@ -577,15 +709,10 @@ function FactoryContent() {
           </div>
         )}
 
-        {data && (
+        {floor === "floor1" && data && (
           <>
-            {/* Pipeline Funnel */}
             <PipelineFunnel funnel={data.funnel} />
-
-            {/* Attention Panel */}
             <AttentionPanel items={data.attention} />
-
-            {/* Two-column: Posts + Client Health */}
             <div className="flex flex-col lg:flex-row gap-4 min-h-0">
               <PostsTable
                 posts={data.posts}
@@ -600,7 +727,565 @@ function FactoryContent() {
             </div>
           </>
         )}
+
+        {floor === "floor2" && (
+          <>
+            {f2Loading && !templates.length ? (
+              <div className="space-y-4">
+                <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg h-20 animate-pulse" />
+                <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg h-60 animate-pulse" />
+              </div>
+            ) : (
+              <>
+                {/* Medusa Status Bar */}
+                {medusaStatus && <MedusaStatusBar status={medusaStatus} />}
+
+                {/* Template Grid */}
+                <TemplateGrid
+                  templates={templates}
+                  onSelect={(t) => { setEditTemplate(t); setCreatingNew(false); }}
+                  onNew={() => { setEditTemplate(null); setCreatingNew(true); }}
+                />
+
+                {/* Client Pipelines */}
+                <ClientPipelinesPanel />
+              </>
+            )}
+
+            {/* Template Editor Panel */}
+            {(editTemplate || creatingNew) && (
+              <TemplateEditorPanel
+                template={editTemplate}
+                availablePipes={availablePipes}
+                onClose={() => { setEditTemplate(null); setCreatingNew(false); }}
+                onSave={async (data) => {
+                  const method = editTemplate ? "PATCH" : "POST";
+                  const url = editTemplate
+                    ? `${API_BASE}/hq/floor2/templates/${editTemplate.id}`
+                    : `${API_BASE}/hq/floor2/templates`;
+                  const res = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                  });
+                  if (res.ok) {
+                    setEditTemplate(null);
+                    setCreatingNew(false);
+                    fetchFloor2();
+                  }
+                }}
+                onDelete={editTemplate ? async () => {
+                  await fetch(`${API_BASE}/hq/floor2/templates/${editTemplate.id}`, { method: "DELETE" });
+                  setEditTemplate(null);
+                  fetchFloor2();
+                } : undefined}
+                onPublish={editTemplate ? async (priceCents: number) => {
+                  await fetch(`${API_BASE}/hq/floor2/templates/${editTemplate.id}/publish`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ price_cents: priceCents }),
+                  });
+                  fetchFloor2();
+                } : undefined}
+              />
+            )}
+          </>
+        )}
       </main>
+    </div>
+  );
+}
+
+
+// ── Floor 2 Components ──────────────────────────────────────
+
+function MedusaStatusBar({ status }: { status: MedusaStatusData }) {
+  return (
+    <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg px-5 py-3 flex items-center gap-6 flex-wrap">
+      <div className="flex items-center gap-2">
+        <div className={`w-2 h-2 rounded-full ${status.daemon_running ? "bg-emerald-500" : "bg-red-500"}`} />
+        <span className="text-[10px] text-[#888] tracking-wider">MEDUSA</span>
+        <span className={`text-xs font-mono ${status.daemon_running ? "text-emerald-400" : "text-red-400"}`}>
+          {status.daemon_running ? "Running" : "Stopped"}
+        </span>
+      </div>
+      <div className="flex items-center gap-4 text-[10px] text-[#666]">
+        <span><span className="text-emerald-400 font-mono">{status.active_pipes}</span> active</span>
+        <span><span className="font-mono">{status.paused_pipes}</span> paused</span>
+        {status.failed_pipes > 0 && (
+          <span><span className="text-red-400 font-mono">{status.failed_pipes}</span> failed</span>
+        )}
+        <span>{status.total_pipes} total pipes</span>
+      </div>
+      {status.last_run && (
+        <span className="text-[10px] text-[#444] font-mono ml-auto">
+          Last: {relativeTime(status.last_run)}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function TemplateGrid({
+  templates,
+  onSelect,
+  onNew,
+}: {
+  templates: PipelineTemplate[];
+  onSelect: (t: PipelineTemplate) => void;
+  onNew: () => void;
+}) {
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const filtered = statusFilter === "all"
+    ? templates
+    : templates.filter((t) => t.status === statusFilter);
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="text-xs font-semibold tracking-wider text-[#888]">TEMPLATES</h2>
+        <div className="flex gap-1 ml-2">
+          {["all", "draft", "active"].map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
+                statusFilter === s
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                  : "text-[#555] hover:text-[#888] border border-transparent"
+              }`}
+            >
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={onNew}
+          className="ml-auto text-[10px] px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-colors"
+        >
+          + New Template
+        </button>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-12 text-center">
+          <p className="text-[#333] text-sm mb-2">No templates yet</p>
+          <p className="text-[#555] text-xs">Create your first pipeline template to get started</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filtered.map((template) => {
+            const statusColor = TEMPLATE_STATUS_COLORS[template.status] || "#888";
+            return (
+              <button
+                key={template.id}
+                onClick={() => onSelect(template)}
+                className="text-left bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-4 hover:border-emerald-500/30 transition-all group"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-sm text-[#ccc] font-medium group-hover:text-emerald-300 transition-colors">
+                    {template.name}
+                  </h3>
+                  <span
+                    className="text-[9px] px-1.5 py-0.5 rounded font-mono tracking-wider shrink-0"
+                    style={{ backgroundColor: `${statusColor}20`, color: statusColor }}
+                  >
+                    {template.status.toUpperCase()}
+                  </span>
+                </div>
+                {template.niche && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#1a1a1f] text-[#888] inline-block mb-2">
+                    {template.niche.replace(/_/g, " ")}
+                  </span>
+                )}
+                <div className="flex items-center gap-2 mb-2">
+                  {template.pipes_config.map((p) => {
+                    const color = MISSION_COLORS[p.mission_type] || "#888";
+                    return (
+                      <span
+                        key={p.pipe_name}
+                        className="text-[8px] px-1 py-0.5 rounded font-mono"
+                        style={{ backgroundColor: `${color}20`, color }}
+                      >
+                        {p.pipe_name}
+                      </span>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-[#555]">
+                  <span>{template.pipes_config.length} pipes</span>
+                  {template.price_cents && (
+                    <span className="text-emerald-400">${(template.price_cents / 100).toFixed(0)}/mo</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TemplateEditorPanel({
+  template,
+  availablePipes,
+  onClose,
+  onSave,
+  onDelete,
+  onPublish,
+}: {
+  template: PipelineTemplate | null;
+  availablePipes: AvailablePipe[];
+  onClose: () => void;
+  onSave: (data: Record<string, unknown>) => Promise<void>;
+  onDelete?: () => Promise<void>;
+  onPublish?: (priceCents: number) => Promise<void>;
+}) {
+  const [name, setName] = useState(template?.name || "");
+  const [description, setDescription] = useState(template?.description || "");
+  const [niche, setNiche] = useState(template?.niche || "");
+  const [pipes, setPipes] = useState<PipeConfig[]>(template?.pipes_config || []);
+  const [preferredStyle, setPreferredStyle] = useState(template?.style_config?.preferred_style || "ghibli");
+  const [loraModel, setLoraModel] = useState(template?.style_config?.lora_model || "");
+  const [postsPerWeek, setPostsPerWeek] = useState(template?.rhythm_config?.posts_per_week || 5);
+  const [saving, setSaving] = useState(false);
+  const [publishPrice, setPublishPrice] = useState(template?.price_cents ? String(template.price_cents / 100) : "");
+  const [showPublish, setShowPublish] = useState(false);
+
+  const uniquePipes = availablePipes.filter(
+    (p, i, arr) => arr.findIndex((x) => x.pipe_name === p.pipe_name) === i
+  );
+
+  const togglePipe = (pipeName: string, missionType: string) => {
+    const exists = pipes.find((p) => p.pipe_name === pipeName);
+    if (exists) {
+      setPipes(pipes.filter((p) => p.pipe_name !== pipeName));
+    } else {
+      setPipes([...pipes, { pipe_name: pipeName, mission_type: missionType, schedule: "daily", run_hour: 6 }]);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    setSaving(true);
+    await onSave({
+      name,
+      description,
+      niche,
+      pipes_config: pipes,
+      style_config: { preferred_style: preferredStyle, ...(loraModel ? { lora_model: loraModel } : {}) },
+      rhythm_config: { posts_per_week: postsPerWeek, posting_days: ["mon", "tue", "wed", "thu", "fri"].slice(0, postsPerWeek), stagger_hours: true },
+    });
+    setSaving(false);
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
+
+      {/* Panel */}
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[440px] bg-[#0a0a0b] border-l border-[#1a1a1f] z-50 overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-[#0a0a0b] border-b border-[#1a1a1f] px-5 py-3 flex items-center justify-between z-10">
+          <h3 className="text-sm text-[#ccc] font-medium">
+            {template ? "Edit Template" : "New Template"}
+          </h3>
+          <button onClick={onClose} className="text-[#555] hover:text-[#ccc] transition-colors text-lg">&times;</button>
+        </div>
+
+        <div className="p-5 space-y-5">
+          {/* Identity */}
+          <div>
+            <label className="text-[10px] text-[#555] tracking-wider block mb-1">NAME</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Motivational Coach"
+              className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-2 text-sm text-[#ccc] focus:border-emerald-500/40 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] text-[#555] tracking-wider block mb-1">DESCRIPTION</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What this template does..."
+              rows={2}
+              className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-2 text-sm text-[#ccc] focus:border-emerald-500/40 focus:outline-none resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] text-[#555] tracking-wider block mb-1">TARGET NICHE</label>
+            <select
+              value={niche}
+              onChange={(e) => setNiche(e.target.value)}
+              className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-2 text-sm text-[#ccc] focus:border-emerald-500/40 focus:outline-none"
+            >
+              <option value="">Select niche...</option>
+              {NICHES.map((n) => (
+                <option key={n} value={n}>{n.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Pipes */}
+          <div>
+            <label className="text-[10px] text-[#555] tracking-wider block mb-2">CONTENT PIPES</label>
+            <div className="space-y-1.5">
+              {uniquePipes.map((ap) => {
+                const isActive = pipes.some((p) => p.pipe_name === ap.pipe_name);
+                const color = MISSION_COLORS[ap.mission_type] || "#888";
+                return (
+                  <button
+                    key={ap.pipe_name}
+                    onClick={() => togglePipe(ap.pipe_name, ap.mission_type)}
+                    className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded border transition-all ${
+                      isActive
+                        ? "bg-emerald-500/10 border-emerald-500/30"
+                        : "bg-[#111] border-[#1a1a1f] hover:border-[#2a2a2f]"
+                    }`}
+                  >
+                    <div className={`w-3.5 h-3.5 rounded border-2 flex items-center justify-center transition-colors ${
+                      isActive ? "border-emerald-400 bg-emerald-500" : "border-[#333]"
+                    }`}>
+                      {isActive && <span className="text-white text-[8px]">&#10003;</span>}
+                    </div>
+                    <span className="text-sm text-[#ccc] flex-1">{ap.pipe_name.replace(/_/g, " ")}</span>
+                    <span
+                      className="text-[8px] px-1.5 py-0.5 rounded font-mono"
+                      style={{ backgroundColor: `${color}20`, color }}
+                    >
+                      {ap.mission_type}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Style */}
+          <div>
+            <label className="text-[10px] text-[#555] tracking-wider block mb-1">VISUAL STYLE</label>
+            <select
+              value={preferredStyle}
+              onChange={(e) => setPreferredStyle(e.target.value)}
+              className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-2 text-sm text-[#ccc] focus:border-emerald-500/40 focus:outline-none mb-2"
+            >
+              {["ghibli", "flux_schnell", "flux_dev", "warm_cinematic", "marble_minimal", "none"].map((s) => (
+                <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+            <input
+              value={loraModel}
+              onChange={(e) => setLoraModel(e.target.value)}
+              placeholder="LoRA model ID (optional, future)"
+              className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-2 text-xs text-[#888] focus:border-emerald-500/40 focus:outline-none"
+            />
+          </div>
+
+          {/* Rhythm */}
+          <div>
+            <label className="text-[10px] text-[#555] tracking-wider block mb-1">
+              POSTS PER WEEK: <span className="text-emerald-400">{postsPerWeek}</span>
+            </label>
+            <input
+              type="range"
+              min={1}
+              max={7}
+              value={postsPerWeek}
+              onChange={(e) => setPostsPerWeek(Number(e.target.value))}
+              className="w-full accent-emerald-500"
+            />
+            <div className="flex justify-between text-[9px] text-[#444] mt-1">
+              <span>1x</span><span>3x</span><span>5x</span><span>7x</span>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={handleSave}
+              disabled={saving || !name.trim()}
+              className="flex-1 py-2.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-medium hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+            >
+              {saving ? "Saving..." : template ? "Save Changes" : "Create Template"}
+            </button>
+            {template && onPublish && !template.store_product_id && (
+              <button
+                onClick={() => setShowPublish(!showPublish)}
+                className="px-3 py-2.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/40 text-xs font-medium hover:bg-violet-500/30 transition-colors"
+              >
+                Publish
+              </button>
+            )}
+            {template && onDelete && (
+              <button
+                onClick={onDelete}
+                className="px-3 py-2.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 text-xs hover:bg-red-500/20 transition-colors"
+              >
+                Archive
+              </button>
+            )}
+          </div>
+
+          {template?.store_product_id && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-violet-500/10 border border-violet-500/20 rounded">
+              <div className="w-2 h-2 bg-violet-400 rounded-full" />
+              <span className="text-xs text-violet-300">Published to Chloe&apos;s Store</span>
+              {template.price_cents && (
+                <span className="text-xs text-violet-400 ml-auto font-mono">${(template.price_cents / 100).toFixed(0)}/mo</span>
+              )}
+            </div>
+          )}
+
+          {showPublish && onPublish && (
+            <div className="bg-[#111] border border-violet-500/20 rounded-lg p-4">
+              <label className="text-[10px] text-[#555] tracking-wider block mb-1">STORE PRICE ($/mo)</label>
+              <div className="flex gap-2">
+                <input
+                  value={publishPrice}
+                  onChange={(e) => setPublishPrice(e.target.value)}
+                  placeholder="29"
+                  type="number"
+                  className="flex-1 bg-[#0a0a0b] border border-[#1a1a1f] rounded px-3 py-2 text-sm text-[#ccc] focus:border-violet-500/40 focus:outline-none"
+                />
+                <button
+                  onClick={() => {
+                    const cents = Math.round(Number(publishPrice) * 100);
+                    if (cents > 0) onPublish(cents);
+                    setShowPublish(false);
+                  }}
+                  disabled={!publishPrice || Number(publishPrice) <= 0}
+                  className="px-4 py-2 rounded bg-violet-500/20 text-violet-300 border border-violet-500/40 text-xs font-medium hover:bg-violet-500/30 disabled:opacity-50"
+                >
+                  Publish
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ClientPipelinesPanel() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [clients, setClients] = useState<Array<{ id: string; business_name: string; tier: string }>>([]);
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [clientPipes, setClientPipes] = useState<ClientPipe[]>([]);
+  const [loadingPipes, setLoadingPipes] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/hq/clients`)
+      .then((r) => r.ok ? r.json() : { clients: [] })
+      .then((d) => setClients(Array.isArray(d) ? d : d.clients || []))
+      .catch(() => {});
+  }, []);
+
+  const loadPipes = async (clientId: string) => {
+    setSelectedClient(clientId);
+    setLoadingPipes(true);
+    try {
+      const res = await fetch(`${API_BASE}/hq/floor2/clients/${clientId}/pipes`);
+      if (res.ok) setClientPipes((await res.json()).pipes);
+    } catch {}
+    setLoadingPipes(false);
+  };
+
+  const togglePipe = async (pipe: ClientPipe) => {
+    await fetch(`${API_BASE}/hq/floor2/clients/${pipe.client_id}/pipes/${pipe.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: !pipe.enabled }),
+    });
+    if (selectedClient) loadPipes(selectedClient);
+  };
+
+  const filteredClients = searchQuery
+    ? clients.filter((c) => c.business_name?.toLowerCase().includes(searchQuery.toLowerCase()) || c.id.includes(searchQuery))
+    : clients;
+
+  return (
+    <div>
+      <h2 className="text-xs font-semibold tracking-wider text-[#888] mb-3">CLIENT PIPELINES</h2>
+      <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg overflow-hidden">
+        <div className="p-3 border-b border-[#1a1a1f]">
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search clients..."
+            className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-1.5 text-xs text-[#ccc] focus:border-emerald-500/40 focus:outline-none"
+          />
+        </div>
+
+        <div className="max-h-[300px] overflow-y-auto divide-y divide-[#111]">
+          {filteredClients.map((client) => {
+            const isSelected = selectedClient === client.id;
+            const tierColor = TIER_COLORS[client.tier] || "#888";
+            return (
+              <div key={client.id}>
+                <button
+                  onClick={() => isSelected ? setSelectedClient(null) : loadPipes(client.id)}
+                  className={`w-full text-left px-3 py-2.5 flex items-center gap-2 transition-colors ${
+                    isSelected ? "bg-emerald-500/5" : "hover:bg-[#0d0d0e]"
+                  }`}
+                >
+                  <span className="text-sm text-[#ccc] flex-1">{client.business_name || client.id}</span>
+                  <span
+                    className="text-[9px] px-1.5 py-0.5 rounded tracking-wider"
+                    style={{ backgroundColor: `${tierColor}20`, color: tierColor }}
+                  >
+                    {client.tier?.toUpperCase()}
+                  </span>
+                </button>
+                {isSelected && (
+                  <div className="px-3 pb-3 bg-emerald-500/5">
+                    {loadingPipes ? (
+                      <div className="py-2 text-[10px] text-[#555]">Loading...</div>
+                    ) : clientPipes.length === 0 ? (
+                      <div className="py-2 text-[10px] text-[#555]">No pipes assigned</div>
+                    ) : (
+                      <div className="space-y-1">
+                        {clientPipes.map((pipe) => {
+                          const statusColor = pipe.enabled ? "#10b981" : "#555";
+                          return (
+                            <div key={pipe.id} className="flex items-center gap-2 py-1.5">
+                              <button
+                                onClick={() => togglePipe(pipe)}
+                                className={`w-3 h-3 rounded-sm border transition-colors ${
+                                  pipe.enabled ? "bg-emerald-500 border-emerald-400" : "border-[#333]"
+                                }`}
+                              />
+                              <span className="text-xs text-[#aaa] flex-1">{pipe.pipe_name}</span>
+                              <span className="text-[9px] text-[#555] font-mono">{pipe.schedule}</span>
+                              {pipe.last_status && (
+                                <span
+                                  className="text-[8px] px-1 py-0.5 rounded font-mono"
+                                  style={{ backgroundColor: `${pipe.last_status === "success" ? "#10b981" : "#ef4444"}20`, color: pipe.last_status === "success" ? "#10b981" : "#ef4444" }}
+                                >
+                                  {pipe.last_status}
+                                </span>
+                              )}
+                              <span className="text-[9px] text-[#444] font-mono">
+                                {pipe.total_successes}/{pipe.total_runs}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
