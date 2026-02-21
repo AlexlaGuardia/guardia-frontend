@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="sg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="mg" x1="256" y1="120" x2="256" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ddd6fe"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield body -->
+  <path d="M256 32L72 80V248C72 368 172 460 256 488C340 460 440 368 440 248V80L256 32Z" fill="url(#sg)"/>
+
+  <!-- Inner shield bevel -->
+  <path d="M256 60L100 102V244C100 350 190 434 256 460C322 434 412 350 412 244V102L256 60Z" fill="#7c3aed" opacity="0.4"/>
+
+  <!-- Stylized G: open circle with horizontal bar and descender -->
+  <path d="M304 184C292 166 274 156 254 156C220 156 192 186 192 222C192 258 220 288 254 288C268 288 280 283 290 274V240H258C252 240 248 236 248 230C248 224 252 220 258 220H310C316 220 320 224 320 230V284C320 288 318 292 314 294C298 310 278 320 254 320C202 320 160 276 160 222C160 168 202 124 254 124C282 124 308 138 324 160C328 166 326 174 320 178C314 182 306 180 304 184Z" fill="url(#mg)"/>
+</svg>

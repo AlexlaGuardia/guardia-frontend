@@ -154,9 +154,7 @@ function Nav() {
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#C9A227] flex items-center justify-center">
-            <span className="text-white font-bold text-sm font-[var(--font-fraunces)]">G</span>
-          </div>
+          <img src="/images/guardia-logo.png" alt="Guardia" className="w-9 h-9 object-contain" />
           <span className="text-[#2A2A2A] font-semibold tracking-tight font-[var(--font-fraunces)]">
             Guardia
           </span>
@@ -535,9 +533,7 @@ function Footer() {
     <footer className="border-t border-[#E8DDD3] py-12 px-6 bg-[#FAF6F1]">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#C9A227] flex items-center justify-center">
-            <span className="text-white font-bold text-sm font-[var(--font-fraunces)]">G</span>
-          </div>
+          <img src="/images/guardia-logo.png" alt="Guardia" className="w-9 h-9 object-contain" />
           <span className="text-[#2A2A2A] font-semibold font-[var(--font-fraunces)]">Guardia</span>
         </div>
 

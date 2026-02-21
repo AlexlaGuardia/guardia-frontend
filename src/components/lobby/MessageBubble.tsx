@@ -9,7 +9,8 @@ export default function MessageBubble({ message, isUser }: MessageBubbleProps) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fade-in`}>
       {!isUser && (
-        <div className="w-8 h-8 bg-[var(--bg-elevated)] rounded-lg flex items-center justify-center text-[var(--accent)] text-sm mr-2 flex-shrink-0 mt-1 border border-[var(--border-subtle)]">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-semibold mr-2 flex-shrink-0 mt-1"
+          style={{ background: 'linear-gradient(135deg, #4338CA, #7c3aed)', boxShadow: '0 1px 4px rgba(99,102,241,0.25)' }}>
           G
         </div>
       )}

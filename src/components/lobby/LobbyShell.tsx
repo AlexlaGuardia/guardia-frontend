@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import GioMode from "./GioMode";
 import TabletMode from "./TabletMode";
+import ChloeTab from "./ChloeTab";
 import WelcomeBubble from "./WelcomeBubble";
 import NotificationBubble from "./NotificationBubble";
 
@@ -61,6 +62,7 @@ export default function LobbyShell() {
   // Mode state
   const [mode, setMode] = useState<LobbyMode>("gio");
   const [activeTab, setActiveTab] = useState<TabletTab>("calendar");
+  const [chloeOpen, setChloeOpen] = useState(false);
 
   // Chat state (shared so it persists across mode switches)
   const [messages, setMessages] = useState<Message[]>([]);
@@ -157,7 +159,12 @@ export default function LobbyShell() {
       status += " To start posting automatically, connect your Facebook in the Account tab.";
     }
 
-    return `${timeGreeting}, ${name}! Welcome back.${status} How can I help you today?`;
+    // Chloe discovery — subtle mention when there's nothing urgent
+    const chloeNudge = !ctx.needs_platform_setup && (ctx.posted_this_month || 0) > 0
+      ? " Looking to level up your brand? Try Chloe — your brand stylist."
+      : "";
+
+    return `${timeGreeting}, ${name}! Welcome back.${status}${chloeNudge} How can I help you today?`;
   };
 
   // ============================================
@@ -201,19 +208,6 @@ export default function LobbyShell() {
           <div className="w-12 h-12 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
           <p className="text-[var(--text-secondary)] text-sm">Loading...</p>
         </div>
-  
-      {/* Welcome Bubble - appears 60s after auth */}
-      <WelcomeBubble
-        jwt={jwt}
-        onEngage={(msg) => {
-          setMessages((m) => [...m, { role: "assistant", content: msg }]);
-          setMode("gio");
-        }}
-        onOpenTablet={(tab) => {
-          if (tab) setActiveTab(tab as TabletTab);
-          setMode("tablet");
-        }}
-      />
     </main>
     );
   }
@@ -241,15 +235,16 @@ export default function LobbyShell() {
       
 
       {/* Gio Mode (base layer, always rendered for depth) */}
-      <div className={`relative z-10 ${mode === "tablet" ? "pointer-events-none" : ""}`}>
+      <div className={`relative z-10 ${mode === "tablet" || chloeOpen ? "pointer-events-none" : ""}`}>
         <GioMode
           client={client}
           jwt={jwt}
           messages={messages}
           setMessages={setMessages}
           onOpenTablet={() => setMode("tablet")}
+          onOpenChloe={() => setChloeOpen(true)}
           onLogout={handleLogout}
-          isBackground={mode === "tablet"}
+          isBackground={mode === "tablet" || chloeOpen}
         />
       </div>
 
@@ -266,6 +261,66 @@ export default function LobbyShell() {
           }}
         />
       )}
+
+      {/* Chloe Overlay */}
+      {chloeOpen && client && jwt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setChloeOpen(false)} />
+          <div className="relative w-full h-full max-w-[95vw] max-h-[95vh] bg-[var(--bg-base)] border border-violet-500/20 rounded-2xl overflow-hidden flex flex-col animate-chloe-open">
+            {/* Chloe header bar */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-violet-500/15 bg-gradient-to-r from-violet-500/5 to-fuchsia-500/5">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                  </svg>
+                </div>
+                <span className="text-sm font-semibold text-violet-300">Chloe &middot; Brand Studio</span>
+              </div>
+              <button
+                onClick={() => setChloeOpen(false)}
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded-lg transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <ChloeTab
+                clientId={client.id}
+                jwt={jwt}
+                onMessage={(msg) => {
+                  setMessages((m) => [...m, { role: "assistant", content: msg }]);
+                  setChloeOpen(false);
+                }}
+              />
+            </div>
+          </div>
+          <style jsx>{`
+            @keyframes chloe-open {
+              from { opacity: 0; transform: scale(0.95) translateY(20px); }
+              to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+            .animate-chloe-open {
+              animation: chloe-open 0.3s ease-out forwards;
+            }
+          `}</style>
+        </div>
+      )}
+
+      {/* Welcome Bubble - appears 60s after auth */}
+      <WelcomeBubble
+        jwt={jwt}
+        onEngage={(msg) => {
+          setMessages((m) => [...m, { role: "assistant", content: msg }]);
+          setMode("gio");
+        }}
+        onOpenTablet={(tab) => {
+          if (tab) setActiveTab(tab as TabletTab);
+          setMode("tablet");
+        }}
+      />
 
       {/* Notification Bubbles */}
       <NotificationBubble jwt={jwt} />
@@ -334,7 +389,7 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 bg-[var(--accent)] rounded-lg" />
+              <img src="/images/guardia-logo.png" alt="Guardia" className="w-8 h-8 object-contain" />
               <span className="text-xl font-semibold text-[var(--text-primary)]">Guardia</span>
             </div>
           </div>
@@ -343,7 +398,8 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
           <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl p-8">
             {/* Giovanni avatar */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-[var(--accent)] rounded-xl flex items-center justify-center text-white text-xl">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-semibold"
+                style={{ background: 'linear-gradient(135deg, #4338CA, #7c3aed)', boxShadow: '0 2px 8px rgba(99,102,241,0.3)' }}>
                 G
               </div>
               <div>

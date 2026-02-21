@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   title: "Guardia - Social Media That Works For You",
   description: "We style your photos, write every caption, schedule every post, and manage engagement for 24 hours.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

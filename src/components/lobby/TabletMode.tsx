@@ -124,7 +124,8 @@ export default function TabletMode({
               className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-[var(--border)] rounded-full text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-all"
               title="Back to Giovanni"
             >
-              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md flex items-center justify-center text-[10px] text-white font-semibold">
+              <div className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] text-white font-semibold"
+                style={{ background: 'linear-gradient(135deg, #4338CA, #7c3aed)' }}>
                 G
               </div>
               <span className="text-xs">Chat</span>

@@ -18,6 +18,7 @@ interface GioModeProps {
   messages: Message[];
   setMessages: Dispatch<SetStateAction<Message[]>>;
   onOpenTablet: () => void;
+  onOpenChloe: () => void;
   onLogout: () => void;
   isBackground: boolean;
 }
@@ -28,6 +29,7 @@ export default function GioMode({
   messages,
   setMessages,
   onOpenTablet,
+  onOpenChloe,
   onLogout,
   isBackground,
 }: GioModeProps) {
@@ -95,7 +97,8 @@ export default function GioMode({
       <header className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[var(--bg-elevated)] rounded-xl flex items-center justify-center text-[var(--accent)] font-semibold border border-[var(--border-subtle)]">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold overflow-hidden"
+              style={{ background: 'linear-gradient(135deg, #4338CA, #7c3aed)', boxShadow: '0 2px 8px rgba(99,102,241,0.3)' }}>
               G
             </div>
             <div>
@@ -112,6 +115,20 @@ export default function GioMode({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenChloe}
+              className="relative flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 hover:from-violet-500/20 hover:to-fuchsia-500/20 border border-violet-500/20 hover:border-violet-500/40 rounded-xl text-violet-300 hover:text-violet-200 transition-all"
+              title="Chloe — Brand Studio"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+              </svg>
+              <span className="text-sm hidden sm:inline">Chloe</span>
+              {/* Discovery pulse — draws eye on first visit */}
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-violet-400 animate-pulse"
+                style={{ boxShadow: '0 0 6px rgba(167,139,250,0.6)' }} />
+            </button>
+
             <button
               onClick={onOpenTablet}
               className="relative flex items-center gap-2 px-3 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
