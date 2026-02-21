@@ -47,7 +47,7 @@ export default function EditorPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link href="/hq/athernyx" className="text-[#555] text-xs hover:text-[#888] transition-colors mb-2 block">
-              &larr; Back to Canon
+              &larr; Writers Hub
             </Link>
             <h1 className="text-2xl font-semibold tracking-wide" style={{ color: "#a855f7" }}>
               Chapter Editor

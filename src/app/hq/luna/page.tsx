@@ -20,11 +20,14 @@ export default function LunaPage() {
   const [lastText, setLastText] = useState("");
   const [lobbyRoomId, setLobbyRoomId] = useState<number | null>(null);
   const [time, setTime] = useState("");
+  const [connected, setConnected] = useState(false);
 
   const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sendRef = useRef<(text: string) => Promise<void>>(() => Promise.resolve());
+  const audioUnlockedRef = useRef(false);
+  const lastNotifIdRef = useRef(0);
 
   // ── Auth (kiosk bypass via ?dev=serb) ──
   useEffect(() => {
@@ -60,6 +63,19 @@ export default function LunaPage() {
       })
       .catch(console.error);
   }, [authenticated]);
+
+  // ── Audio unlock — must happen on first user gesture ──
+  const unlockAudio = useCallback(() => {
+    if (audioUnlockedRef.current) return;
+    const silent = new AudioContext();
+    const buf = silent.createBuffer(1, 1, 22050);
+    const src = silent.createBufferSource();
+    src.buffer = buf;
+    src.connect(silent.destination);
+    src.start(0);
+    audioUnlockedRef.current = true;
+    console.log("[Luna] Audio context unlocked");
+  }, []);
 
   // ── Helpers ──
   const clearFadeTimer = () => {
@@ -97,7 +113,7 @@ export default function LunaPage() {
         setLunaText("");
       }, 3000);
     };
-    audio.play().catch(e => console.warn("[Luna] Audio blocked:", e));
+    audio.play().catch(e => console.warn("[Luna] Audio play failed:", e));
   }, []);
 
   // ── Send message to Luna (via lobby room) ──
@@ -145,7 +161,6 @@ export default function LunaPage() {
         }
       }
 
-      // Show final response
       showLunaMessage(fullText);
 
       // Generate voice via ElevenLabs
@@ -169,7 +184,6 @@ export default function LunaPage() {
     }
   }, [lobbyRoomId, showLunaMessage, playAudio]);
 
-  // Keep ref in sync for voice recognition callback
   useEffect(() => { sendRef.current = sendToLuna; }, [sendToLuna]);
 
   // ── Voice recognition ──
@@ -209,89 +223,43 @@ export default function LunaPage() {
     recognitionRef.current = recognition;
   }, []);
 
-  // ── SSE — direct connection to backend (bypasses Next.js proxy) ──
-  const [sseConnected, setSseConnected] = useState(false);
-
-  useEffect(() => {
-    if (!authenticated) return;
-
-    let es: EventSource | null = null;
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    const connect = () => {
-      if (es) { es.close(); es = null; }
-      es = new EventSource("https://5.161.217.38:8443/luna/notifications/stream");
-
-      es.onopen = () => {
-        console.log("[Luna SSE] Connected directly to backend");
-        setSseConnected(true);
-        attempts = 0;
-      };
-
-      es.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === "luna_message") {
-            showLunaMessage(data.text, data.audio_duration_ms);
-            if (data.audio_url) playAudio(data.audio_url);
-          }
-        } catch {}
-      };
-
-      es.onerror = () => {
-        setSseConnected(false);
-        es?.close();
-        es = null;
-        if (attempts < maxAttempts) {
-          const delay = 1000 * Math.pow(2, attempts);
-          console.log(`[Luna SSE] Reconnecting in ${delay}ms (${attempts + 1}/${maxAttempts})`);
-          reconnectTimer = setTimeout(() => { attempts++; connect(); }, delay);
-        }
-      };
-    };
-
-    connect();
-    return () => {
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-      es?.close();
-    };
-  }, [authenticated, showLunaMessage, playAudio]);
-
-
-  // ── Polling fallback — Cloudflare kills SSE, so poll for missed notifications ──
-  const lastNotifIdRef = useRef(0);
-
+  // ── Polling for notifications (Cloudflare-safe) ──
   useEffect(() => {
     if (!authenticated) return;
 
     const poll = async () => {
       try {
         const res = await fetch(`${API_BASE}/luna/notifications?undelivered_only=true&limit=5`);
-        if (!res.ok) return;
+        if (!res.ok) {
+          setConnected(false);
+          return;
+        }
+        setConnected(true);
+
         const data = await res.json();
         const notifications = data.notifications || [];
-        for (const n of notifications) {
+        for (const n of notifications.reverse()) {
           if (n.id <= lastNotifIdRef.current) continue;
           lastNotifIdRef.current = n.id;
-          const text = n.message || n.text || "";
-          showLunaMessage(text);
-          // Check for audio URL in the notification
+          const text = n.message || "";
+          showLunaMessage(text, n.audio_duration_ms);
           if (n.audio_url) playAudio(n.audio_url);
-          // Mark as delivered
           fetch(`${API_BASE}/luna/notifications/${n.id}/delivered`, { method: "POST" }).catch(() => {});
         }
-      } catch {}
+      } catch {
+        setConnected(false);
+      }
     };
 
-    const interval = setInterval(poll, 4000);
-    poll(); // Initial check
+    poll();
+    const interval = setInterval(poll, 5000);
     return () => clearInterval(interval);
   }, [authenticated, showLunaMessage, playAudio]);
 
   // ── Tap handler ──
   const handleTap = () => {
+    unlockAudio();
+
     if (state === "listening") {
       recognitionRef.current?.stop();
       setState("idle");
@@ -307,7 +275,6 @@ export default function LunaPage() {
     }
     if (state === "processing") return;
 
-    // Start listening
     if (recognitionRef.current) {
       setState("listening");
       setTranscript("");
@@ -319,7 +286,7 @@ export default function LunaPage() {
     }
   };
 
-  // ── Login (minimal — kiosk auto-bypasses) ──
+  // ── Login ──
   if (!authenticated) {
     return (
       <div className="h-screen bg-[#030304] flex items-center justify-center p-4">
@@ -373,10 +340,6 @@ export default function LunaPage() {
     : state === "speaking" ? 0.95
     : 0;
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // RENDER — The Abyss
-  // ════════════════════════════════════════════════════════════════════════════
-
   return (
     <div
       className="h-screen w-screen fixed inset-0 flex flex-col items-center justify-center overflow-hidden select-none"
@@ -390,7 +353,6 @@ export default function LunaPage() {
     >
       {/* ── Luna presence ── */}
       <div className="relative mb-10">
-        {/* Outer glow ring */}
         <div
           className="absolute inset-[-16px] rounded-full transition-all duration-700"
           style={{
@@ -398,7 +360,6 @@ export default function LunaPage() {
             opacity: state === "idle" ? 0.5 : 1,
           }}
         />
-        {/* Ring */}
         <div
           className={`relative w-28 h-28 rounded-full border flex items-center justify-center transition-all duration-700 ${
             state === "listening" ? "animate-pulse" : ""
@@ -435,7 +396,7 @@ export default function LunaPage() {
         )}
       </div>
 
-      {/* ── Tap hint (first use only) ── */}
+      {/* ── Tap hint ── */}
       {state === "idle" && !lastText && (
         <p className="absolute bottom-16 text-[11px] text-[#1a1a1f] tracking-wide">
           tap anywhere to speak
@@ -446,10 +407,10 @@ export default function LunaPage() {
       <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-1.5">
           <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
-            sseConnected ? "bg-green-500/50" : "bg-red-500/20"
+            connected ? "bg-green-500/50" : "bg-red-500/20"
           }`} />
-          <span className="text-[10px] tracking-wide" style={{ color: sseConnected ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.2)" }}>
-            {sseConnected ? "LIVE" : "OFFLINE"}
+          <span className="text-[10px] tracking-wide" style={{ color: connected ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.2)" }}>
+            {connected ? "LIVE" : "OFFLINE"}
           </span>
         </div>
         <span className="text-[10px] text-[#1a1a1f] tracking-wide">{time}</span>

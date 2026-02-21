@@ -103,6 +103,24 @@ body::after {
   background: var(--text-muted);
 }
 
+/* HQ dark scrollbar — hardcoded dark since HQ doesn't use data-theme */
+.hq-dark {
+  scrollbar-color: #2a2a2f transparent;
+  scrollbar-width: thin;
+}
+
+.hq-dark ::-webkit-scrollbar-thumb {
+  background: #2a2a2f;
+}
+
+.hq-dark ::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3f;
+}
+
+.hq-dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* Focus states */
 :focus-visible {
   outline: 2px solid var(--accent);
