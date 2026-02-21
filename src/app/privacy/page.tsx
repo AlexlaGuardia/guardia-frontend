@@ -5,17 +5,17 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#0f0f10] text-[#ebebeb] px-6 py-20">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] px-6 py-20">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
-        <p className="text-[#9a9a9a] mb-12">Last updated: December 30, 2024</p>
+        <p className="text-[var(--text-secondary)] mb-12">Last updated: December 30, 2024</p>
 
-        <div className="space-y-8 text-[#9a9a9a] leading-relaxed">
+        <div className="space-y-8 text-[var(--text-secondary)] leading-relaxed">
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Overview</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Overview</h2>
             <p>
-              Guardia Content Intelligence Agency ("Guardia," "we," "us," or "our"), operated by Alejandro Moreno, provides
+              Guardia Content Intelligence Agency (&ldquo;Guardia,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;), operated by Alejandro Moreno, provides
               a social media management service for local businesses. This Privacy Policy
               explains how we collect, use, disclose, and safeguard your information when
               you use our service at guardiacontent.com.
@@ -23,9 +23,9 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Information We Collect</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Information We Collect</h2>
 
-            <h3 className="text-lg font-medium text-[#ebebeb] mt-6 mb-2">Information You Provide</h3>
+            <h3 className="text-lg font-medium text-[var(--text-primary)] mt-6 mb-2">Information You Provide</h3>
             <ul className="list-disc list-inside space-y-2">
               <li>Business name, contact email, and phone number</li>
               <li>Photos and images you upload for styling</li>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
               <li>Payment information (processed securely via Stripe)</li>
             </ul>
 
-            <h3 className="text-lg font-medium text-[#ebebeb] mt-6 mb-2">Information from Connected Accounts</h3>
+            <h3 className="text-lg font-medium text-[var(--text-primary)] mt-6 mb-2">Information from Connected Accounts</h3>
             <p>
               When you connect your social media accounts (Facebook, Instagram, YouTube),
               we receive access tokens that allow us to post content on your behalf. We collect:
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
               <li>Post performance metrics (likes, comments, reach)</li>
             </ul>
 
-            <h3 className="text-lg font-medium text-[#ebebeb] mt-6 mb-2">Automatically Collected Information</h3>
+            <h3 className="text-lg font-medium text-[var(--text-primary)] mt-6 mb-2">Automatically Collected Information</h3>
             <ul className="list-disc list-inside space-y-2">
               <li>IP address and browser type</li>
               <li>Usage data and interaction with our service</li>
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">How We Use Your Information</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">How We Use Your Information</h2>
             <ul className="list-disc list-inside space-y-2">
               <li>To provide our social media management services</li>
               <li>To create and publish content on your connected social media accounts</li>
@@ -68,26 +68,26 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Data Sharing</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Data Sharing</h2>
             <p>We do not sell your personal information. We may share data with:</p>
             <ul className="list-disc list-inside space-y-2 mt-4">
-              <li><strong className="text-[#ebebeb]">Service Providers:</strong> Stripe (payments), Meta (Facebook/Instagram posting), Google (YouTube posting), AI providers for image styling</li>
-              <li><strong className="text-[#ebebeb]">Social Media Platforms:</strong> Content you authorize us to post on your behalf</li>
-              <li><strong className="text-[#ebebeb]">Legal Requirements:</strong> When required by law or to protect our rights</li>
+              <li><strong className="text-[var(--text-primary)]">Service Providers:</strong> Stripe (payments), Meta (Facebook/Instagram posting), Google (YouTube posting), AI providers for image styling</li>
+              <li><strong className="text-[var(--text-primary)]">Social Media Platforms:</strong> Content you authorize us to post on your behalf</li>
+              <li><strong className="text-[var(--text-primary)]">Legal Requirements:</strong> When required by law or to protect our rights</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Data from Facebook and Instagram</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Data from Facebook and Instagram</h2>
             <p>
               When you connect your Facebook or Instagram account, we request only the
               permissions necessary to provide our services:
             </p>
             <ul className="list-disc list-inside space-y-2 mt-4">
-              <li><strong className="text-[#ebebeb]">pages_manage_posts:</strong> To publish content to your Facebook Pages</li>
-              <li><strong className="text-[#ebebeb]">pages_read_engagement:</strong> To show you how your posts perform</li>
-              <li><strong className="text-[#ebebeb]">instagram_basic:</strong> To connect your Instagram Business account</li>
-              <li><strong className="text-[#ebebeb]">instagram_content_publish:</strong> To publish posts to Instagram</li>
+              <li><strong className="text-[var(--text-primary)]">pages_manage_posts:</strong> To publish content to your Facebook Pages</li>
+              <li><strong className="text-[var(--text-primary)]">pages_read_engagement:</strong> To show you how your posts perform</li>
+              <li><strong className="text-[var(--text-primary)]">instagram_basic:</strong> To connect your Instagram Business account</li>
+              <li><strong className="text-[var(--text-primary)]">instagram_content_publish:</strong> To publish posts to Instagram</li>
             </ul>
             <p className="mt-4">
               We only access and store information necessary to provide our services.
@@ -96,18 +96,18 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Data Retention</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Data Retention</h2>
             <p>
               We retain your data for as long as your account is active or as needed to
               provide services. Uploaded images and generated content are retained until
               you request deletion or close your account. You can request data deletion
               at any time by visiting our{' '}
-              <a href="/data-deletion" className="text-[#e8a060] hover:underline">Data Deletion page</a>.
+              <a href="/data-deletion" className="text-[#C9A227] hover:underline">Data Deletion page</a>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Data Security</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Data Security</h2>
             <p>
               We implement appropriate technical and organizational measures to protect
               your data, including encryption in transit (HTTPS), secure token storage,
@@ -117,7 +117,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Your Rights</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Your Rights</h2>
             <p>You have the right to:</p>
             <ul className="list-disc list-inside space-y-2 mt-4">
               <li>Access the personal data we hold about you</li>
@@ -129,7 +129,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Children&apos;s Privacy</h2>
             <p>
               Our service is not intended for individuals under 18 years of age.
               We do not knowingly collect personal information from children.
@@ -137,23 +137,23 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Changes to This Policy</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Changes to This Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. We will notify you
               of any changes by posting the new Privacy Policy on this page and updating
-              the "Last updated" date.
+              the &ldquo;Last updated&rdquo; date.
             </p>
           </section>
 
-          <section className="border-t border-white/10 pt-8">
-            <h2 className="text-2xl font-semibold text-[#ebebeb] mb-4">Contact Us</h2>
+          <section className="border-t border-[var(--border)] pt-8">
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Contact Us</h2>
             <p>
               If you have questions about this Privacy Policy, please contact us at:{' '}
-              <a href="mailto:guardiacontent@gmail.com" className="text-[#e8a060] hover:underline">
+              <a href="mailto:guardiacontent@gmail.com" className="text-[#C9A227] hover:underline">
                 guardiacontent@gmail.com
               </a>
             </p>
-            <p className="mt-4 text-[#9a9a9a]/60 text-sm">
+            <p className="mt-4 text-[var(--text-muted)] text-sm">
               Guardia Content Intelligence Agency is operated by Alejandro Moreno.
             </p>
           </section>
