@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Globe, Sparkles, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { Globe, ArrowRight, Check, Loader2 } from 'lucide-react';
 
 const packages: Record<string, { name: string; price: number; features: string[]; gradient: string }> = {
   starter: {
@@ -53,14 +53,14 @@ export default function WebsiteIntakePage() {
 
   if (!pkg) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <p>Invalid package. <a href="/websites" className="text-blue-400 underline">Go back</a></p>
+      <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] flex items-center justify-center">
+        <p>Invalid package. <a href="/websites" className="text-[#C9A227] underline">Go back</a></p>
       </div>
     );
   }
 
   const toggleAddon = (id: string) => {
-    setSelectedAddons(prev => 
+    setSelectedAddons(prev =>
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     );
   };
@@ -107,17 +107,15 @@ export default function WebsiteIntakePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
       {/* Nav */}
-      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-xl">
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--border)] bg-[var(--bg-base)]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/25">
-              <Sparkles className="h-4 w-4" />
-            </div>
+            <img src="/images/guardia-logo.png" alt="Guardia" className="h-9 w-9 object-contain" />
             <span className="text-lg font-semibold tracking-tight">Guardia</span>
           </a>
-          <a href="/websites" className="text-sm text-gray-400 hover:text-white transition-colors">← Back to Packages</a>
+          <a href="/websites" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">&larr; Back to Packages</a>
         </div>
       </nav>
 
@@ -126,12 +124,12 @@ export default function WebsiteIntakePage() {
           {/* Form */}
           <div className="order-2 lg:order-1">
             <div className="mb-8">
-              <div className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${pkg.gradient} px-4 py-1.5 text-sm font-medium mb-4`}>
+              <div className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${pkg.gradient} px-4 py-1.5 text-sm font-medium text-white mb-4`}>
                 <Globe className="h-4 w-4" />
                 {pkg.name}
               </div>
-              <h1 className="text-3xl font-bold mb-2">Let's build your website</h1>
-              <p className="text-gray-400">Fill out the basics. We'll handle the rest.</p>
+              <h1 className="text-3xl font-bold mb-2">Let&apos;s build your website</h1>
+              <p className="text-[var(--text-secondary)]">Fill out the basics. We&apos;ll handle the rest.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -143,7 +141,7 @@ export default function WebsiteIntakePage() {
                     required
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10 transition-all"
                     placeholder="Jane Smith"
                   />
                 </div>
@@ -154,7 +152,7 @@ export default function WebsiteIntakePage() {
                     required
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10 transition-all"
                     placeholder="jane@business.com"
                   />
                 </div>
@@ -167,7 +165,7 @@ export default function WebsiteIntakePage() {
                   required
                   value={formData.businessName}
                   onChange={e => setFormData({ ...formData, businessName: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10 transition-all"
                   placeholder="Awesome Business LLC"
                 />
               </div>
@@ -178,7 +176,7 @@ export default function WebsiteIntakePage() {
                   type="url"
                   value={formData.currentWebsite}
                   onChange={e => setFormData({ ...formData, currentWebsite: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10 transition-all"
                   placeholder="https://currentsite.com"
                 />
               </div>
@@ -189,7 +187,7 @@ export default function WebsiteIntakePage() {
                   rows={3}
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all resize-none"
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10 transition-all resize-none"
                   placeholder="What do you do? Who are your customers?"
                 />
               </div>
@@ -205,12 +203,12 @@ export default function WebsiteIntakePage() {
                       onClick={() => toggleAddon(addon.id)}
                       className={`flex items-center justify-between rounded-xl border p-4 text-left transition-all ${
                         selectedAddons.includes(addon.id)
-                          ? 'border-blue-500 bg-blue-500/10'
-                          : 'border-white/10 bg-white/5 hover:border-white/20'
+                          ? 'border-[#C9A227]/50 bg-[#C9A227]/10'
+                          : 'border-[var(--border)] bg-[var(--bg-elevated)] hover:border-[var(--text-muted)]'
                       }`}
                     >
                       <span className="text-sm">{addon.name}</span>
-                      <span className={`text-sm font-medium ${selectedAddons.includes(addon.id) ? 'text-blue-400' : 'text-gray-500'}`}>
+                      <span className={`text-sm font-medium ${selectedAddons.includes(addon.id) ? 'text-[#C9A227]' : 'text-[var(--text-muted)]'}`}>
                         +${addon.price}
                       </span>
                     </button>
@@ -219,7 +217,7 @@ export default function WebsiteIntakePage() {
               </div>
 
               {error && (
-                <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+                <div className="rounded-xl bg-red-50 border border-red-400/30 px-4 py-3 text-sm text-red-700">
                   {error}
                 </div>
               )}
@@ -227,7 +225,8 @@ export default function WebsiteIntakePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 py-4 font-medium transition-all hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 rounded-xl py-4 font-medium text-white transition-all hover:brightness-110 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(135deg, #C9A227, #b8911f)', boxShadow: '0 4px 14px rgba(201, 162, 39, 0.2)' }}
               >
                 {loading ? (
                   <>
@@ -242,48 +241,48 @@ export default function WebsiteIntakePage() {
                 )}
               </button>
 
-              <p className="text-center text-xs text-gray-500">
-                Secure checkout powered by Stripe. You'll be charged ${calculateTotal().toLocaleString()} today.
+              <p className="text-center text-xs text-[var(--text-muted)]">
+                Secure checkout powered by Stripe. You&apos;ll be charged ${calculateTotal().toLocaleString()} today.
               </p>
             </form>
           </div>
 
           {/* Summary */}
           <div className="order-1 lg:order-2">
-            <div className="sticky top-28 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
+            <div className="sticky top-28 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6">
               <h3 className="font-semibold mb-4">Order Summary</h3>
-              
+
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">{pkg.name}</span>
+                  <span className="text-[var(--text-secondary)]">{pkg.name}</span>
                   <span>${pkg.price.toLocaleString()}</span>
                 </div>
-                
+
                 {selectedAddons.map(id => {
                   const addon = addons.find(a => a.id === id);
                   return addon ? (
                     <div key={id} className="flex justify-between text-sm">
-                      <span className="text-gray-400">{addon.name}</span>
+                      <span className="text-[var(--text-secondary)]">{addon.name}</span>
                       <span>${addon.price}</span>
                     </div>
                   ) : null;
                 })}
               </div>
 
-              <div className="border-t border-white/10 pt-4 mb-6">
+              <div className="border-t border-[var(--border)] pt-4 mb-6">
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
                   <span>${calculateTotal().toLocaleString()}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">One-time payment</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">One-time payment</p>
               </div>
 
               <div>
-                <h4 className="text-sm font-medium mb-3">What's included:</h4>
+                <h4 className="text-sm font-medium mb-3">What&apos;s included:</h4>
                 <ul className="space-y-2">
                   {pkg.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-gray-400">
-                      <Check className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <li key={i} className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                      <Check className="h-4 w-4 text-[#C9A227] shrink-0" />
                       {feature}
                     </li>
                   ))}
