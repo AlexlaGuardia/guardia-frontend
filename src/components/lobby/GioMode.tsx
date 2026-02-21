@@ -87,7 +87,7 @@ export default function GioMode({
   };
 
   const tier = client?.tier || "pro";
-  const colors = tierColors[tier];
+  const colors = tierColors[tier] || tierColors.pro;
 
   return (
     <div className={`min-h-screen bg-[var(--bg-surface)] flex flex-col transition-all duration-300 ${isBackground ? "opacity-30 scale-[0.98]" : ""}`}>

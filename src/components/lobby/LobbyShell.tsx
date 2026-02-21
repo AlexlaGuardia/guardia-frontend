@@ -34,16 +34,17 @@ export interface Message {
 
 type AuthState = "loading" | "setup" | "login" | "authenticated";
 export type LobbyMode = "gio" | "tablet";
-export type TabletTab = "calendar" | "gallery" | "styles" | "analytics" | "account";
+export type TabletTab = "calendar" | "gallery" | "styles" | "analytics" | "engage" | "account";
 
 const API_BASE = "https://api.guardiacontent.com";
 
 // ============================================
 // TIER COLORS
 // ============================================
-export const tierColors = {
+export const tierColors: Record<string, { bg: string; text: string; accent: string }> = {
   spark: { bg: "bg-amber-500/20", text: "text-amber-300", accent: "amber-500" },
   pro: { bg: "bg-blue-500/20", text: "text-blue-300", accent: "blue-500" },
+  unleashed: { bg: "bg-violet-500/20", text: "text-violet-300", accent: "violet-500" },
 };
 
 // ============================================

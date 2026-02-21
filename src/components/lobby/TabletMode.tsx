@@ -7,6 +7,7 @@ import GalleryTab from "./GalleryTab";
 import GuardiaAccount from "./GuardiaAccount";
 import BrandMirror from "./BrandMirror";
 import AnalyticsTab from "./AnalyticsTab";
+import CommentsInbox from "./CommentsInbox";
 import ContentDirectionPanel from "./ContentDirectionPanel";
 import PlanningPreferencesPanel from "./PlanningPreferencesPanel";
 // VideoTab archived - see guardia-core/archive/video_pipeline_jan15/
@@ -92,6 +93,16 @@ export default function TabletMode({
               label="Analytics"
             />
             <TabButton
+              active={activeTab === "engage"}
+              onClick={() => setActiveTab("engage")}
+              icon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              }
+              label="Engage"
+            />
+            <TabButton
               active={activeTab === "account"}
               onClick={() => setActiveTab("account")}
               badge={needsSetup ? "!" : undefined}
@@ -166,6 +177,13 @@ export default function TabletMode({
           )}
           {activeTab === "analytics" && (
             <AnalyticsTab client={client} jwt={jwt} />
+          )}
+          {activeTab === "engage" && client && jwt && (
+            <div className="h-full overflow-y-auto p-6">
+              <div className="max-w-3xl mx-auto">
+                <CommentsInbox clientId={client.id} jwt={jwt} />
+              </div>
+            </div>
           )}
           {activeTab === "account" && (
             <div className="h-full overflow-y-auto">
