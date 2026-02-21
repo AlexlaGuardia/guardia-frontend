@@ -7,6 +7,12 @@ const API_BASE = "https://api.guardiacontent.com";
 
 type LunaState = "idle" | "listening" | "processing" | "speaking";
 
+interface CrawlItem {
+  id: string;
+  text: string;
+  color: string;
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // LUNA AMBIENT TERMINAL
 // Voice-first kiosk interface. Same brain — different surface.
@@ -28,6 +34,8 @@ export default function LunaPage() {
   const sendRef = useRef<(text: string) => Promise<void>>(() => Promise.resolve());
   const audioUnlockedRef = useRef(false);
   const lastNotifIdRef = useRef(0);
+  const [crawlItems, setCrawlItems] = useState<CrawlItem[]>([]);
+  const crawlIdRef = useRef(0);
 
   // ── Auth (kiosk bypass via ?dev=serb) ──
   useEffect(() => {
@@ -99,6 +107,15 @@ export default function LunaPage() {
       setState("idle");
       setLunaText("");
     }, lingerTime);
+  }, []);
+
+  const addCrawl = useCallback((text: string, color = "rgba(167,139,250,0.45)") => {
+    const id = `c-${Date.now()}-${++crawlIdRef.current}`;
+    setCrawlItems(prev => [...prev.slice(-30), { id, text, color }]);
+  }, []);
+
+  const removeCrawl = useCallback((id: string) => {
+    setCrawlItems(prev => prev.filter(i => i.id !== id));
   }, []);
 
   const playAudio = useCallback((url: string) => {
@@ -238,12 +255,18 @@ export default function LunaPage() {
 
         const data = await res.json();
         const notifications = data.notifications || [];
-        for (const n of notifications.reverse()) {
+        for (const [idx, n] of notifications.reverse().entries()) {
           if (n.id <= lastNotifIdRef.current) continue;
           lastNotifIdRef.current = n.id;
           const text = n.message || "";
-          showLunaMessage(text, n.audio_duration_ms);
-          if (n.audio_url) playAudio(n.audio_url);
+          const truncated = text.length > 100 ? text.slice(0, 97) + "..." : text;
+          // Stagger items from same batch so they don't overlap
+          setTimeout(() => addCrawl(truncated), idx * 2500);
+          // Audio notifications still get voice display
+          if (n.audio_url) {
+            showLunaMessage(text, n.audio_duration_ms);
+            playAudio(n.audio_url);
+          }
           fetch(`${API_BASE}/luna/notifications/${n.id}/delivered`, { method: "POST" }).catch(() => {});
         }
       } catch {
@@ -254,7 +277,21 @@ export default function LunaPage() {
     poll();
     const interval = setInterval(poll, 5000);
     return () => clearInterval(interval);
-  }, [authenticated, showLunaMessage, playAudio]);
+  }, [authenticated, showLunaMessage, playAudio, addCrawl]);
+
+  // ── Crawl startup sequence ──
+  useEffect(() => {
+    if (!authenticated) return;
+    const seeds = [
+      { text: "shadow rooms online", delay: 2000 },
+      { text: "forge // glass // kage // pulse // paradise // magii", delay: 5500 },
+      { text: "monitoring active", delay: 9000 },
+    ];
+    const timers = seeds.map(s =>
+      setTimeout(() => addCrawl(s.text, "rgba(100,116,139,0.3)"), s.delay)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [authenticated, addCrawl]);
 
   // ── Tap handler ──
   const handleTap = () => {
@@ -351,8 +388,64 @@ export default function LunaPage() {
         touchAction: "manipulation",
       }}
     >
+      {/* ── Star Wars crawl feed ── */}
+      <style>{`
+        @keyframes starCrawl {
+          0% { transform: translateY(0); opacity: 0; }
+          3% { opacity: 0.7; }
+          75% { opacity: 0.5; }
+          100% { transform: translateY(-110vh); opacity: 0; }
+        }
+      `}</style>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          perspective: "350px",
+          overflow: "hidden",
+          pointerEvents: "none",
+          zIndex: 0,
+          maskImage: "linear-gradient(to bottom, transparent 0%, black 25%, black 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 25%, black 100%)",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "100%",
+            transformOrigin: "50% 100%",
+            transform: "rotateX(25deg)",
+          }}
+        >
+          {crawlItems.map(item => (
+            <div
+              key={item.id}
+              onAnimationEnd={() => removeCrawl(item.id)}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: "12%",
+                right: "12%",
+                textAlign: "center",
+                color: item.color,
+                fontSize: "14px",
+                lineHeight: "1.6",
+                letterSpacing: "0.1em",
+                textShadow: `0 0 10px ${item.color}`,
+                animation: "starCrawl 55s linear forwards",
+              }}
+            >
+              {item.text}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Luna presence ── */}
-      <div className="relative mb-10">
+      <div className="relative mb-10" style={{ zIndex: 1 }}>
         <div
           className="absolute inset-[-16px] rounded-full transition-all duration-700"
           style={{
@@ -380,7 +473,7 @@ export default function LunaPage() {
       </div>
 
       {/* ── Text display ── */}
-      <div className="px-8 max-w-sm w-full text-center min-h-[80px] flex items-start justify-center">
+      <div className="px-8 max-w-sm w-full text-center min-h-[80px] flex items-start justify-center" style={{ position: "relative", zIndex: 1 }}>
         {displayText && (
           <p
             className="text-[15px] leading-relaxed transition-opacity duration-500"
