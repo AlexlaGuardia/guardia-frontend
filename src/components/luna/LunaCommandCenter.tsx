@@ -531,17 +531,17 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
       </div>
 
       {/* Text display */}
-      <div className="px-8 max-w-sm w-full text-center min-h-[80px] flex items-start justify-center" style={{ position: "relative", zIndex: 1 }}>
+      <div className="px-8 max-w-md w-full text-center min-h-[80px] flex items-start justify-center" style={{ position: "relative", zIndex: 1 }}>
         {displayText && (
           <p
-            className="text-[15px] leading-relaxed transition-opacity duration-500 whitespace-pre-wrap"
+            className="text-[15px] leading-relaxed transition-opacity duration-500 whitespace-pre-wrap break-words"
             style={{ color: `rgba(204,204,204,${textOpacity})` }}
           >
             {displayText}
           </p>
         )}
         {!displayText && dimText && (
-          <p className="text-[13px] leading-relaxed text-[#ccc] opacity-[0.12] whitespace-pre-wrap">
+          <p className="text-[13px] leading-relaxed text-[#ccc] opacity-[0.12] whitespace-pre-wrap break-words">
             {dimText}
           </p>
         )}

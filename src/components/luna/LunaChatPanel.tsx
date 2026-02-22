@@ -267,7 +267,7 @@ export default function LunaChatPanel() {
         {/* Streaming indicator */}
         {streamingText && (
           <div className="flex justify-start">
-            <div className="max-w-[85%] rounded-lg px-3 py-2 bg-[#1a1a1f] text-xs text-[#ccc] leading-relaxed whitespace-pre-wrap">
+            <div className="max-w-[85%] rounded-lg px-3 py-2 bg-[#1a1a1f] text-xs text-[#ccc] leading-relaxed whitespace-pre-wrap break-words">
               {streamingText}
               <span className="inline-block w-1.5 h-3 bg-violet-400/50 ml-0.5 animate-pulse" />
             </div>
