@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { Maximize2, Minimize2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -57,6 +58,7 @@ export default function ChapterEditorPage() {
   const [markerPositions, setMarkerPositions] = useState<number[]>([]);
   const [splitting, setSplitting] = useState(false);
   const [merging, setMerging] = useState(false);
+  const [zenMode, setZenMode] = useState(false);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentRef = useRef(content);
@@ -64,8 +66,37 @@ export default function ChapterEditorPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
+  const sessionStartWords = useRef<number | null>(null);
 
   const dirty = content !== originalContent;
+
+  // Zen mode ESC handler
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && zenMode) setZenMode(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [zenMode]);
+
+  // Typewriter scroll — keeps cursor at ~40% viewport in zen mode
+  function typewriterScroll() {
+    const textarea = textareaRef.current;
+    const mirror = mirrorRef.current;
+    if (!textarea || !mirror || !zenMode) return;
+    const cs = getComputedStyle(textarea);
+    mirror.style.width = cs.width;
+    mirror.style.font = cs.font;
+    mirror.style.letterSpacing = cs.letterSpacing;
+    mirror.style.padding = cs.padding;
+    mirror.style.lineHeight = cs.lineHeight;
+    mirror.style.whiteSpace = "pre-wrap";
+    mirror.style.wordWrap = "break-word";
+    mirror.style.overflowWrap = "break-word";
+    mirror.textContent = textarea.value.slice(0, textarea.selectionStart);
+    const cursorY = mirror.scrollHeight;
+    textarea.scrollTop = Math.max(0, cursorY - textarea.clientHeight * 0.4);
+  }
 
   // Fetch page list
   const fetchPages = useCallback(() => {
@@ -89,6 +120,9 @@ export default function ChapterEditorPage() {
       const d = await res.json();
       setContent(d.content || "");
       setOriginalContent(d.content || "");
+      if (sessionStartWords.current === null) {
+        sessionStartWords.current = (d.content || "").split(/\s+/).filter(Boolean).length;
+      }
       setActivePage(pageNum);
       setSaveStatus("");
     } catch {}
@@ -291,8 +325,21 @@ export default function ChapterEditorPage() {
         }}
       />
 
+      {/* Zen mode exit overlay */}
+      {zenMode && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <span className="text-[10px] text-[#333] font-mono">ESC to exit</span>
+          <button
+            onClick={() => setZenMode(false)}
+            className="p-2 rounded-lg bg-[#1a1a1f]/80 text-[#555] hover:text-[#888] backdrop-blur-sm transition-colors"
+          >
+            <Minimize2 size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-[#1a1a1f] bg-[#0a0a0b] flex-shrink-0">
+      <div className={`flex items-center justify-between px-4 py-2 border-b border-[#1a1a1f] bg-[#0a0a0b] flex-shrink-0 ${zenMode ? "hidden" : ""}`}>
         <div className="flex items-center gap-4">
           <Link href="/hq/athernyx/editor" className="text-[#555] text-xs hover:text-[#888] transition-colors">
             &larr; Chapters
@@ -300,6 +347,11 @@ export default function ChapterEditorPage() {
           <span className="text-sm font-medium" style={{ color: "#a855f7" }}>{title}</span>
           <span className="text-[#333] text-xs">Page {activePage}</span>
           <span className="text-[#444] text-xs">{wordCount} words</span>
+          {sessionStartWords.current !== null && wordCount > sessionStartWords.current && (
+            <span className="text-emerald-400/70 text-xs font-mono">
+              +{wordCount - sessionStartWords.current} this session
+            </span>
+          )}
           {saveStatus && (
             <span className={`text-xs ${
               saveStatus === "saved" ? "text-[#10b981]" :
@@ -353,13 +405,21 @@ export default function ChapterEditorPage() {
           >
             {currentPage?.status === "approved" ? "Approved" : "Approve"}
           </button>
+          <div className="w-px h-4 bg-[#1a1a1f]" />
+          <button
+            onClick={() => setZenMode(!zenMode)}
+            className="text-[#555] hover:text-[#888] transition-colors"
+            title={zenMode ? "Exit zen mode" : "Zen mode"}
+          >
+            {zenMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          </button>
         </div>
       </div>
 
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-48 border-r border-[#1a1a1f] bg-[#0a0a0b] overflow-y-auto flex-shrink-0 flex flex-col">
+        <div className={`w-48 border-r border-[#1a1a1f] bg-[#0a0a0b] overflow-y-auto flex-shrink-0 flex flex-col ${zenMode ? "hidden" : ""}`}>
           <div className="p-3 flex-1">
             <div className="text-[10px] font-semibold tracking-wider text-[#555] mb-3">PAGES</div>
             <div className="space-y-0.5">
@@ -429,7 +489,7 @@ export default function ChapterEditorPage() {
                 {/* Word marker gutter */}
                 <div
                   ref={gutterRef}
-                  className="w-3 flex-shrink-0 overflow-hidden relative bg-[#050506]"
+                  className={`w-3 flex-shrink-0 overflow-hidden relative bg-[#050506] ${zenMode ? "hidden" : ""}`}
                   style={{ pointerEvents: "none" }}
                 >
                   {markerPositions.map((top, i) => (
@@ -446,10 +506,13 @@ export default function ChapterEditorPage() {
                 <textarea
                   ref={textareaRef}
                   value={content}
-                  onChange={e => setContent(e.target.value)}
+                  onChange={e => {
+                    setContent(e.target.value);
+                    if (zenMode) requestAnimationFrame(typewriterScroll);
+                  }}
                   onScroll={handleTextareaScroll}
-                  className="flex-1 w-full bg-[#050506] text-[#e8e8e8] py-6 pr-6 pl-3 resize-none outline-none text-sm leading-relaxed"
-                  style={{ fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace" }}
+                  className={`flex-1 w-full bg-[#050506] text-[#e8e8e8] resize-none outline-none text-[14px] leading-[1.8] ${zenMode ? "px-[15%] py-12" : "py-6 pr-6 pl-3"}`}
+                  style={{ fontFamily: "var(--font-lora), Georgia, serif" }}
                   spellCheck={true}
                 />
               </>
@@ -460,7 +523,7 @@ export default function ChapterEditorPage() {
           {showPreview && (
             <div className="w-1/2 overflow-y-auto p-6 bg-[#080809]">
               <div className="prose prose-invert prose-sm max-w-none
-                prose-p:text-[#ccc] prose-p:leading-relaxed
+                prose-p:text-[#ccc] prose-p:leading-[1.8]
                 prose-strong:text-[#e8e8e8]
                 prose-em:text-[#bbb]
                 prose-headings:text-[#e8e8e8]

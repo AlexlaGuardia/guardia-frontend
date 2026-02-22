@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { getSeriesById, getIssuesForSeries } from "../lib/series-data";
 import { statusColor } from "../lib/helpers";
 import type {
@@ -14,6 +15,27 @@ import type {
 } from "../lib/types";
 
 const API = "https://api.guardiacontent.com";
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function panelWordCount(panel: ComicPanel): number {
+  return panel.dialogue.reduce(
+    (sum, dl) => sum + dl.text.split(/\s+/).filter(Boolean).length, 0
+  );
+}
+
+function wordCountColor(count: number): string {
+  if (count <= 0) return "#333";
+  if (count < 35) return "#22c55e";
+  if (count <= 50) return "#f59e0b";
+  return "#ef4444";
+}
+
+function countIssueDialogueWords(s: IssueScript): number {
+  return s.pages.reduce((sum, p) =>
+    sum + p.panels.reduce((pSum, panel) =>
+      pSum + panelWordCount(panel), 0), 0);
+}
 
 // ─── Workspace ───────────────────────────────────────────────────────────────
 
@@ -37,11 +59,13 @@ export default function ComicWorkspacePage() {
   const [illustrating, setIllustrating] = useState(false);
   const [publishStep, setPublishStep] = useState(0);
   const [expandedPanel, setExpandedPanel] = useState<number | null>(null);
+  const [zenMode, setZenMode] = useState(false);
 
   const originalRef = useRef("");
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scriptRef = useRef(script);
   scriptRef.current = script;
+  const sessionStartDialogueWords = useRef<number | null>(null);
 
   // ── Load issue ──
 
@@ -56,6 +80,9 @@ export default function ComicWorkspacePage() {
         );
         const data: IssueScript = await res.json();
         setScript(data);
+        if (sessionStartDialogueWords.current === null) {
+          sessionStartDialogueWords.current = countIssueDialogueWords(data);
+        }
         setActivePage(1);
         originalRef.current = JSON.stringify(data);
         setSaveStatus("");
@@ -70,6 +97,15 @@ export default function ComicWorkspacePage() {
   useEffect(() => {
     loadIssue(activeIssue);
   }, [activeIssue, loadIssue]);
+
+  // Zen mode ESC handler
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && zenMode) setZenMode(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [zenMode]);
 
   // ── Dirty check + auto-save ──
 
@@ -272,8 +308,21 @@ export default function ComicWorkspacePage() {
 
   return (
     <div className="h-screen bg-[#0a0a0b] text-[#e8e8e8] flex flex-col overflow-hidden">
+      {/* Zen mode exit overlay */}
+      {zenMode && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <span className="text-[10px] text-[#333] font-mono">ESC to exit</span>
+          <button
+            onClick={() => setZenMode(false)}
+            className="p-2 rounded-lg bg-[#1a1a1f]/80 text-[#555] hover:text-[#888] backdrop-blur-sm transition-colors"
+          >
+            <Minimize2 size={14} />
+          </button>
+        </div>
+      )}
+
       {/* ── Top Bar ── */}
-      <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#1a1a1f] bg-[#0d0d0e] flex-shrink-0">
+      <div className={`flex items-center justify-between px-5 py-2.5 border-b border-[#1a1a1f] bg-[#0d0d0e] flex-shrink-0 ${zenMode ? "hidden" : ""}`}>
         <div className="flex items-center gap-4">
           <Link
             href="/hq/athernyx/comics"
@@ -331,6 +380,13 @@ export default function ComicWorkspacePage() {
                   : "Unsaved"}
             </span>
           )}
+          {script && sessionStartDialogueWords.current !== null && (() => {
+            const current = countIssueDialogueWords(script);
+            const delta = current - sessionStartDialogueWords.current;
+            return delta > 0 ? (
+              <span className="text-emerald-400/70 text-xs font-mono">+{delta} words</span>
+            ) : null;
+          })()}
           {currentPage && (
             <span
               className="text-[9px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded"
@@ -342,13 +398,20 @@ export default function ComicWorkspacePage() {
               {currentPage.status}
             </span>
           )}
+          <button
+            onClick={() => setZenMode(!zenMode)}
+            className="text-[#555] hover:text-[#888] transition-colors"
+            title={zenMode ? "Exit zen mode" : "Zen mode"}
+          >
+            {zenMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          </button>
         </div>
       </div>
 
       {/* ── Main Layout ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* ── Sidebar ── */}
-        <div className="w-48 border-r border-[#1a1a1f] bg-[#0d0d0e] overflow-y-auto flex-shrink-0">
+        <div className={`w-48 border-r border-[#1a1a1f] bg-[#0d0d0e] overflow-y-auto flex-shrink-0 ${zenMode ? "hidden" : ""}`}>
           <div className="p-3">
             <div className="text-[9px] font-semibold tracking-wider text-[#444] mb-2">
               ISSUES
@@ -402,7 +465,7 @@ export default function ComicWorkspacePage() {
 
         {/* ── Content: Vertical Scroll ── */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-6 py-6 space-y-6">
+          <div className={`${zenMode ? "max-w-4xl" : "max-w-3xl"} mx-auto px-6 py-6 space-y-6`}>
             {/* ── 1. Story Summary ── */}
             <section>
               <div className="flex items-center justify-between mb-3">
@@ -482,7 +545,15 @@ export default function ComicWorkspacePage() {
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {!isOpen && (
                               <span className="text-[10px] text-[#333]">
-                                {panel.dialogue.length > 0 && `${panel.dialogue.length} line${panel.dialogue.length > 1 ? "s" : ""}`}
+                                {panel.dialogue.length > 0 && (
+                                  <>
+                                    {panel.dialogue.length} line{panel.dialogue.length > 1 ? "s" : ""}
+                                    {" \u00b7 "}
+                                    <span style={{ color: wordCountColor(panelWordCount(panel)) }}>
+                                      {panelWordCount(panel)}w
+                                    </span>
+                                  </>
+                                )}
                               </span>
                             )}
                             <span className="text-[#444] text-xs">
@@ -510,19 +581,33 @@ export default function ComicWorkspacePage() {
                                 <option value="quarter">Quarter</option>
                                 <option value="hero-strip">Hero Strip</option>
                               </select>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const newPanels = currentPage.panels.filter(
-                                    (_, i) => i !== idx
-                                  );
-                                  updatePage(activePage, { panels: newPanels });
-                                  setExpandedPanel(null);
-                                }}
-                                className="text-[#333] hover:text-[#ef4444] text-xs transition-colors px-2 py-1"
-                              >
-                                Remove
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className="text-[10px] font-mono px-2 py-0.5 rounded"
+                                  style={{
+                                    color: wordCountColor(panelWordCount(panel)),
+                                    backgroundColor: `${wordCountColor(panelWordCount(panel))}15`,
+                                  }}
+                                >
+                                  {panelWordCount(panel)} words
+                                </span>
+                                {panelWordCount(panel) > 50 && (
+                                  <span className="text-[9px] text-red-400/60 italic">over limit</span>
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newPanels = currentPage.panels.filter(
+                                      (_, i) => i !== idx
+                                    );
+                                    updatePage(activePage, { panels: newPanels });
+                                    setExpandedPanel(null);
+                                  }}
+                                  className="text-[#333] hover:text-[#ef4444] text-xs transition-colors px-2 py-1"
+                                >
+                                  Remove
+                                </button>
+                              </div>
                             </div>
 
                             <div className="p-5 space-y-4">
