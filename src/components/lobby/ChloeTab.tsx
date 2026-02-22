@@ -8,7 +8,7 @@ interface ChloeTabProps {
 
 const PREVIEW_ITEMS = [
   { icon: "logo", label: "Custom Logos", desc: "From quick marks to full brand identities", price: "$1.99+" },
-  { icon: "social", label: "Social Kits", desc: "Instagram-ready icons, highlights, templates", price: "$5" },
+  { icon: "social", label: "Social Kits", desc: "Post-ready icons, highlights, templates", price: "$5" },
   { icon: "mascot", label: "Brand Mascots", desc: "A character that represents your brand", price: "$29.99" },
   { icon: "voice", label: "Brand Voice", desc: "A unique AI voice for your content", price: "$9.99" },
   { icon: "pipeline", label: "Content Pipelines", desc: "Automated content strategies, built for you", price: "$4.99+" },

@@ -22,12 +22,8 @@ export default function IntakeProPage() {
     business_name: '',
     industry: '',
     website: '',
-    platform_1: 'instagram',
-    platform_2: 'facebook',
-    platform_3: '',
+    platform_1: 'facebook',
     handle_1: '',
-    handle_2: '',
-    handle_3: '',
     brand_voice: '',
     brand_colors: '',
     content_themes: [] as string[],
@@ -58,7 +54,7 @@ export default function IntakeProPage() {
       return formData.business_name && formData.industry && formData.contact_name && formData.contact_email;
     }
     if (step === 2) {
-      return formData.handle_1 || formData.handle_2;
+      return !!formData.handle_1;
     }
     return true;
   };
@@ -205,61 +201,18 @@ export default function IntakeProPage() {
             </div>
           )}
 
-          {/* Step 2: Platforms */}
+          {/* Step 2: Platform */}
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <h2 className="mb-1 text-xl font-semibold">Connect your platforms</h2>
-                <p className="text-sm text-[var(--text-secondary)]">Pro includes up to 3 platforms. At least one is required.</p>
+                <h2 className="mb-1 text-xl font-semibold">Connect your Facebook page</h2>
+                <p className="text-sm text-[var(--text-secondary)]">We&apos;ll post to your Facebook page. Additional platforms available as add-ons.</p>
               </div>
 
               <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Platform 1</label>
-                    <select value={formData.platform_1} onChange={e => updateField('platform_1', e.target.value)} className={selectCls}>
-                      <option value="instagram">Instagram</option>
-                      <option value="facebook">Facebook</option>
-                      <option value="tiktok">TikTok</option>
-                      <option value="youtube">YouTube</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Handle / Page Name *</label>
-                    <input type="text" placeholder="@acmecoffee" value={formData.handle_1} onChange={e => updateField('handle_1', e.target.value)} className={inputCls} />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Platform 2</label>
-                    <select value={formData.platform_2} onChange={e => updateField('platform_2', e.target.value)} className={selectCls}>
-                      <option value="facebook">Facebook</option>
-                      <option value="instagram">Instagram</option>
-                      <option value="tiktok">TikTok</option>
-                      <option value="youtube">YouTube</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Handle / Page Name</label>
-                    <input type="text" placeholder="Acme Coffee Shop" value={formData.handle_2} onChange={e => updateField('handle_2', e.target.value)} className={inputCls} />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Platform 3 (optional)</label>
-                    <select value={formData.platform_3} onChange={e => updateField('platform_3', e.target.value)} className={selectCls}>
-                      <option value="">None</option>
-                      <option value="tiktok">TikTok</option>
-                      <option value="youtube">YouTube</option>
-                      <option value="linkedin">LinkedIn</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Handle / Page Name</label>
-                    <input type="text" placeholder="@acmecoffee" value={formData.handle_3} onChange={e => updateField('handle_3', e.target.value)} disabled={!formData.platform_3} className={`${inputCls} disabled:opacity-50`} />
-                  </div>
+                <div>
+                  <label className="mb-2 block text-sm text-[var(--text-secondary)]">Facebook Page Name *</label>
+                  <input type="text" placeholder="Acme Coffee Shop" value={formData.handle_1} onChange={e => updateField('handle_1', e.target.value)} className={inputCls} />
                 </div>
 
                 <div
@@ -267,7 +220,7 @@ export default function IntakeProPage() {
                   style={{ borderColor: `${tierColor}30`, backgroundColor: `${tierColor}08` }}
                 >
                   <p className="text-sm" style={{ color: `${tierColor}cc` }}>
-                    <strong>Pro tip:</strong> After signup, we&apos;ll send you a secure link to connect your accounts.
+                    <strong>Pro tip:</strong> After signup, we&apos;ll send you a secure link to connect your Facebook page.
                     No passwords shared — we use official platform connections.
                   </p>
                 </div>

@@ -13,10 +13,8 @@ export default function IntakeSparkPage() {
     industry: '',
     contact_name: '',
     contact_email: '',
-    platform_1: 'instagram',
-    platform_2: 'facebook',
+    platform_1: 'facebook',
     handle_1: '',
-    handle_2: '',
     vibe: 'professional',
     posting_preference: 'weekdays',
   });
@@ -30,7 +28,7 @@ export default function IntakeSparkPage() {
       return formData.business_name && formData.industry && formData.contact_name && formData.contact_email;
     }
     if (step === 2) {
-      return formData.handle_1 || formData.handle_2;
+      return !!formData.handle_1;
     }
     return true;
   };
@@ -184,61 +182,24 @@ export default function IntakeSparkPage() {
             </div>
           )}
 
-          {/* Step 2: Platforms & Preferences */}
+          {/* Step 2: Platform & Preferences */}
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <h2 className="mb-1 text-xl font-semibold">Connect your platforms</h2>
-                <p className="text-sm text-[var(--text-secondary)]">Spark includes 2 platforms.</p>
+                <h2 className="mb-1 text-xl font-semibold">Connect your Facebook page</h2>
+                <p className="text-sm text-[var(--text-secondary)]">We&apos;ll post to your Facebook page. Additional platforms available as add-ons.</p>
               </div>
 
               <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Platform 1</label>
-                    <select
-                      value={formData.platform_1}
-                      onChange={e => updateField('platform_1', e.target.value)}
-                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] transition-colors focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10"
-                    >
-                      <option value="instagram">Instagram</option>
-                      <option value="facebook">Facebook</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Handle / Page *</label>
-                    <input
-                      type="text"
-                      placeholder="@acmecoffee"
-                      value={formData.handle_1}
-                      onChange={e => updateField('handle_1', e.target.value)}
-                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Platform 2</label>
-                    <select
-                      value={formData.platform_2}
-                      onChange={e => updateField('platform_2', e.target.value)}
-                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] transition-colors focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10"
-                    >
-                      <option value="facebook">Facebook</option>
-                      <option value="instagram">Instagram</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm text-[var(--text-secondary)]">Handle / Page</label>
-                    <input
-                      type="text"
-                      placeholder="Acme Coffee Shop"
-                      value={formData.handle_2}
-                      onChange={e => updateField('handle_2', e.target.value)}
-                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10"
-                    />
-                  </div>
+                <div>
+                  <label className="mb-2 block text-sm text-[var(--text-secondary)]">Facebook Page Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Acme Coffee Shop"
+                    value={formData.handle_1}
+                    onChange={e => updateField('handle_1', e.target.value)}
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors focus:border-[#C9A227]/50 focus:outline-none focus:ring-2 focus:ring-[#C9A227]/10"
+                  />
                 </div>
 
                 <div>

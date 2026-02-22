@@ -122,7 +122,7 @@ export default function VIPStartPage() {
                   </div>
                   <div>
                     <p className="text-[var(--text-primary)] font-medium text-sm sm:text-base">Social Media Management</p>
-                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">AI-styled posts, caption writing, scheduled posting, monthly reports</p>
+                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">AI-styled posts, caption writing, Facebook posting, professional scheduling</p>
                   </div>
                 </div>
 

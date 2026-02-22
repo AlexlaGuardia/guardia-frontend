@@ -672,7 +672,7 @@ const structuredData = {
           {
             "@type": "Offer",
             "name": "Spark",
-            "description": "12 styled posts per month on Facebook and Instagram",
+            "description": "12 styled posts per month with professional scheduling and image upscaling",
             "price": "15",
             "priceCurrency": "USD",
             "priceSpecification": { "@type": "UnitPriceSpecification", "price": "15", "priceCurrency": "USD", "unitText": "month" }
