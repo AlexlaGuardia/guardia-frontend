@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /hq/
+Disallow: /dashboard/
+Disallow: /client/
+Disallow: /portal/
+Disallow: /studio/
+Disallow: /onboard/
+Disallow: /billing/
+
+Sitemap: https://guardiacontent.com/sitemap.xml

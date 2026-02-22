@@ -1,11 +1,11 @@
 {
   "name": "Guardia",
   "short_name": "Guardia",
-  "description": "Your AI-powered social media manager",
+  "description": "Social media management for local businesses. We style your photos, write captions, and post on schedule.",
   "start_url": "/portal",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#7c3aed",
+  "background_color": "#FAF6F1",
+  "theme_color": "#C9A227",
   "orientation": "portrait-primary",
   "icons": [
     {

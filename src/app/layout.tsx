@@ -17,18 +17,20 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://guardiacontent.com'),
   openGraph: {
     title: 'Guardia - Social Media That Works For You',
-    description: 'We style your photos, write every caption, schedule every post, and manage engagement for 24 hours.',
+    description: 'Send us your photos. We style them, write the captions, post on schedule, and handle engagement — so you can run your business.',
     url: 'https://guardiacontent.com',
     siteName: 'Guardia',
     type: 'website',
+    images: [{ url: '/images/guardia-og.png', width: 1200, height: 630, alt: 'Guardia - Social Media Management for Local Businesses' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Guardia - Social Media That Works For You',
-    description: 'We style your photos, write every caption, schedule every post, and manage engagement for 24 hours.',
+    description: 'Send us your photos. We style them, write the captions, post on schedule, and handle engagement — so you can run your business.',
+    images: ['/images/guardia-og.png'],
   },
   title: "Guardia - Social Media That Works For You",
-  description: "We style your photos, write every caption, schedule every post, and manage engagement for 24 hours.",
+  description: "Send us your photos. We style them, write the captions, post on schedule, and handle engagement — so you can run your business.",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
@@ -38,6 +40,13 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Guardia",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: 'https://guardiacontent.com',
   },
 };
 

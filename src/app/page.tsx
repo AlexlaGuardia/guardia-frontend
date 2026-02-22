@@ -31,10 +31,8 @@ const tiers = [
     color: "#C9A227",
     features: [
       "12 styled posts per month",
-      "Facebook + Instagram",
-      "AI-styled images from your photos",
-      "Captions written for you",
-      "Scheduled at optimal times",
+      "Professional scheduling",
+      "Image upscaling",
     ],
     cta: "Start Spark",
     href: "/intake/spark",
@@ -49,10 +47,9 @@ const tiers = [
     popular: true,
     features: [
       "20 styled posts per month",
-      "Facebook, IG, TikTok + more",
-      "24-hour post management after every post",
-      "Comment replies & engagement on your behalf",
-      "Dedicated style profile",
+      "Professional scheduling",
+      "Image upscaling",
+      "24-hour post management",
     ],
     cta: "Get Started",
     href: "/intake/pro",
@@ -97,7 +94,7 @@ const faqs = [
   },
   {
     q: "What platforms do you post to?",
-    a: "Spark covers Facebook and Instagram. Pro adds TikTok, YouTube, and more.",
+    a: "All plans include Facebook posting. Additional platforms like Instagram, TikTok, LinkedIn, and YouTube are available as add-ons.",
   },
 ];
 
@@ -452,6 +449,72 @@ function Pricing() {
             </a>
           </div>
         </div>
+
+        {/* What's Included — Detail Breakdown */}
+        <div className={`mt-16 transition-all duration-700 delay-200 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          <h3 className="text-2xl font-bold text-[#2A2A2A] text-center mb-10 font-[var(--font-fraunces)]">
+            What&apos;s included
+          </h3>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Spark Detail */}
+            <div className="bg-white/60 rounded-2xl p-8 border border-[#E8DDD3]">
+              <div className="flex items-center gap-2 mb-5">
+                <Zap className="w-5 h-5 text-[#C9A227]" />
+                <h4 className="text-lg font-bold text-[#2A2A2A] font-[var(--font-fraunces)]">Spark</h4>
+                <span className="text-sm text-[#635C54] ml-1">$15/mo</span>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="font-medium text-[#2A2A2A] mb-1">12 styled posts per month</p>
+                  <p className="text-sm text-[#635C54] leading-relaxed">Send us your photos and we transform them into scroll-stopping social media posts. Professional styling, every time.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-[#2A2A2A] mb-1">Captions & hashtags</p>
+                  <p className="text-sm text-[#635C54] leading-relaxed">We write captions that sound like you — not a robot. Plus optimized hashtags to help new customers find you.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-[#2A2A2A] mb-1">Professional scheduling</p>
+                  <p className="text-sm text-[#635C54] leading-relaxed">Posts go live at the best times for your audience. Consistent posting builds trust and keeps you top of mind.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-[#2A2A2A] mb-1">Image upscaling</p>
+                  <p className="text-sm text-[#635C54] leading-relaxed">Phone photos get AI-enhanced to look crisp and professional. No blurry images on your feed.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pro Detail */}
+            <div className="bg-white/60 rounded-2xl p-8 border border-[#4338CA]/20">
+              <div className="flex items-center gap-2 mb-5">
+                <Star className="w-5 h-5 text-[#4338CA]" />
+                <h4 className="text-lg font-bold text-[#2A2A2A] font-[var(--font-fraunces)]">Pro</h4>
+                <span className="text-sm text-[#635C54] ml-1">$25/mo</span>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="font-medium text-[#2A2A2A] mb-1">20 styled posts per month</p>
+                  <p className="text-sm text-[#635C54] leading-relaxed">More posts means more visibility. Everything in Spark, with higher volume to keep your brand active and growing.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-[#2A2A2A] mb-1">Captions, hashtags & scheduling</p>
+                  <p className="text-sm text-[#635C54] leading-relaxed">All the content creation and scheduling from Spark, plus a dedicated style profile tailored to your brand voice.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-[#2A2A2A] mb-1">Image upscaling</p>
+                  <p className="text-sm text-[#635C54] leading-relaxed">Same AI-enhanced image quality. Every photo looks its best before it hits your feed.</p>
+                </div>
+                <div className="pt-3 mt-3 border-t border-[#4338CA]/10">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-4 h-4 text-[#4338CA]" />
+                    <p className="font-medium text-[#4338CA]">24-hour post management</p>
+                  </div>
+                  <p className="text-sm text-[#635C54] leading-relaxed">After every post goes live, we monitor and reply to comments on your behalf for a full day. We thank followers, answer questions, and keep the conversation going — so you don&apos;t have to.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -558,9 +621,83 @@ function Footer() {
    PAGE
 ============================================================================= */
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "name": "Guardia",
+      "url": "https://guardiacontent.com",
+      "logo": "https://guardiacontent.com/images/guardia-logo.png",
+      "description": "Social media management for local businesses. We style your photos, write captions, and post on schedule.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Northumberland",
+        "addressRegion": "PA",
+        "addressCountry": "US"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "support@guardiacontent.com",
+        "contactType": "customer service"
+      },
+      "sameAs": []
+    },
+    {
+      "@type": "WebSite",
+      "name": "Guardia",
+      "url": "https://guardiacontent.com"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.a
+        }
+      }))
+    },
+    {
+      "@type": "Service",
+      "name": "Guardia Social Media Management",
+      "provider": { "@type": "Organization", "name": "Guardia" },
+      "description": "Professional social media management for local businesses including photo styling, caption writing, scheduling, and engagement management.",
+      "areaServed": "US",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Plans",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "name": "Spark",
+            "description": "12 styled posts per month on Facebook and Instagram",
+            "price": "15",
+            "priceCurrency": "USD",
+            "priceSpecification": { "@type": "UnitPriceSpecification", "price": "15", "priceCurrency": "USD", "unitText": "month" }
+          },
+          {
+            "@type": "Offer",
+            "name": "Pro",
+            "description": "20 styled posts per month with 24-hour engagement management",
+            "price": "25",
+            "priceCurrency": "USD",
+            "priceSpecification": { "@type": "UnitPriceSpecification", "price": "25", "priceCurrency": "USD", "unitText": "month" }
+          }
+        ]
+      }
+    }
+  ]
+};
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#FAF6F1]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <Nav />
       <Hero />
       <HowItWorks />
