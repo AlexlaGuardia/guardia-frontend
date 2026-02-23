@@ -304,14 +304,19 @@ export default function LunaChatPanel() {
             ref={inputRef}
             type="text"
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={e => {
+              setInput(e.target.value);
+              (inputRef.current as any).__lastChange = Date.now();
+            }}
             onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) {
+                const last = (inputRef.current as any).__lastChange || 0;
+                if (Date.now() - last < 200) return;
                 e.preventDefault();
                 handleSend();
               }
             }}
-            placeholder={isListening ? "Listening..." : "Message Luna..."}
+            placeholder={isListening ? "Listening..." : "Message Luna... (v3)"}
             disabled={isProcessing || isListening}
             className="flex-1 bg-[#0f0f10] border border-[#1a1a1f] rounded-lg px-3 py-2 text-xs text-[#ccc] placeholder-[#555] focus:outline-none focus:border-[#2a2a2f] disabled:opacity-50"
           />

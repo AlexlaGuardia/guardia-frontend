@@ -568,11 +568,24 @@ function ChatArea({
     }
   }, [input]);
 
+  const isPasting = useRef(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || sending) return;
     onSend(input, modelOverride || undefined);
     setInput("");
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    const textarea = e.currentTarget as HTMLTextAreaElement;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = input.slice(0, start);
+    const after = input.slice(end);
+    setInput(before + text + after);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -693,6 +706,7 @@ function ChatArea({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder={isListening ? "Listening..." : "Message Serberus... (Enter to send)"}
             disabled={sending}
             rows={1}
