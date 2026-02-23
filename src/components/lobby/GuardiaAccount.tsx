@@ -282,7 +282,7 @@ function ProfilePanel({ isOpen, onClose, profile, onSave }: ProfilePanelProps) {
         className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{
           background: 'var(--bg-surface)',
-          boxShadow: '-4px 0 24px rgba(0,0,0,0.5)'
+          boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none'
         }}
       >
         {/* Header */}
@@ -916,7 +916,7 @@ function HelpSupportPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
       />
       <div
         className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+        style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
       >
         <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Help & Support</h2>
@@ -1051,7 +1051,7 @@ function SecurityPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
       />
       <div
         className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+        style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
       >
         <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Privacy & Security</h2>
@@ -1188,7 +1188,7 @@ function BillingHistoryPanel({ isOpen, onClose }: { isOpen: boolean; onClose: ()
       />
       <div
         className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+        style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
       >
         <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Billing History</h2>
@@ -1313,7 +1313,7 @@ function SubscriptionPanel({ isOpen, onClose, tier }: { isOpen: boolean; onClose
       />
       <div
         className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ background: 'var(--bg-surface)', boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}
+        style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
       >
         <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Manage Subscription</h2>
@@ -1354,7 +1354,8 @@ function SubscriptionPanel({ isOpen, onClose, tier }: { isOpen: boolean; onClose
           {/* Plan Comparison */}
           <div>
             <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Plan Comparison</h3>
-            <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+            <div className="rounded-2xl overflow-x-auto" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
+              <div className="min-w-[320px]">
               {/* Header */}
               <div className="grid grid-cols-4 p-3 border-b border-[var(--border-subtle)]">
                 <span className="text-xs" style={{ color: tokens.text.tertiary }}></span>
@@ -1385,6 +1386,7 @@ function SubscriptionPanel({ isOpen, onClose, tier }: { isOpen: boolean; onClose
                   })}
                 </div>
               ))}
+              </div>
             </div>
           </div>
         </div>
@@ -1412,7 +1414,7 @@ function SubscriptionPanel({ isOpen, onClose, tier }: { isOpen: boolean; onClose
 // =============================================================================
 // MAIN COMPONENT
 // =============================================================================
-export default function GuardiaAccount() {
+export default function GuardiaAccount({ onLogout }: { onLogout?: () => void } = {}) {
   const [notifications, setNotifications] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -1465,9 +1467,13 @@ export default function GuardiaAccount() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('guardia_jwt');
-    localStorage.removeItem('guardia_client_id');
-    window.location.href = '/';
+    if (onLogout) {
+      onLogout();
+    } else {
+      localStorage.removeItem('guardia_jwt');
+      localStorage.removeItem('guardia_client_id');
+      window.location.href = '/';
+    }
   };
 
   return (
