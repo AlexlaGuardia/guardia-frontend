@@ -247,8 +247,8 @@ export default function FactoryScreen({ jwt, clientTier }: FactoryScreenProps) {
         {/* ── Empty State ── */}
         {isEmpty && scheduled.length === 0 && (
           <div className="text-center py-16">
-            <div className="w-28 h-40 mx-auto mb-4">
-              <Image src="/images/gio/thumbs.png" alt="All caught up" width={112} height={160} className="w-full h-full object-contain" />
+            <div className="w-32 mx-auto mb-4">
+              <Image src="/images/gio/thumbs.png" alt="All caught up" width={128} height={192} className="w-full h-auto" />
             </div>
             <p className="text-base font-medium text-[var(--text-primary)]">All caught up!</p>
             <p className="text-sm text-[var(--text-muted)] mt-1">Upload photos to start creating content.</p>

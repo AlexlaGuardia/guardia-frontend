@@ -1,11 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import GioMode from "./GioMode";
+import PortalMain from "./PortalMain";
 import TabletMode from "./TabletMode";
-
-import WelcomeBubble from "./WelcomeBubble";
-import NotificationBubble from "./NotificationBubble";
 
 // ============================================
 // TYPES
@@ -34,7 +31,6 @@ export interface Message {
 }
 
 type AuthState = "loading" | "setup" | "login" | "authenticated";
-export type LobbyMode = "gio" | "tablet";
 export type TabletTab = "calendar" | "gallery" | "styles" | "analytics" | "engage" | "account";
 
 const API_BASE = "https://api.guardiacontent.com";
@@ -60,9 +56,10 @@ export default function LobbyShell() {
   const [client, setClient] = useState<ClientContext | null>(null);
 
   // Mode state
-  const [mode, setMode] = useState<LobbyMode>("gio");
+  const [tabletOpen, setTabletOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabletTab>("calendar");
-
+  const [chatOpen, setChatOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
   // Chat state (shared so it persists across mode switches)
   const [messages, setMessages] = useState<Message[]>([]);
@@ -173,7 +170,7 @@ export default function LobbyShell() {
     setAuthState("authenticated");
 
     if (isSetup) {
-      setMode("tablet");
+      setTabletOpen(true);
       setActiveTab("styles");
       setMessages([{
         role: "assistant",
@@ -191,7 +188,8 @@ export default function LobbyShell() {
     setJwt(null);
     setClient(null);
     setMessages([]);
-    setMode("gio");
+    setTabletOpen(false);
+    setChatOpen(false);
     setAuthState("login");
   }, []);
 
@@ -224,55 +222,44 @@ export default function LobbyShell() {
   }
 
   // ============================================
-  // RENDER: AUTHENTICATED — GIO + TABLET MODES
+  // RENDER: AUTHENTICATED — PORTAL + TABLET
   // ============================================
+  const handleOpenTablet = (tab?: TabletTab, postId?: number) => {
+    if (tab) setActiveTab(tab);
+    if (postId) setSelectedPostId(postId);
+    setTabletOpen(true);
+  };
+
   return (
     <main className="min-h-screen bg-[var(--bg-surface)] relative overflow-hidden">
-
-      
-
-      {/* Gio Mode (base layer, always rendered for depth) */}
-      <div className={`relative z-10 ${mode === "tablet" ? "pointer-events-none" : ""}`}>
-        <GioMode
+      {/* Portal Main (base layer — gallery + widget + message bar) */}
+      <div className={`relative z-10 ${tabletOpen ? "pointer-events-none opacity-30 scale-[0.98]" : ""} transition-all duration-300`}>
+        <PortalMain
           client={client}
           jwt={jwt}
           messages={messages}
           setMessages={setMessages}
-          onOpenTablet={() => setMode("tablet")}
+          chatOpen={chatOpen}
+          setChatOpen={setChatOpen}
+          onOpenTablet={handleOpenTablet}
           onLogout={handleLogout}
-          isBackground={mode === "tablet"}
         />
       </div>
 
       {/* Tablet Mode (overlay) */}
-      {mode === "tablet" && (
+      {tabletOpen && (
         <TabletMode
           client={client}
           jwt={jwt}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          onClose={() => setMode("gio")}
+          onClose={() => { setTabletOpen(false); setSelectedPostId(null); }}
           onMessage={(msg) => {
             setMessages((m) => [...m, { role: "assistant", content: msg }]);
           }}
+          selectedPostId={selectedPostId}
         />
       )}
-
-      {/* Welcome Bubble - appears 60s after auth */}
-      <WelcomeBubble
-        jwt={jwt}
-        onEngage={(msg) => {
-          setMessages((m) => [...m, { role: "assistant", content: msg }]);
-          setMode("gio");
-        }}
-        onOpenTablet={(tab) => {
-          if (tab) setActiveTab(tab as TabletTab);
-          setMode("tablet");
-        }}
-      />
-
-      {/* Notification Bubbles */}
-      <NotificationBubble jwt={jwt} />
     </main>
   );
 }

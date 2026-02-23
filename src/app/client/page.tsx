@@ -1,5 +1,5 @@
-import LobbyShell from "@/components/lobby/LobbyShell";
+import AppShell from "@/components/gio/AppShell";
 
 export default function ClientPage() {
-  return <LobbyShell />;
+  return <AppShell />;
 }

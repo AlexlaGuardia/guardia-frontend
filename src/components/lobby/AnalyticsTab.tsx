@@ -81,13 +81,14 @@ type Period = "7d" | "30d" | "all";
 interface AnalyticsTabProps {
   client: ClientContext | null;
   jwt: string | null;
+  selectedPostId?: number | null;
 }
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
-export default function AnalyticsTab({ client, jwt }: AnalyticsTabProps) {
+export default function AnalyticsTab({ client, jwt, selectedPostId }: AnalyticsTabProps) {
   const [period, setPeriod] = useState<Period>("30d");
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -309,7 +310,7 @@ function EngagementChart({ timeseries }: { timeseries: TimeseriesPoint[] }) {
 
   return (
     <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Engagement Trend</h3>
         <div className="flex items-center gap-4">
           {lines.map(l => (
@@ -420,11 +421,11 @@ function EngagementChart({ timeseries }: { timeseries: TimeseriesPoint[] }) {
           {/* Tooltip */}
           {hoveredIdx !== null && timeseries[hoveredIdx] && (
             <div
-              className="absolute top-2 z-10 px-3 py-2 rounded-xl text-xs shadow-lg pointer-events-none"
+              className="absolute top-2 z-10 px-3 py-2 rounded-xl text-xs shadow-lg pointer-events-none max-w-[200px]"
               style={{
                 background: "var(--bg-elevated)",
                 border: "1px solid var(--border)",
-                left: `${Math.min(Math.max((hoveredIdx / (timeseries.length - 1)) * 100, 10), 85)}%`,
+                left: `clamp(8%, ${(hoveredIdx / (timeseries.length - 1)) * 100}%, 92%)`,
                 transform: "translateX(-50%)",
               }}
             >
@@ -487,7 +488,7 @@ function PlatformBreakdown({ breakdown }: { breakdown: Record<string, PlatformDa
                   style={{ width: `${Math.max(pct, 4)}%`, background: meta.color, opacity: 0.85 }}
                 />
               </div>
-              <div className="flex gap-4 mt-1.5 text-[11px] text-[var(--text-muted)]">
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[11px] text-[var(--text-muted)]">
                 <span>{data.likes} like{data.likes !== 1 ? "s" : ""}</span>
                 <span>{data.comments} comment{data.comments !== 1 ? "s" : ""}</span>
                 <span>{data.shares} share{data.shares !== 1 ? "s" : ""}</span>
@@ -517,7 +518,7 @@ function TopPosts({ posts }: { posts: TopPost[] }) {
       <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Top Performing</h3>
       <div className="space-y-3">
         {posts.map((post, i) => (
-          <div key={post.id} className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-[var(--bg-surface)]">
+          <div key={post.id} className="flex flex-wrap items-center gap-3 p-3 rounded-xl transition-colors hover:bg-[var(--bg-surface)]">
             {/* Rank */}
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
@@ -549,13 +550,6 @@ function TopPosts({ posts }: { posts: TopPost[] }) {
               </div>
             </div>
 
-            {/* Metrics */}
-            <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)] shrink-0">
-              <span className="flex items-center gap-0.5"><Heart className="w-3 h-3" />{post.likes}</span>
-              <span className="flex items-center gap-0.5"><MessageCircle className="w-3 h-3" />{post.comments}</span>
-              <span className="flex items-center gap-0.5"><Share2 className="w-3 h-3" />{post.shares}</span>
-            </div>
-
             {/* Link */}
             {post.post_url && (
               <a
@@ -567,6 +561,13 @@ function TopPosts({ posts }: { posts: TopPost[] }) {
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             )}
+
+            {/* Metrics — wrap to new line on mobile */}
+            <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)] w-full sm:w-auto sm:shrink-0 pl-10 sm:pl-0 -mt-1 sm:mt-0">
+              <span className="flex items-center gap-0.5"><Heart className="w-3 h-3" />{post.likes}</span>
+              <span className="flex items-center gap-0.5"><MessageCircle className="w-3 h-3" />{post.comments}</span>
+              <span className="flex items-center gap-0.5"><Share2 className="w-3 h-3" />{post.shares}</span>
+            </div>
           </div>
         ))}
       </div>

@@ -780,7 +780,7 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center bg-[var(--bg-base)]">
+      <div className="flex items-center justify-center py-32 bg-[var(--bg-base)]">
         <div className="w-8 h-8 rounded-full border-2 border-[var(--border)] border-t-[var(--accent)] animate-spin" />
       </div>
     );
@@ -789,13 +789,13 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
   const numRows = Math.ceil(calendarDays.length / 7);
 
   return (
-    <div className="h-full flex flex-col bg-[var(--bg-base)] overflow-hidden">
+    <div className="flex flex-col bg-[var(--bg-base)]">
       <GlowFilters />
       
       {/* Today's Status Banner + Save Changes + Auto-Schedule Toggle */}
-      <div className="px-4 pt-4 pb-2 flex items-center justify-between gap-3">
+      <div className="px-4 pt-4 pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <TodayStatusBanner posts={todayPosts} />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           {hasChanges && (
             <button
               onClick={saveAllChanges}
@@ -861,10 +861,10 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
 
       {/* Calendar Grid */}
       <div
-        className="flex-1 mx-3 mb-2 rounded-2xl overflow-x-auto border border-[var(--border)]"
+        className="mx-3 mb-2 rounded-2xl overflow-x-auto border border-[var(--border)]"
         style={{ background: 'var(--bg-surface)' }}
       >
-        <div className="grid grid-cols-7 h-full min-w-[320px]">
+        <div className="grid grid-cols-7 min-w-[320px]">
           {calendarDays.map((day, i) => {
             const display = day ? getDayDisplay(day) : { type: "off" as const };
             const dayPosts = day ? getPostsForDay(day) : [];
@@ -881,7 +881,7 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
                 key={i}
                 onClick={() => day && handleDayClick(day)}
                 disabled={!day}
-                className="relative p-1 transition-all duration-150"
+                className="relative p-1 aspect-square transition-all duration-150"
                 style={{ 
                   background: isSelected 
                     ? 'var(--bg-elevated)' 

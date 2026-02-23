@@ -45,6 +45,7 @@ export default function SpiritTalesLibrary() {
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newTheme, setNewTheme] = useState("");
+  const [newSynopsis, setNewSynopsis] = useState("");
 
   useEffect(() => {
     fetch(`${API}/hq/athernyx/spirit-tales/books`)
@@ -62,6 +63,7 @@ export default function SpiritTalesLibrary() {
         title: newTitle,
         book_number: books.length + 1,
         theme: newTheme || undefined,
+        synopsis: newSynopsis || undefined,
         target_words: 10000,
       }),
     });
@@ -70,6 +72,7 @@ export default function SpiritTalesLibrary() {
       setCreating(false);
       setNewTitle("");
       setNewTheme("");
+      setNewSynopsis("");
       // Refresh
       const r2 = await fetch(`${API}/hq/athernyx/spirit-tales/books`);
       const d2 = await r2.json();
@@ -150,10 +153,16 @@ export default function SpiritTalesLibrary() {
                   </div>
 
                   {book.theme && (
-                    <p className="text-[11px] text-[#666] mb-3 italic">
+                    <p className="text-[11px] text-[#666] mb-1 italic">
                       Theme: {book.theme}
                     </p>
                   )}
+                  {book.synopsis && (
+                    <p className="text-[11px] text-[#444] mb-3 line-clamp-2">
+                      {book.synopsis}
+                    </p>
+                  )}
+                  {!book.synopsis && book.theme && <div className="mb-3" />}
 
                   <div className="flex gap-4 mb-3 text-[11px]">
                     <span className="text-amber-400 font-mono">
@@ -195,32 +204,39 @@ export default function SpiritTalesLibrary() {
               </div>
             </button>
           ) : (
-            <div className="rounded-xl border border-[#f59e0b30] bg-[#0a0a0b] p-5">
-              <h3 className="text-[13px] font-semibold text-amber-400 mb-3">New Book</h3>
+            <div className="rounded-xl border border-[#f59e0b30] bg-[#0a0a0b] p-6 sm:col-span-2 lg:col-span-3">
+              <h3 className="text-[13px] font-semibold text-amber-400 mb-4">New Book</h3>
               <input
                 type="text"
                 placeholder="Book title..."
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full bg-[#111] border border-[#1a1a1f] rounded-lg px-3 py-2 text-[13px] text-[#e8e8e8] mb-2 outline-none focus:border-[#f59e0b40]"
+                className="w-full bg-[#111] border border-[#1a1a1f] rounded-lg px-3 py-2 text-[13px] text-[#e8e8e8] mb-3 outline-none focus:border-[#f59e0b40]"
                 autoFocus
               />
-              <input
-                type="text"
-                placeholder="Theme / lesson (optional)..."
+              <textarea
+                placeholder="Theme — e.g. Discovery & courage in the unknown"
                 value={newTheme}
                 onChange={(e) => setNewTheme(e.target.value)}
-                className="w-full bg-[#111] border border-[#1a1a1f] rounded-lg px-3 py-2 text-[13px] text-[#e8e8e8] mb-3 outline-none focus:border-[#f59e0b40]"
+                rows={3}
+                className="w-full bg-[#111] border border-[#1a1a1f] rounded-lg px-3 py-2 text-[13px] text-[#e8e8e8] mb-3 outline-none focus:border-[#f59e0b40] resize-none"
+              />
+              <textarea
+                placeholder="Synopsis — what happens in this book? Pour it out here..."
+                value={newSynopsis}
+                onChange={(e) => setNewSynopsis(e.target.value)}
+                rows={8}
+                className="w-full bg-[#111] border border-[#1a1a1f] rounded-lg px-3 py-2 text-[13px] text-[#e8e8e8] mb-4 outline-none focus:border-[#f59e0b40] resize-none"
               />
               <div className="flex gap-2">
                 <button
                   onClick={createBook}
-                  className="flex-1 bg-amber-500/20 text-amber-400 rounded-lg px-3 py-1.5 text-[12px] font-medium hover:bg-amber-500/30 transition-colors"
+                  className="bg-amber-500/20 text-amber-400 rounded-lg px-5 py-1.5 text-[12px] font-medium hover:bg-amber-500/30 transition-colors"
                 >
                   Create
                 </button>
                 <button
-                  onClick={() => { setCreating(false); setNewTitle(""); setNewTheme(""); }}
+                  onClick={() => { setCreating(false); setNewTitle(""); setNewTheme(""); setNewSynopsis(""); }}
                   className="px-3 py-1.5 text-[12px] text-[#555] hover:text-[#888] transition-colors"
                 >
                   Cancel

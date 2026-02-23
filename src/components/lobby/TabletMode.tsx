@@ -19,6 +19,7 @@ interface TabletModeProps {
   setActiveTab: Dispatch<SetStateAction<TabletTab>>;
   onClose: () => void;
   onMessage: (msg: string) => void;
+  selectedPostId?: number | null;
 }
 
 export default function TabletMode({
@@ -28,6 +29,7 @@ export default function TabletMode({
   setActiveTab,
   onClose,
   onMessage,
+  selectedPostId,
 }: TabletModeProps) {
   // Calculate badge counts from client context
   const galleryBadge = (client?.pending_uploads || 0) + (client?.styled_ready || 0);
@@ -35,7 +37,7 @@ export default function TabletMode({
   const needsSetup = client?.needs_platform_setup;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-0 sm:p-6 md:p-8">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -43,11 +45,11 @@ export default function TabletMode({
       />
 
       {/* Tablet container */}
-      <div className="relative w-full h-full max-w-[95vw] max-h-[95vh] bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl flex flex-col animate-tablet-open" style={{ overflow: 'clip' }}>
+      <div className="relative w-full h-full sm:max-w-[95vw] sm:max-h-[95vh] bg-[var(--bg-base)] border-0 sm:border sm:border-[var(--border)] rounded-none sm:rounded-2xl flex flex-col animate-tablet-open" style={{ overflow: 'clip' }}>
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface)]">
           {/* Left: Tabs */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
             <TabButton
               active={activeTab === "gallery"}
               onClick={() => setActiveTab("gallery")}
@@ -58,7 +60,7 @@ export default function TabletMode({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               }
-              label="Gallery"
+              label="Factory"
             />
             <TabButton
               active={activeTab === "calendar"}
@@ -118,10 +120,10 @@ export default function TabletMode({
 
           {/* Right: Gio bubble + Close */}
           <div className="flex items-center gap-2">
-            {/* Gio chat bubble */}
+            {/* Gio chat bubble — hidden on mobile to save space */}
             <button
               onClick={onClose}
-              className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-[var(--border)] rounded-full text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-all"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-[var(--border)] rounded-full text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-all"
               title="Back to Giovanni"
             >
               <div className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] text-white font-semibold"
@@ -177,7 +179,7 @@ export default function TabletMode({
             </div>
           )}
           {activeTab === "analytics" && (
-            <AnalyticsTab client={client} jwt={jwt} />
+            <AnalyticsTab client={client} jwt={jwt} selectedPostId={selectedPostId} />
           )}
           {activeTab === "engage" && client && jwt && (
             <div className="h-full overflow-y-auto p-6">

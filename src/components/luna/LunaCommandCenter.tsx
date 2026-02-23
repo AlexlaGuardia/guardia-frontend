@@ -134,8 +134,10 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
   const [lobbyRoomId, setLobbyRoomId] = useState<number | null>(null);
   const [time, setTime] = useState("");
   const [connected, setConnected] = useState(false);
+  const [convMode, setConvMode] = useState(false);
 
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sendRef = useRef<(text: string) => Promise<void>>(() => Promise.resolve());
@@ -143,6 +145,30 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
   const lastNotifIdRef = useRef(0);
   const [crawlItems, setCrawlItems] = useState<CrawlItem[]>([]);
   const crawlIdRef = useRef(0);
+
+  // Conversation mode refs
+  const convStreamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const vadIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const silenceStartRef = useRef<number>(0);
+  const speechStartRef = useRef<number>(0);
+  const isSpeechRef = useRef(false);
+  const convRecorderRef = useRef<MediaRecorder | null>(null);
+  const convActiveRef = useRef(false); // true when conv mode should be listening
+  const suppressVadRef = useRef(false); // true during Luna playback
+  const stateRef = useRef<LunaState>("idle");
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wasLongPressRef = useRef(false);
+
+  // Keep stateRef in sync
+  useEffect(() => { stateRef.current = state; }, [state]);
+
+  // VAD config
+  const VAD_THRESHOLD = 15; // RMS volume threshold (0-128 scale)
+  const SPEECH_CONFIRM_MS = 250; // volume must stay above threshold this long to confirm speech
+  const SILENCE_TIMEOUT_MS = 1500; // silence duration before we stop recording
+  const MIN_RECORDING_MS = 500; // minimum recording length to send
 
   // ── Clock ──
   useEffect(() => {
@@ -212,6 +238,7 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
 
   const playAudio = useCallback((url: string) => {
     if (audioRef.current) audioRef.current.pause();
+    suppressVadRef.current = true; // Suppress VAD during playback
     const fullUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
     const audio = new Audio(fullUrl);
     audioRef.current = audio;
@@ -220,15 +247,30 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
       fadeTimerRef.current = setTimeout(() => {
         setState(prev => prev === "speaking" ? "idle" : prev);
         setLunaText("");
-      }, 3000);
+        // Resume conversation mode listening after clip ends
+        suppressVadRef.current = false;
+        if (convActiveRef.current) {
+          setTimeout(() => resumeConvListening(), 500);
+        }
+      }, 2000);
     };
-    audio.play().catch(e => console.warn("[Luna] Audio play failed:", e));
+    audio.onerror = () => {
+      suppressVadRef.current = false;
+      if (convActiveRef.current) {
+        setTimeout(() => resumeConvListening(), 500);
+      }
+    };
+    audio.play().catch(e => {
+      console.warn("[Luna] Audio play failed:", e);
+      suppressVadRef.current = false;
+    });
   }, []);
 
   // ── Send message to Luna ──
   const sendToLuna = useCallback(async (text: string) => {
     if (!lobbyRoomId || !text.trim()) {
       setState("idle");
+      if (convActiveRef.current) setTimeout(() => resumeConvListening(), 1000);
       return;
     }
     setState("processing");
@@ -272,59 +314,276 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
 
       showLunaMessage(fullText);
 
-      try {
-        const speakRes = await fetch(`${API_BASE}/luna/speak`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: fullText })
-        });
-        const speakData = await speakRes.json();
-        if (speakData.audio_url) {
-          playAudio(speakData.audio_url);
-        }
-      } catch {}
+      // Resume conversation mode listening after response displays
+      if (convActiveRef.current) {
+        suppressVadRef.current = false;
+      }
     } catch {
       showLunaMessage("I couldn't process that. Try again.");
+      if (convActiveRef.current) {
+        suppressVadRef.current = false;
+        setTimeout(() => resumeConvListening(), 3000);
+      }
     }
   }, [lobbyRoomId, showLunaMessage, playAudio]);
 
   useEffect(() => { sendRef.current = sendToLuna; }, [sendToLuna]);
 
-  // ── Voice recognition ──
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const SR = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-    if (!SR) return;
+  // ══════════════════════════════════════════════════════════════════════════
+  // CONVERSATION MODE — VAD (Voice Activity Detection)
+  // ══════════════════════════════════════════════════════════════════════════
 
-    const recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
+  const startConvMode = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      convStreamRef.current = stream;
 
-    recognition.onresult = (event: any) => {
-      let t = "";
-      let isFinal = false;
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        t += event.results[i][0].transcript;
-        if (event.results[i].isFinal) isFinal = true;
-      }
-      setTranscript(t);
-      if (isFinal && t.trim()) {
-        sendRef.current?.(t.trim());
-      }
-    };
+      // Set up audio analysis
+      const ctx = new AudioContext();
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      analyser.smoothingTimeConstant = 0.3;
+      source.connect(analyser);
+      audioContextRef.current = ctx;
+      analyserRef.current = analyser;
 
-    recognition.onend = () => {
-      setState(prev => prev === "listening" ? "idle" : prev);
+      convActiveRef.current = true;
+      suppressVadRef.current = false;
+      isSpeechRef.current = false;
+      silenceStartRef.current = 0;
+      speechStartRef.current = 0;
+      setConvMode(true);
+      setState("listening");
       setTranscript("");
+
+      // Start VAD polling
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      vadIntervalRef.current = setInterval(() => {
+        if (suppressVadRef.current) return;
+        if (stateRef.current === "processing") return;
+
+        analyser.getByteTimeDomainData(dataArray);
+        // Calculate RMS volume
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          const v = (dataArray[i] - 128) / 128;
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / dataArray.length) * 128;
+        const now = Date.now();
+
+        if (rms > VAD_THRESHOLD) {
+          // Sound detected
+          silenceStartRef.current = 0;
+          if (!isSpeechRef.current) {
+            if (!speechStartRef.current) {
+              speechStartRef.current = now;
+            } else if (now - speechStartRef.current > SPEECH_CONFIRM_MS) {
+              // Confirmed speech — start recording
+              isSpeechRef.current = true;
+              startConvRecording(stream);
+              setState("listening");
+              setTranscript("");
+            }
+          }
+        } else {
+          // Silence
+          speechStartRef.current = 0;
+          if (isSpeechRef.current) {
+            if (!silenceStartRef.current) {
+              silenceStartRef.current = now;
+            } else if (now - silenceStartRef.current > SILENCE_TIMEOUT_MS) {
+              // Silence confirmed — stop recording and send
+              isSpeechRef.current = false;
+              silenceStartRef.current = 0;
+              stopConvRecording();
+            }
+          }
+        }
+      }, 80);
+
+    } catch (e) {
+      console.warn("[Conv] Failed to start:", e);
+      setConvMode(false);
+      convActiveRef.current = false;
+      setState("idle");
+    }
+  }, []);
+
+  const stopConvMode = useCallback(() => {
+    convActiveRef.current = false;
+    setConvMode(false);
+    isSpeechRef.current = false;
+    suppressVadRef.current = false;
+
+    if (vadIntervalRef.current) {
+      clearInterval(vadIntervalRef.current);
+      vadIntervalRef.current = null;
+    }
+    if (convRecorderRef.current && convRecorderRef.current.state === "recording") {
+      convRecorderRef.current.stop();
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    if (convStreamRef.current) {
+      convStreamRef.current.getTracks().forEach(t => t.stop());
+      convStreamRef.current = null;
+    }
+    analyserRef.current = null;
+    setState("idle");
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (convActiveRef.current) {
+        convActiveRef.current = false;
+        if (vadIntervalRef.current) clearInterval(vadIntervalRef.current);
+        if (audioContextRef.current) audioContextRef.current.close().catch(() => {});
+        if (convStreamRef.current) convStreamRef.current.getTracks().forEach(t => t.stop());
+      }
+    };
+  }, []);
+
+  const startConvRecording = useCallback((stream: MediaStream) => {
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+      ? "audio/webm;codecs=opus"
+      : "audio/webm";
+    const recorder = new MediaRecorder(stream, { mimeType });
+    audioChunksRef.current = [];
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunksRef.current.push(e.data);
     };
 
-    recognition.onerror = () => {
+    recorder.onstop = async () => {
+      const blob = new Blob(audioChunksRef.current, { type: mimeType });
+      if (blob.size < 1000) {
+        // Too short, resume listening
+        if (convActiveRef.current) setState("listening");
+        return;
+      }
+
+      setState("processing");
+      setTranscript("Transcribing...");
+      suppressVadRef.current = true; // Suppress VAD while processing
+
+      try {
+        const form = new FormData();
+        form.append("audio", blob, "recording.webm");
+        form.append("language", "en");
+        const res = await fetch(`${API_BASE}/luna/listen`, { method: "POST", body: form });
+        const data = await res.json();
+        const text = data.text?.trim();
+        if (text) {
+          setTranscript(text);
+          sendRef.current?.(text);
+        } else {
+          // No speech detected, resume
+          suppressVadRef.current = false;
+          if (convActiveRef.current) {
+            setState("listening");
+            setTranscript("");
+          } else {
+            setState("idle");
+            setTranscript("");
+          }
+        }
+      } catch {
+        suppressVadRef.current = false;
+        if (convActiveRef.current) {
+          setState("listening");
+        } else {
+          setState("idle");
+        }
+        setTranscript("");
+      }
+    };
+
+    recorder.start(250); // Collect in 250ms chunks for smoother data
+    convRecorderRef.current = recorder;
+  }, []);
+
+  const stopConvRecording = useCallback(() => {
+    if (convRecorderRef.current && convRecorderRef.current.state === "recording") {
+      convRecorderRef.current.stop();
+      convRecorderRef.current = null;
+    }
+  }, []);
+
+  const resumeConvListening = useCallback(() => {
+    if (!convActiveRef.current) return;
+    if (stateRef.current === "processing") return;
+    suppressVadRef.current = false;
+    isSpeechRef.current = false;
+    silenceStartRef.current = 0;
+    speechStartRef.current = 0;
+    setState("listening");
+    setTranscript("");
+  }, []);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MANUAL RECORDING (tap-to-talk, original behavior)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "audio/webm";
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (blob.size < 1000) {
+          setState("idle");
+          setTranscript("");
+          return;
+        }
+        setState("processing");
+        setTranscript("Transcribing...");
+        try {
+          const form = new FormData();
+          form.append("audio", blob, "recording.webm");
+          form.append("language", "en");
+          const res = await fetch(`${API_BASE}/luna/listen`, { method: "POST", body: form });
+          const data = await res.json();
+          const text = data.text?.trim();
+          if (text) {
+            setTranscript(text);
+            sendRef.current?.(text);
+          } else {
+            setState("idle");
+            setTranscript("");
+          }
+        } catch {
+          setState("idle");
+          setTranscript("");
+        }
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+    } catch {
       setState("idle");
       setTranscript("");
-    };
+    }
+  }, []);
 
-    recognitionRef.current = recognition;
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
   }, []);
 
   // ── Notification polling ──
@@ -375,14 +634,50 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
     return () => timers.forEach(clearTimeout);
   }, [addCrawl]);
 
-  // ── Tap handler ──
+  // ── Tap / Long-press handler ──
+  const handlePointerDown = () => {
+    wasLongPressRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      wasLongPressRef.current = true;
+      unlockAudio();
+      // Toggle conversation mode
+      if (convMode) {
+        stopConvMode();
+      } else {
+        startConvMode();
+      }
+    }, 600);
+  };
+
+  const handlePointerUp = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
   const handleTap = () => {
+    if (wasLongPressRef.current) {
+      wasLongPressRef.current = false;
+      return; // Was a long-press, don't handle as tap
+    }
+
     unlockAudio();
 
+    // In conversation mode, tap to interrupt/cancel
+    if (convMode) {
+      if (state === "speaking") {
+        audioRef.current?.pause();
+        clearFadeTimer();
+        suppressVadRef.current = false;
+        setTimeout(() => resumeConvListening(), 500);
+      }
+      return;
+    }
+
+    // Manual tap-to-talk mode
     if (state === "listening") {
-      recognitionRef.current?.stop();
-      setState("idle");
-      setTranscript("");
+      stopRecording();
       return;
     }
     if (state === "speaking") {
@@ -394,27 +689,28 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
     }
     if (state === "processing") return;
 
-    if (recognitionRef.current) {
-      setState("listening");
-      setTranscript("");
-      try {
-        recognitionRef.current.start();
-      } catch {
-        setState("idle");
-      }
-    }
+    setState("listening");
+    setTranscript("");
+    startRecording();
   };
 
   // ── Visual state ──
-  const glow = {
-    idle:       { ring: "rgba(167,139,250,0.12)", bg: "rgba(167,139,250,0.04)", icon: "rgba(167,139,250,0.3)" },
-    listening:  { ring: "rgba(239,68,68,0.35)",    bg: "rgba(239,68,68,0.08)",   icon: "rgba(239,68,68,0.8)"   },
-    processing: { ring: "rgba(167,139,250,0.25)", bg: "rgba(167,139,250,0.06)", icon: "rgba(167,139,250,0.5)" },
-    speaking:   { ring: "rgba(167,139,250,0.4)",  bg: "rgba(167,139,250,0.1)",  icon: "rgba(167,139,250,0.7)" },
-  }[state];
+  const glow = convMode
+    ? {
+        idle:       { ring: "rgba(34,197,94,0.15)",  bg: "rgba(34,197,94,0.04)",  icon: "rgba(34,197,94,0.4)" },
+        listening:  { ring: "rgba(34,197,94,0.35)",   bg: "rgba(34,197,94,0.08)",  icon: "rgba(34,197,94,0.8)" },
+        processing: { ring: "rgba(167,139,250,0.25)", bg: "rgba(167,139,250,0.06)", icon: "rgba(167,139,250,0.5)" },
+        speaking:   { ring: "rgba(167,139,250,0.4)",  bg: "rgba(167,139,250,0.1)",  icon: "rgba(167,139,250,0.7)" },
+      }[state]
+    : {
+        idle:       { ring: "rgba(167,139,250,0.12)", bg: "rgba(167,139,250,0.04)", icon: "rgba(167,139,250,0.3)" },
+        listening:  { ring: "rgba(239,68,68,0.35)",    bg: "rgba(239,68,68,0.08)",   icon: "rgba(239,68,68,0.8)"   },
+        processing: { ring: "rgba(167,139,250,0.25)", bg: "rgba(167,139,250,0.06)", icon: "rgba(167,139,250,0.5)" },
+        speaking:   { ring: "rgba(167,139,250,0.4)",  bg: "rgba(167,139,250,0.1)",  icon: "rgba(167,139,250,0.7)" },
+      }[state];
 
   const displayText = state === "listening"
-    ? (transcript || "Listening...")
+    ? (transcript || (convMode ? "Listening..." : "Listening..."))
     : (state === "processing" || state === "speaking")
       ? lunaText
       : "";
@@ -429,9 +725,12 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
   return (
     <div
       className="h-screen w-screen fixed inset-0 flex flex-col items-center justify-center overflow-hidden select-none"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       onClick={handleTap}
       style={{
-        background: `radial-gradient(ellipse 50% 40% at 50% 42%, ${glow.bg} 0%, transparent 100%), #030304`,
+        background: `radial-gradient(ellipse 50% 40% at 50% 42%, ${glow?.bg} 0%, transparent 100%), #030304`,
         transition: "background 0.8s ease",
         WebkitTapHighlightColor: "transparent",
         touchAction: "manipulation",
@@ -440,6 +739,7 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
       {/* Mode switch button */}
       <button
         onClick={(e) => { e.stopPropagation(); onSwitchMode(); }}
+        onPointerDown={(e) => e.stopPropagation()}
         className="fixed top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded text-xs text-[#555] hover:text-[#888] hover:bg-[#1a1a1f]/50 transition"
       >
         <Terminal className="w-3.5 h-3.5" />
@@ -507,8 +807,8 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
         <div
           className="absolute inset-[-16px] rounded-full transition-all duration-700"
           style={{
-            background: `radial-gradient(circle, ${glow.ring} 0%, transparent 70%)`,
-            opacity: state === "idle" ? 0.5 : 1,
+            background: `radial-gradient(circle, ${glow?.ring} 0%, transparent 70%)`,
+            opacity: state === "idle" && !convMode ? 0.5 : 1,
           }}
         />
         <div
@@ -516,16 +816,16 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
             state === "listening" ? "animate-pulse" : ""
           }`}
           style={{
-            borderColor: glow.ring,
-            boxShadow: `0 0 60px ${glow.bg}`,
+            borderColor: glow?.ring,
+            boxShadow: `0 0 60px ${glow?.bg}`,
           }}
         >
           {state === "listening" ? (
-            <Mic size={32} style={{ color: glow.icon }} className="transition-colors duration-300" />
+            <Mic size={32} style={{ color: glow?.icon }} className="transition-colors duration-300" />
           ) : state === "processing" ? (
             <div className="w-8 h-8 border-2 border-violet-400/30 border-t-violet-400/70 rounded-full animate-spin" />
           ) : (
-            <Moon size={32} style={{ color: glow.icon }} className="transition-colors duration-300" />
+            <Moon size={32} style={{ color: glow?.icon }} className="transition-colors duration-300" />
           )}
         </div>
       </div>
@@ -548,7 +848,7 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
       </div>
 
       {/* Tap hint */}
-      {state === "idle" && !lastText && (
+      {state === "idle" && !lastText && !convMode && (
         <p className="absolute bottom-16 text-[11px] text-[#1a1a1f] tracking-wide">
           tap anywhere to speak
         </p>
@@ -556,16 +856,24 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
 
       {/* Status bar */}
       <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-1.5">
-          <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
-            connected ? "bg-green-500/50" : "bg-red-500/20"
-          }`} />
-          <span className="text-[10px] tracking-wide" style={{ color: connected ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.2)" }}>
-            {connected ? "LIVE" : "OFFLINE"}
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
+              connected ? "bg-green-500/50" : "bg-red-500/20"
+            }`} />
+            <span className="text-[10px] tracking-wide" style={{ color: connected ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.2)" }}>
+              {connected ? "LIVE" : "OFFLINE"}
+            </span>
+          </div>
+          {convMode && (
+            <span className="text-[10px] tracking-wide" style={{ color: "rgba(34,197,94,0.4)" }}>
+              CONV
+            </span>
+          )}
         </div>
         <span className="text-[10px] text-[#1a1a1f] tracking-wide">{time}</span>
       </div>
     </div>
   );
 }
+

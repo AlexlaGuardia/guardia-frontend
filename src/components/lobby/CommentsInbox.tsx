@@ -100,12 +100,21 @@ export default function CommentsInbox({ clientId, jwt, onReply, onClose }: Comme
   return (
     <div className="bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border-subtle)] overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-        <div>
-          <h3 className="text-[var(--text-primary)] font-medium">Comments Inbox</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-0.5">
-            {comments.length} {filter === "pending" ? "need replies" : "comments"}
-          </p>
+      <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex items-center justify-between sm:block">
+          <div>
+            <h3 className="text-[var(--text-primary)] font-medium">Comments Inbox</h3>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">
+              {comments.length} {filter === "pending" ? "need replies" : "comments"}
+            </p>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="sm:hidden p-2 hover:bg-[var(--bg-surface)] rounded-lg">
+              <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {/* Filter tabs */}
@@ -124,9 +133,9 @@ export default function CommentsInbox({ clientId, jwt, onReply, onClose }: Comme
               </button>
             ))}
           </div>
-          
+
           {onClose && (
-            <button onClick={onClose} className="p-2 hover:bg-[var(--bg-surface)] rounded-lg">
+            <button onClick={onClose} className="hidden sm:block p-2 hover:bg-[var(--bg-surface)] rounded-lg">
               <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -136,7 +145,7 @@ export default function CommentsInbox({ clientId, jwt, onReply, onClose }: Comme
       </div>
 
       {/* Comments List */}
-      <div className="max-h-[400px] overflow-y-auto">
+      <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
         {loading ? (
           <div className="p-8 flex items-center justify-center">
             <div className="w-6 h-6 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
