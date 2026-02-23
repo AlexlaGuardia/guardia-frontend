@@ -29,6 +29,9 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   tool?: string | null;
+  question_id?: number;
+  category?: string;
+  answered?: boolean;
 }
 
 type AuthState = "loading" | "setup" | "login" | "authenticated";
