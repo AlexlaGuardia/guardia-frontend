@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import PortalMain from "./PortalMain";
 import TabletMode from "./TabletMode";
+import NotificationBubble from "./NotificationBubble";
 
 // ============================================
 // TYPES
@@ -260,6 +261,9 @@ export default function LobbyShell() {
           selectedPostId={selectedPostId}
         />
       )}
+
+      {/* Notification popups — outcomes + soul questions */}
+      <NotificationBubble jwt={jwt} />
     </main>
   );
 }
