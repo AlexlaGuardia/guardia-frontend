@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Heart, MessageCircle, Share2, FileText, TrendingUp, TrendingDown, Clock, Sparkles, ExternalLink } from "lucide-react";
 import { ClientContext } from "./LobbyShell";
 
@@ -165,7 +165,7 @@ export default function AnalyticsTab({ client, jwt, selectedPostId }: AnalyticsT
 
             {/* Top Posts */}
             {data.top_posts.length > 0 && (
-              <TopPosts posts={data.top_posts} />
+              <TopPosts posts={data.top_posts} selectedPostId={selectedPostId} />
             )}
 
             {/* Content Insights */}
@@ -505,7 +505,15 @@ function PlatformBreakdown({ breakdown }: { breakdown: Record<string, PlatformDa
 // TOP POSTS
 // ============================================================================
 
-function TopPosts({ posts }: { posts: TopPost[] }) {
+function TopPosts({ posts, selectedPostId }: { posts: TopPost[]; selectedPostId?: number | null }) {
+  const selectedRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedPostId && selectedRef.current) {
+      selectedRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [selectedPostId]);
+
   const rankColors = ["var(--accent)", "#94a3b8", "#c2956b"];
 
   const formatDate = (dateStr: string) => {
@@ -518,7 +526,11 @@ function TopPosts({ posts }: { posts: TopPost[] }) {
       <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">Top Performing</h3>
       <div className="space-y-3">
         {posts.map((post, i) => (
-          <div key={post.id} className="flex flex-wrap items-center gap-3 p-3 rounded-xl transition-colors hover:bg-[var(--bg-surface)]">
+          <div
+            key={post.id}
+            ref={post.id === selectedPostId ? selectedRef : undefined}
+            className={`flex flex-wrap items-center gap-3 p-3 rounded-xl transition-colors hover:bg-[var(--bg-surface)] ${post.id === selectedPostId ? "ring-2 ring-[var(--accent)] bg-[var(--bg-surface)]" : ""}`}
+          >
             {/* Rank */}
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
