@@ -40,9 +40,15 @@ interface FlockDossier extends FlockLead {
   rent_estimate_per_unit: number;
   monthly_gross: number;
   mortgage_estimate: number;
+  monthly_cash_flow: number;
+  annual_cash_flow: number;
+  down_payment: number;
+  cash_on_cash_return: number;
   owner_name: string | null;
   talking_points: string[];
-  comps: { address: string; price: number; units: number; sold_date: string }[];
+  deal_summary: string;
+  red_flags: string[];
+  comps: { address: string; price: number; units: number; price_per_door?: number; sold_date: string }[];
 }
 
 interface FlockStats {
@@ -266,11 +272,18 @@ function LeadCard({ lead, rank, showDate }: { lead: FlockLead; rank?: number; sh
             </div>
           ) : (
             <div className="space-y-5">
+              {/* Deal Summary */}
+              {dossier?.deal_summary && (
+                <div className="bg-blue-500/5 border border-blue-500/10 rounded-lg p-3">
+                  <p className="text-xs text-[#ccc]">{dossier.deal_summary}</p>
+                </div>
+              )}
+
               {/* Financial Summary */}
               {dossier && (
                 <div>
                   <h4 className="text-[10px] tracking-wider text-blue-500/60 mb-3">FINANCIALS</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <div className="bg-[#0d0d0e] rounded-lg p-3">
                       <span className="text-[10px] text-[#444] block">Rent/Unit</span>
                       <span className="text-sm font-mono text-[#ccc]">${dossier.rent_estimate_per_unit?.toLocaleString() || "—"}/mo</span>
@@ -280,13 +293,37 @@ function LeadCard({ lead, rank, showDate }: { lead: FlockLead; rank?: number; sh
                       <span className="text-sm font-mono text-emerald-400">${dossier.monthly_gross?.toLocaleString() || "—"}</span>
                     </div>
                     <div className="bg-[#0d0d0e] rounded-lg p-3">
-                      <span className="text-[10px] text-[#444] block">Est. Mortgage</span>
+                      <span className="text-[10px] text-[#444] block">Mortgage (75% LTV)</span>
                       <span className="text-sm font-mono text-[#ccc]">${dossier.mortgage_estimate?.toLocaleString() || "—"}/mo</span>
                     </div>
                     <div className="bg-[#0d0d0e] rounded-lg p-3">
-                      <span className="text-[10px] text-[#444] block">Owner</span>
-                      <span className="text-sm text-[#ccc]">{dossier.owner_name || "Unknown"}</span>
+                      <span className="text-[10px] text-[#444] block">Monthly Cash Flow</span>
+                      <span className={`text-sm font-mono ${(dossier.monthly_cash_flow || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        ${dossier.monthly_cash_flow?.toLocaleString() || "—"}
+                      </span>
                     </div>
+                    <div className="bg-[#0d0d0e] rounded-lg p-3">
+                      <span className="text-[10px] text-[#444] block">Down Payment (25%)</span>
+                      <span className="text-sm font-mono text-[#ccc]">${dossier.down_payment?.toLocaleString() || "—"}</span>
+                    </div>
+                    <div className="bg-[#0d0d0e] rounded-lg p-3">
+                      <span className="text-[10px] text-[#444] block">Cash-on-Cash</span>
+                      <span className={`text-sm font-mono ${(dossier.cash_on_cash_return || 0) >= 8 ? "text-emerald-400" : (dossier.cash_on_cash_return || 0) >= 4 ? "text-amber-400" : "text-[#ccc]"}`}>
+                        {dossier.cash_on_cash_return || 0}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Red Flags */}
+              {dossier?.red_flags && dossier.red_flags.length > 0 && (
+                <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-3">
+                  <h4 className="text-[10px] tracking-wider text-red-500/60 mb-2">RED FLAGS</h4>
+                  <div className="space-y-1">
+                    {dossier.red_flags.map((flag, i) => (
+                      <p key={i} className="text-xs text-red-400/80">{flag}</p>
+                    ))}
                   </div>
                 </div>
               )}
