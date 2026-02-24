@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Check, Building2, ChevronDown, ExternalLink, Phone, User, FileText } from "lucide-react";
+import { Check, Building2, ChevronDown, ExternalLink, Phone, User, FileText, Mail, Loader2 } from "lucide-react";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -94,6 +94,69 @@ function StatPill({ label, value, color = "#888" }: { label: string; value: stri
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg px-4 py-3">
       <span className="text-[#555] text-[10px] tracking-wider block">{label}</span>
       <p className="font-mono text-lg" style={{ color }}>{value}</p>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CALL PREP SECTION
+// ══════════════════════════════════════════════════════════════════════════════
+
+function CallPrepSection({ leadId, talkingPoints }: { leadId: number; talkingPoints: string[] }) {
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const sendPrep = async () => {
+    setSending(true);
+    try {
+      const res = await fetch(`${API_BASE}/hq/flock/lead/${leadId}/prep-call`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setSent(true);
+        setMessage(data.message || "Sent!");
+      } else {
+        setMessage("Failed to send");
+      }
+    } catch {
+      setMessage("Failed to send");
+    }
+    setSending(false);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-3">
+        <h4 className="text-[10px] tracking-wider text-blue-500/60">CALL PREP</h4>
+        <button
+          onClick={(e) => { e.stopPropagation(); sendPrep(); }}
+          disabled={sending || sent}
+          className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            sent
+              ? "bg-emerald-500/10 text-emerald-400"
+              : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+          }`}
+        >
+          {sending ? (
+            <><Loader2 size={12} className="animate-spin" /> Generating...</>
+          ) : sent ? (
+            <><Check size={12} /> Sent</>
+          ) : (
+            <><Mail size={12} /> Prep Call</>
+          )}
+        </button>
+      </div>
+      {message && <p className="text-[10px] text-[#555] mb-2">{message}</p>}
+      {talkingPoints.length > 0 && (
+        <div className="space-y-2">
+          {talkingPoints.map((tp, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <span className="text-blue-500/40 text-xs mt-0.5">&#8250;</span>
+              <p className="text-xs text-[#888]">{tp}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -328,20 +391,8 @@ function LeadCard({ lead, rank, showDate }: { lead: FlockLead; rank?: number; sh
                 </div>
               )}
 
-              {/* Talking Points */}
-              {dossier?.talking_points && dossier.talking_points.length > 0 && (
-                <div>
-                  <h4 className="text-[10px] tracking-wider text-blue-500/60 mb-3">CALL PREP</h4>
-                  <div className="space-y-2">
-                    {dossier.talking_points.map((tp, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <span className="text-blue-500/40 text-xs mt-0.5">&#8250;</span>
-                        <p className="text-xs text-[#888]">{tp}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Call Prep */}
+              <CallPrepSection leadId={lead.id} talkingPoints={dossier?.talking_points || []} />
 
               {/* Comps */}
               {dossier?.comps && dossier.comps.length > 0 && (
