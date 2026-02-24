@@ -81,6 +81,7 @@ interface FlockLead {
   estimated_dscr: number;
   composite_score: number;
   owl_reasoning: string;
+  reasoning?: string;
   status: string;
 }
 
@@ -456,17 +457,22 @@ function AthernyxWidget() {
 function FlockSection() {
   const refreshKey = useContext(RefreshContext);
   const [leads, setLeads] = useState<FlockLead[]>([]);
+  const [lastPickDate, setLastPickDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/hq/flock/top`)
+    fetch(`${API_BASE}/hq/flock/top?days=7`)
       .then(res => res.ok ? res.json() : Promise.reject("Failed"))
-      .then(data => setLeads(Array.isArray(data) ? data : data.picks || data.leads || []))
+      .then(data => {
+        // Flatten picks_by_date into a flat list, take most recent 3
+        const allPicks = data.picks || [];
+        setLeads(allPicks.slice(0, 3));
+        const dates = Object.keys(data.picks_by_date || {}).sort((a: string, b: string) => b.localeCompare(a));
+        if (dates.length > 0) setLastPickDate(dates[0]);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [refreshKey]);
-
-  if (!loading && leads.length === 0) return null;
 
   return (
     <div className="mt-6">
@@ -474,7 +480,8 @@ function FlockSection() {
         <div className="flex items-center gap-2 mb-4 group cursor-pointer">
           <div className="w-2 h-2 rounded-full bg-blue-500" />
           <h3 className="text-xs font-medium tracking-wider uppercase text-blue-500">Flock</h3>
-          <span className="text-[#444] text-xs ml-auto group-hover:text-[#666] transition-colors">View all \u2192</span>
+          {lastPickDate && <span className="text-[10px] text-[#333] font-mono">Last pick: {lastPickDate}</span>}
+          <span className="text-[#444] text-xs ml-auto group-hover:text-[#666] transition-colors">View all &#8594;</span>
         </div>
       </Link>
       {loading ? (
@@ -482,6 +489,10 @@ function FlockSection() {
           {[1,2,3].map(i => (
             <div key={i} className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-xl p-4 h-[160px] animate-pulse" />
           ))}
+        </div>
+      ) : leads.length === 0 ? (
+        <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-xl p-6 text-center">
+          <p className="text-[#555] text-xs">No picks in the last 7 days. Owl runs daily at 8am EST.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -497,18 +508,22 @@ function FlockSection() {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-[#ccc] truncate">{lead.address}</p>
-                  <p className="text-xs text-[#555]">{lead.city}, {lead.county}</p>
+                  <p className="text-xs text-[#555]">{lead.city}{lead.county ? `, ${lead.county}` : ""}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 mt-3 text-xs">
-                <span className="text-blue-400 font-mono">${(lead.asking_price / 1000).toFixed(0)}K</span>
-                <span className="text-[#666]">{lead.units} units</span>
-                <span className="text-[#666]">{lead.dom}d</span>
-                <span className={`ml-auto font-mono ${lead.composite_score >= 70 ? "text-emerald-400" : lead.composite_score >= 40 ? "text-amber-400" : "text-[#555]"}`}>
-                  {lead.composite_score}
-                </span>
+                {lead.asking_price > 0 && <span className="text-blue-400 font-mono">${(lead.asking_price / 1000).toFixed(0)}K</span>}
+                {lead.units > 0 && <span className="text-[#666]">{lead.units} units</span>}
+                {lead.dom > 0 && <span className="text-[#666]">{lead.dom}d</span>}
+                {lead.composite_score > 0 && (
+                  <span className={`ml-auto font-mono ${lead.composite_score >= 70 ? "text-emerald-400" : lead.composite_score >= 40 ? "text-amber-400" : "text-[#555]"}`}>
+                    {Math.round(lead.composite_score)}
+                  </span>
+                )}
               </div>
-              <p className="text-[10px] text-[#555] mt-2 line-clamp-2">{lead.owl_reasoning}</p>
+              {(lead.owl_reasoning || lead.reasoning) && (
+                <p className="text-[10px] text-[#555] mt-2 line-clamp-2">{lead.owl_reasoning || lead.reasoning}</p>
+              )}
             </div>
           ))}
         </div>

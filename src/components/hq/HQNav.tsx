@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/hq", color: "#a78bfa" },
   { label: "Paradise", href: "/hq/paradise", color: "#d4af37" },
   { label: "Factory", href: "/hq/factory", color: "#10b981" },
+  { label: "Flock", href: "/hq/flock", color: "#3b82f6" },
   { label: "Cortex", href: "/hq/cortex", color: "#8b5cf6" },
   { label: "Clients", href: "/hq/clients", color: "#f59e0b" },
   { label: "Atlas", href: "/hq/atlas", color: "#06b6d4" },
