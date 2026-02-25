@@ -42,7 +42,8 @@ export default function TopBar({
   const activeBase = activeScreen === "post-detail" ? "feed" : activeScreen === "gio-chat" ? "feed" : activeScreen;
 
   return (
-    <header className="flex-shrink-0 z-40 bg-[var(--bg-elevated)] border-b border-[var(--border-subtle)] flex items-center px-4 gap-3"
+    <header
+      className="flex-shrink-0 z-40 flex items-center px-4 gap-3 relative"
       style={{ minHeight: 56, paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       {/* Brand */}
@@ -86,8 +87,12 @@ export default function TopBar({
       {/* Spacer on mobile */}
       {!isDesktop && <div className="flex-1" />}
 
-      {/* Gio avatar */}
-      <GioAvatar onClick={onGioClick} unreadCount={unreadCount} />
+      {/* Gio widget — overlaps header into content below */}
+      <div className="absolute right-4 z-50" style={{ top: 0 }}>
+        <GioAvatar onClick={onGioClick} unreadCount={unreadCount} variant="widget" size={130} />
+      </div>
+      {/* Spacer to reserve space for widget */}
+      <div style={{ width: 130 }} className="flex-shrink-0" />
     </header>
   );
 }

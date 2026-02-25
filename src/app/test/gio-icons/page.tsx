@@ -194,6 +194,95 @@ export default function GioIconTestPage() {
         </div>
       </Section>
 
+      {/* ─── Concept C Refined — Real Site Colors ─── */}
+      <Section title="Widget in Header — Concept C (Real Colors)">
+        <p className="text-xs text-gray-500 mb-6">Real site: header=#FFFFFF, page=#FAF6F1. Widget floats above solid cream page.</p>
+        <div className="space-y-8">
+
+          {/* C1: White header variant — for comparison */}
+          <div>
+            <p className="text-xs text-gray-400 mb-2">C1) White header + cream page — badge bottom-left, solid widget (130px)</p>
+            <div className="relative rounded-xl overflow-visible" style={{ background: "#FAF6F1" }}>
+              {/* White header bar — no bottom border */}
+              <div className="flex items-center gap-3 px-4" style={{ background: "#FFFFFF", height: 56, borderRadius: "12px 12px 0 0" }}>
+                <div className="flex items-center gap-2">
+                  <img src="/images/guardia-logo.png" alt="Guardia" className="w-8 h-8 object-contain" />
+                  <div>
+                    <span className="text-sm font-semibold text-gray-900">Guardia</span>
+                    <span className="text-[10px] text-violet-600 ml-1.5 font-medium">Pro</span>
+                  </div>
+                </div>
+                <div className="flex-1" />
+                <nav className="flex items-center gap-5 text-sm text-gray-500">
+                  <span>Feed</span><span className="text-violet-600 font-medium">Factory</span><span>Calendar</span><span>Stats</span><span>Account</span>
+                </nav>
+                <div className="flex-1" />
+                <div style={{ width: 130 }} />
+              </div>
+              {/* Widget — solid bg, badge bottom-left */}
+              <div className="absolute right-4 z-20 cursor-pointer group" style={{ top: -20, width: 130, height: 130 }}>
+                <div className="rounded-2xl overflow-hidden w-full h-full transition-transform duration-200 group-hover:scale-105" style={{ boxShadow: "0 6px 28px rgba(124, 58, 237, 0.3)" }}>
+                  <img src={`${BASE}/widget_shadow.png`} alt="" className="w-full h-full object-cover" />
+                </div>
+                <span className="absolute -bottom-1 -left-1 min-w-[22px] h-[22px] bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-[#FAF6F1]">
+                  3
+                </span>
+              </div>
+              {/* Content */}
+              <div className="px-4 pt-16 pb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-20 h-3 rounded bg-black/5" />
+                  <div className="w-32 h-3 rounded bg-black/5" />
+                </div>
+                <div className="w-full h-20 rounded-lg bg-black/[0.03]" />
+              </div>
+            </div>
+          </div>
+
+          {/* C2: Solid cream, no divider, transparent widget, badge bottom-left */}
+          <div>
+            <p className="text-xs text-gray-400 mb-2">C2) All cream, no divider — widget floats, badge bottom-left (130px)</p>
+            <div className="relative rounded-xl" style={{ background: "#FAF6F1" }}>
+              {/* Header — no border, seamless with page */}
+              <div className="flex items-center gap-3 px-4" style={{ height: 56 }}>
+                <div className="flex items-center gap-2">
+                  <img src="/images/guardia-logo.png" alt="Guardia" className="w-8 h-8 object-contain" />
+                  <div>
+                    <span className="text-sm font-semibold text-gray-900">Guardia</span>
+                    <span className="text-[10px] text-violet-600 ml-1.5 font-medium">Pro</span>
+                  </div>
+                </div>
+                <div className="flex-1" />
+                <nav className="flex items-center gap-5 text-sm text-gray-500">
+                  <span>Feed</span><span className="text-violet-600 font-medium">Factory</span><span>Calendar</span><span>Stats</span><span>Account</span>
+                </nav>
+                <div className="flex-1" />
+                <div style={{ width: 130 }} />
+              </div>
+              {/* Widget — transparent bg, floats above page */}
+              <div className="absolute right-4 z-20 cursor-pointer group" style={{ top: -20, width: 130, height: 130 }}>
+                <div className="rounded-2xl overflow-hidden w-full h-full transition-transform duration-200 group-hover:scale-105" style={{ boxShadow: "0 6px 28px rgba(124, 58, 237, 0.3)" }}>
+                  <img src={`${BASE}/widget_shadow.png`} alt="" className="w-full h-full object-cover" />
+                </div>
+                {/* Badge bottom-left */}
+                <span className="absolute -bottom-1 -left-1 min-w-[22px] h-[22px] bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-[#FAF6F1]">
+                  3
+                </span>
+              </div>
+              {/* Content */}
+              <div className="px-4 pt-16 pb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-20 h-3 rounded bg-black/5" />
+                  <div className="w-32 h-3 rounded bg-black/5" />
+                </div>
+                <div className="w-full h-20 rounded-lg bg-black/[0.03]" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </Section>
+
       {/* ─── Chat Header Mockup ─── */}
       <Section title="Chat Header Mockup">
         <div className="w-[320px] rounded-xl border border-white/10 overflow-hidden" style={{ background: bgColor }}>
@@ -374,6 +463,17 @@ export default function GioIconTestPage() {
           ))}
         </div>
       </Section>
+
+      {/* Breathing glow animation for widget */}
+      <style jsx>{`
+        @keyframes gio-glow {
+          0%, 100% { box-shadow: 0 4px 20px rgba(124, 58, 237, 0.2); }
+          50% { box-shadow: 0 4px 30px rgba(124, 58, 237, 0.45); }
+        }
+        .animate-gio-glow {
+          animation: gio-glow 3s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
