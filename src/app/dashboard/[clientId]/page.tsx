@@ -514,7 +514,7 @@ function StylesTab({
         body: JSON.stringify({ preferred_style: selected }),
       });
       alert('Style updated! New uploads will use this style.');
-    } catch (e) {
+    } catch (_e) {
       alert('Failed to save');
     }
     setSaving(false);

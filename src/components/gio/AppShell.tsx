@@ -466,7 +466,7 @@ export default function AppShell() {
   const screenProps = {
     client,
     jwt,
-    onPostSelect: (postId: number) => {
+    onPostSelect: (_postId: number) => {
       // For screens that pass postId instead of full post
       // We'd need to find the post — for now just navigate
       setActiveScreen("stats");

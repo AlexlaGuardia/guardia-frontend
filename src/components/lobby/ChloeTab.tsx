@@ -42,7 +42,7 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export default function ChloeTab({ clientId, jwt, onMessage }: ChloeTabProps) {
+export default function ChloeTab({ clientId: _clientId, jwt: _jwt, onMessage: _onMessage }: ChloeTabProps) {
   return (
     <div className="h-full overflow-y-auto flex flex-col">
       {/* Hero */}

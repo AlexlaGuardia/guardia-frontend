@@ -41,13 +41,13 @@ function EditIcon() {
   );
 }
 
-export default function BrandMirror({ clientId, jwt, onStyleUpdated }: BrandMirrorProps) {
+export default function BrandMirror({ clientId: _clientId, jwt, onStyleUpdated }: BrandMirrorProps) {
   const [brand, setBrand] = useState<BrandData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showOriginals, setShowOriginals] = useState(false);
-  const [stylePreview, setStylePreview] = useState<{ prompt: string; strength: number; style_name: string } | null>(null);
+  const [_stylePreview, setStylePreview] = useState<{ prompt: string; strength: number; style_name: string } | null>(null);
 
   // Edit states
   const [editingColors, setEditingColors] = useState(false);

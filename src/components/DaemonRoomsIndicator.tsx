@@ -7,17 +7,6 @@ import { Zap, Check, AlertTriangle, Clock } from "lucide-react";
 // TYPES
 // ══════════════════════════════════════════════════════════════════════════════
 
-interface DaemonRoomEvent {
-  type: "daemon_room_activated" | "daemon_room_completed" | "daemon_room_escalated" | "daemon_room_timeout";
-  room_id: number;
-  timestamp: string;
-  metadata?: {
-    project?: string;
-    room_type?: string;
-    reason?: string;
-  };
-}
-
 interface DaemonRoomStatus {
   room_id: number;
   status: "active" | "completed" | "escalated" | "timeout";

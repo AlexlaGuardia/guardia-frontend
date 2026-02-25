@@ -223,7 +223,7 @@ export default function SpiritTalesEditor() {
     textarea.scrollTop = Math.max(0, cursorY - textarea.clientHeight * 0.4);
   }
 
-  function selectChapter(ch: Chapter, bk?: Book) {
+  function selectChapter(ch: Chapter, _bk?: Book) {
     // Save current first if dirty
     if (dirty && activeChapter !== null) {
       if (editorMode === "outline") saveOutline(activeChapter, outline);

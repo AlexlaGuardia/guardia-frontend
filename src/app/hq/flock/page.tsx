@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Check, Building2, ChevronDown, ExternalLink, Phone, User, FileText, Mail, Loader2 } from "lucide-react";
+import { Check, Building2, ChevronDown, ExternalLink, Phone, User, Mail, Loader2 } from "lucide-react";
 
 const API_BASE = "https://api.guardiacontent.com";
 

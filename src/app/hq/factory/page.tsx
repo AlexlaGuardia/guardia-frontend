@@ -1252,7 +1252,6 @@ function ClientPipelinesPanel() {
                     ) : (
                       <div className="space-y-1">
                         {clientPipes.map((pipe) => {
-                          const statusColor = pipe.enabled ? "#10b981" : "#555";
                           return (
                             <div key={pipe.id} className="flex items-center gap-2 py-1.5">
                               <button

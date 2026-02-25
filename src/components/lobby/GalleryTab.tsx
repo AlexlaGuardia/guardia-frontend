@@ -179,19 +179,6 @@ function ImageCard({
   );
 }
 
-// Relative time helper
-function timeAgo(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  return `${Math.floor(diffHours / 24)}d ago`;
-}
-
 // Platform badge
 function PlatformBadge({ platform }: { platform: string }) {
   const config: Record<string, { label: string; bg: string; text: string }> = {
@@ -213,7 +200,7 @@ function PlatformBadge({ platform }: { platform: string }) {
   );
 }
 
-export default function GalleryTab({ client, jwt, onMessage, onSwitchToGio }: GalleryTabProps) {
+export default function GalleryTab({ client, jwt, onMessage, onSwitchToGio: _onSwitchToGio }: GalleryTabProps) {
   // Upload review (assets needing confirmation)
   const [uploadReview, setUploadReview] = useState<GalleryImage[]>([]);
   // Processing queue (assets being styled)
@@ -384,46 +371,6 @@ export default function GalleryTab({ client, jwt, onMessage, onSwitchToGio }: Ga
     } catch (err) {
       console.error("Send to factory error:", err);
       onMessage("Something went wrong. Let's try that again.");
-    }
-  };
-
-  // ── Content Review Actions ──
-
-  const handleApprovePost = async () => {
-    if (contentReview.length === 0 || !jwt) return;
-    const post = contentReview[contentReviewIndex];
-    try {
-      const res = await fetch(`${API_BASE}/lobby/content-review/${post.id}/approve`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
-      const data = await res.json();
-      if (data.success) {
-        setContentReview(items => items.filter((_, i) => i !== contentReviewIndex));
-        setContentReviewIndex(i => Math.min(i, Math.max(0, contentReview.length - 2)));
-        onMessage("Approved! Scheduling shortly.");
-      }
-    } catch {
-      onMessage("Had trouble approving. Let's try again.");
-    }
-  };
-
-  const handleRejectPost = async () => {
-    if (contentReview.length === 0 || !jwt) return;
-    const post = contentReview[contentReviewIndex];
-    try {
-      const res = await fetch(`${API_BASE}/lobby/content-review/${post.id}/reject`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
-      const data = await res.json();
-      if (data.success) {
-        setContentReview(items => items.filter((_, i) => i !== contentReviewIndex));
-        setContentReviewIndex(i => Math.min(i, Math.max(0, contentReview.length - 2)));
-        onMessage("Post removed.");
-      }
-    } catch {
-      onMessage("Had trouble with that. Let's try again.");
     }
   };
 

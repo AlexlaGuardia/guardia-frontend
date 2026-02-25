@@ -31,7 +31,6 @@ export default function PostedGallery({ jwt, onSelectPost, onOpenFactory }: Post
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {

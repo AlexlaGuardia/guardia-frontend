@@ -544,7 +544,7 @@ function ChatArea({
     setAutoSpeak,
     startListening,
     stopListening,
-    speak,
+    speak: _speak,
     setTranscript,
   } = useVoice();
   
@@ -568,7 +568,7 @@ function ChatArea({
     }
   }, [input]);
 
-  const isPasting = useRef(false);
+  const _isPasting = useRef(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

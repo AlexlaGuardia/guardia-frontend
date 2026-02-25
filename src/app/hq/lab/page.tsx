@@ -5,7 +5,7 @@ import {
   FileImage, FileVideo, FileAudio, FileText, FileCode,
   FileArchive, FileSpreadsheet, File, Upload, Search,
   LayoutList, LayoutGrid, Trash2, Download, X, ChevronDown,
-  Eye, Paintbrush, RefreshCw,
+  Paintbrush, RefreshCw,
 } from "lucide-react";
 
 const API = "https://api.guardiacontent.com";
@@ -1048,7 +1048,6 @@ export default function LabPage() {
   }, []);
 
   // Selection helpers
-  const fileKey = (f: VaultFile) => `${f.zone}/${f.name}`;
   const toggleSelect = useCallback((key: string) => {
     setSelectedFiles((prev) => {
       const next = new Set(prev);

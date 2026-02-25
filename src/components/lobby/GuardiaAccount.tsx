@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 /**
@@ -1030,7 +1030,7 @@ function SecurityPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
         const data = await res.json();
         setPinError(data.detail || 'Failed to update PIN');
       }
-    } catch (err) {
+    } catch (_err) {
       setPinError('Something went wrong');
     }
     setSaving(false);

@@ -9,8 +9,6 @@ import {
   Database,
   PenTool,
   Layers,
-  GitBranch,
-  FileText,
   Feather,
 } from "lucide-react";
 

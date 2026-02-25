@@ -7,7 +7,7 @@ const API_BASE = "https://api.guardiacontent.com";
  * Backend endpoint created by Shadow 3: /luna/shadow-progress/stream
  * Events: shadow_task_claimed, shadow_task_done, shadow_task_retry
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const response = await fetch(`${API_BASE}/luna/shadow-progress/stream`, {
       headers: {

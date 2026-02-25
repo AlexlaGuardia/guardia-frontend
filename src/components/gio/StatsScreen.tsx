@@ -14,7 +14,7 @@ import CommentsInbox from "../lobby/CommentsInbox";
  * AnalyticsTab's root div uses h-full overflow-y-auto, which we override
  * via [&>*] selector so it flows naturally within our scroll container.
  */
-export default function StatsScreen({ client, jwt, onPostSelect }: ScreenProps) {
+export default function StatsScreen({ client, jwt, onPostSelect: _onPostSelect }: ScreenProps) {
   return (
     <div className="h-full overflow-y-auto bg-[var(--bg-base)]">
       {/* Analytics section — neutralize AnalyticsTab's own scroll container */}

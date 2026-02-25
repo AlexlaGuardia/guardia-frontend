@@ -103,7 +103,7 @@ const CAT_COLORS: Record<string, string> = {
   jaguar: "#00CED1",
 };
 
-const CAT_ICONS: Record<string, LucideIcon> = {
+const _CAT_ICONS: Record<string, LucideIcon> = {
   lion: TrendingUp,
   cheetah: Zap,
   tiger: Target,

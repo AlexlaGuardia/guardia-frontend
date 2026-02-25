@@ -109,7 +109,7 @@ interface PlanningPreferencesPanelProps {
 }
 
 export default function PlanningPreferencesPanel({
-  clientId,
+  clientId: _clientId,
   jwt,
   onSave,
   onMessage,

@@ -38,11 +38,6 @@ interface ClientData {
   last_posted: string | null;
 }
 
-interface HealthData {
-  services: { name: string; status: string }[];
-  status: string;
-}
-
 interface AtlasNode {
   id: string;
   name: string;
@@ -539,7 +534,7 @@ function FlockSection() {
 function HQPageContent() {
   const searchParams = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [globalHealth, setGlobalHealth] = useState<"healthy" | "degraded" | "loading">("loading");
+  const [_globalHealth, setGlobalHealth] = useState<"healthy" | "degraded" | "loading">("loading");
   const [refreshKey, setRefreshKey] = useState(0);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [ago, setAgo] = useState("now");

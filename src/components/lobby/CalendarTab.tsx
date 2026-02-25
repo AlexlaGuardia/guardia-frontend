@@ -27,14 +27,6 @@ interface CalendarPost {
   asset_id?: number | null;
 }
 
-interface Slot {
-  id: number;
-  platform: string;
-  scheduled_for: string;
-  caption: string | null;
-  is_filled: boolean;
-}
-
 interface CalendarTabProps {
   client: ClientContext | null;
   jwt: string | null;
@@ -337,7 +329,7 @@ function SlotCreationModal({ day, month, year, jwt, onClose, onCreated, onMessag
         const err = await res.json();
         onMessage(err.detail || "Failed to create slot");
       }
-    } catch (e) {
+    } catch (_e) {
       onMessage("Failed to create slot");
     }
     setLoading(false);
@@ -488,7 +480,7 @@ function SlotCreationModal({ day, month, year, jwt, onClose, onCreated, onMessag
 // Main Component
 // ─────────────────────────────────────────────────────────────
 
-export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps) {
+export default function CalendarTab({ client: _client, jwt, onMessage }: CalendarTabProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -510,7 +502,7 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPost, setEditingPost] = useState<CalendarPost | null>(null);
   const [editCaption, setEditCaption] = useState("");
-  const [editSaving, setEditSaving] = useState(false);
+  const [editSaving, _setEditSaving] = useState(false);
   
   // Pending changes (local until Save)
   const [pendingDeletes, setPendingDeletes] = useState<Set<number>>(new Set());
@@ -873,7 +865,7 @@ export default function CalendarTab({ client, jwt, onMessage }: CalendarTabProps
             const row = Math.floor(i / 7);
             const col = i % 7;
             const isTodayCell = day ? isToday(day) : false;
-            const isFutureCell = day ? isFuture(day) : false;
+            const _isFutureCell = day ? isFuture(day) : false;
             const isPastCell = day ? isPast(day) : false;
             
             return (

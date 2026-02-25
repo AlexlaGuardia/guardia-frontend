@@ -6,7 +6,7 @@ const API_BASE = "https://api.guardiacontent.com";
  * SSE endpoint for Luna proactive notifications
  * Proxies the backend SSE stream to the frontend
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Connect to backend SSE stream
     const response = await fetch(`${API_BASE}/luna/notifications/stream`, {
@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
     // Create a TransformStream to pass through the SSE data
     const stream = new TransformStream();
     const writer = stream.writable.getWriter();
-    const encoder = new TextEncoder();
 
     // Pipe the response body to our stream
     (async () => {
@@ -45,7 +44,7 @@ export async function GET(request: NextRequest) {
       } finally {
         try {
           await writer.close();
-        } catch (e) {
+        } catch (_e) {
           // Ignore close errors
         }
       }

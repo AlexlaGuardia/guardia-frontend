@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, SyntheticEvent } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import ReviewCard, { ReviewPost } from "./ReviewCard";
 import PipelineCard, { PipelineItem } from "./PipelineCard";

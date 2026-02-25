@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Globe, ArrowRight, Check, Loader2 } from 'lucide-react';
 
 const packages: Record<string, { name: string; price: number; features: string[]; gradient: string }> = {
@@ -35,7 +35,6 @@ const addons = [
 
 export default function WebsiteIntakePage() {
   const params = useParams();
-  const router = useRouter();
   const tier = params?.tier as string;
   const pkg = packages[tier];
 
@@ -100,7 +99,7 @@ export default function WebsiteIntakePage() {
         setError(data.detail || 'Something went wrong');
         setLoading(false);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Connection error. Please try again.');
       setLoading(false);
     }

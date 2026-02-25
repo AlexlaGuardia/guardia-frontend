@@ -5,7 +5,6 @@ import StyleHeroShowcase from "@/components/StyleHeroShowcase";
 import {
   Camera,
   Palette,
-  CalendarCheck,
   Check,
   ChevronDown,
   Zap,

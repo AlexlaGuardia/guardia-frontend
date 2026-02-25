@@ -168,7 +168,7 @@ function AmbientTerminal({ onSwitchMode }: { onSwitchMode: () => void }) {
   const VAD_THRESHOLD = 15; // RMS volume threshold (0-128 scale)
   const SPEECH_CONFIRM_MS = 250; // volume must stay above threshold this long to confirm speech
   const SILENCE_TIMEOUT_MS = 1500; // silence duration before we stop recording
-  const MIN_RECORDING_MS = 500; // minimum recording length to send
+  const _MIN_RECORDING_MS = 500; // minimum recording length to send
 
   // ── Clock ──
   useEffect(() => {

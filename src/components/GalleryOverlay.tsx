@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Plus, Clock, Check, Send, Loader2, Facebook, Instagram, Zap, ThumbsUp, ThumbsDown, Calendar } from 'lucide-react';
+import { X, Plus, Clock, Check, Send, Loader2, Facebook, Instagram, Zap, ThumbsDown, Calendar } from 'lucide-react';
 
 interface GalleryItem {
   id: number;
@@ -118,7 +118,7 @@ export default function GalleryOverlay({ isOpen, onClose, clientId, token }: Gal
         const data = await res.json();
         showToast(data.detail || 'Action failed', 'error');
       }
-    } catch (err) {
+    } catch (_err) {
       showToast('Action failed', 'error');
     } finally {
       setActionLoading(null);

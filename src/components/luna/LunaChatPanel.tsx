@@ -208,7 +208,7 @@ export default function LunaChatPanel() {
           audio.play().catch(() => {});
         }
       } catch {}
-    } catch (e) {
+    } catch (_e) {
       setStreamingText("");
       setMessages(prev => [
         ...prev,

@@ -68,7 +68,7 @@ export default function SpiritTalesLibrary() {
       }),
     });
     if (res.ok) {
-      const data = await res.json();
+      await res.json();
       setCreating(false);
       setNewTitle("");
       setNewTheme("");

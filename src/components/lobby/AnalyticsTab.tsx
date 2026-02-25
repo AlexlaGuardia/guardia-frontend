@@ -288,7 +288,6 @@ function EngagementChart({ timeseries }: { timeseries: TimeseriesPoint[] }) {
   // Line path builder
   const buildPath = (key: "likes" | "comments" | "shares") => {
     if (dataPoints.length < 2) return "";
-    const indices = timeseries.map((p, i) => ({ val: p[key], i })).filter(d => d.val > 0 || timeseries[d.i].likes + timeseries[d.i].comments + timeseries[d.i].shares > 0);
     // Use all points for line continuity
     return timeseries.map((p, i) => `${i === 0 ? "M" : "L"} ${xPos(i)} ${yPos(p[key])}`).join(" ");
   };

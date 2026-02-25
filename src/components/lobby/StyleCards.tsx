@@ -73,7 +73,7 @@ export default function StyleCards({ jwt, clientId, onUpdated }: StyleCardsProps
         const data = await res.json();
         setError(data.detail || "Failed to create card");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Connection error");
     }
     setSaving(false);
@@ -129,7 +129,7 @@ export default function StyleCards({ jwt, clientId, onUpdated }: StyleCardsProps
         fetchCards();
         onUpdated?.();
       }
-    } catch (err) {
+    } catch (_err) {
       setCards(prevCards);
     }
   };

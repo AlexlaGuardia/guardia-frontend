@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { Check, Globe, Zap, Star, Rocket, ArrowRight, Calendar, Mail, Image, Search, Shield, Clock } from 'lucide-react';
+import { Check, Globe, Zap, Star, Rocket, ArrowRight, Calendar, Mail, Image, Shield } from 'lucide-react';
 
 const packages = [
   {

@@ -414,7 +414,7 @@ function QuestionBlock({
 }
 
 export default function ContentDirectionPanel({
-  clientId,
+  clientId: _clientId,
   industry,
   jwt,
   onSave,
