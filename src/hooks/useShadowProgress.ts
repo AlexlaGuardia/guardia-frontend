@@ -30,6 +30,8 @@ interface UseShadowProgressOptions {
   enabled?: boolean;
 }
 
+const ALL_SHADOWS: ShadowName[] = ["forge", "glass", "kage", "pulse", "paradise", "magii"];
+
 export function useShadowProgress({
   pollInterval = 5000,
   enabled = true,
@@ -38,8 +40,6 @@ export function useShadowProgress({
   const [isConnected, setIsConnected] = useState(false);
   const [lastPoll, setLastPoll] = useState<Date | null>(null);
   const mountedRef = useRef(true);
-
-  const ALL_SHADOWS: ShadowName[] = ["forge", "glass", "kage", "pulse", "paradise", "magii"];
 
   const poll = useCallback(async () => {
     if (!mountedRef.current) return;
@@ -104,11 +104,13 @@ export function useShadowProgress({
     mountedRef.current = true;
     if (!enabled) return;
 
-    poll();
+    // Defer initial poll to avoid synchronous setState in effect
+    const timeout = setTimeout(poll, 0);
     const interval = setInterval(poll, pollInterval);
 
     return () => {
       mountedRef.current = false;
+      clearTimeout(timeout);
       clearInterval(interval);
     };
   }, [enabled, poll, pollInterval]);

@@ -101,18 +101,19 @@ export function useLunaNotifications({
       }
       onError?.(err instanceof Error ? err : new Error(String(err)));
     }
-  }, [enabled, onMessage, onError, onConnectionChange, isConnected]);
+  }, [onMessage, onError, onConnectionChange, isConnected]);
 
   useEffect(() => {
     if (!enabled) return;
 
-    // Initial poll immediately
-    poll();
+    // Defer initial poll to avoid synchronous setState in effect
+    const timeout = setTimeout(poll, 0);
 
     // Then poll on interval
     intervalRef.current = setInterval(poll, pollInterval);
 
     return () => {
+      clearTimeout(timeout);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
