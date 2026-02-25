@@ -153,16 +153,6 @@ export default function GioChatScreen({
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes slide-up {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 }

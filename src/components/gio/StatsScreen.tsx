@@ -19,8 +19,7 @@ export default function StatsScreen({ client, jwt, onPostSelect: _onPostSelect }
     <div className="h-full overflow-y-auto bg-[var(--bg-base)]">
       {/* Analytics section — neutralize AnalyticsTab's own scroll container */}
       <div className="[&>*]:!h-auto [&>*]:!overflow-visible">
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <AnalyticsTab client={client as any} jwt={jwt} selectedPostId={null} />
+        <AnalyticsTab client={client} jwt={jwt} selectedPostId={null} />
       </div>
 
       {/* Comments section */}

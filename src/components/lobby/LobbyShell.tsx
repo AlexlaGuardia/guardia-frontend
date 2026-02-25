@@ -12,7 +12,7 @@ export interface ClientContext {
   id: string;
   business_name: string;
   contact_name: string;
-  tier: "spark" | "pro";
+  tier: "spark" | "pro" | "unleashed";
   preferred_style?: string;
   industry?: string;
   pending_uploads: number;
