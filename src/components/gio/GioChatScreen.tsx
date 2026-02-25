@@ -89,7 +89,7 @@ export default function GioChatScreen({
         </button>
         <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
           <Image
-            src="/images/gio/avatar.png"
+            src="/images/gio/widget.png"
             alt="Giovanni"
             width={40}
             height={40}

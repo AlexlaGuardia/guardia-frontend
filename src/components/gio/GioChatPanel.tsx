@@ -76,11 +76,8 @@ export default function GioChatPanel({
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--border-subtle)]">
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-semibold"
-          style={{ background: "linear-gradient(135deg, #4338CA, #7c3aed)" }}
-        >
-          G
+        <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0">
+          <img src="/images/gio/widget.png" alt="Giovanni" className="w-full h-full object-cover" />
         </div>
         <div>
           <span className="text-sm font-medium text-[var(--text-primary)]">Giovanni</span>
