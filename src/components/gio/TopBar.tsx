@@ -44,7 +44,7 @@ export default function TopBar({
   return (
     <header
       className="flex-shrink-0 z-40 flex items-center px-4 gap-3 relative"
-      style={{ minHeight: 56, paddingTop: "env(safe-area-inset-top, 0px)" }}
+      style={{ minHeight: 80, paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       {/* Brand */}
       <div className="flex items-center gap-2.5 min-w-0">
