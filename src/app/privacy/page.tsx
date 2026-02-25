@@ -78,17 +78,15 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Data from Facebook and Instagram</h2>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Data from Facebook</h2>
             <p>
-              When you connect your Facebook or Instagram account, we request only the
+              When you connect your Facebook account, we request only the
               permissions necessary to provide our services:
             </p>
             <ul className="list-disc list-inside space-y-2 mt-4">
               <li><strong className="text-[var(--text-primary)]">pages_manage_posts:</strong> To publish content to your Facebook Pages</li>
-              <li><strong className="text-[var(--text-primary)]">pages_read_engagement:</strong> To show you how your posts perform</li>
+              <li><strong className="text-[var(--text-primary)]">pages_read_engagement:</strong> To show you how your posts perform (likes, comments, shares)</li>
               <li><strong className="text-[var(--text-primary)]">pages_show_list:</strong> To list your Facebook Pages for selection during setup</li>
-              <li><strong className="text-[var(--text-primary)]">instagram_basic:</strong> To connect your Instagram Business account</li>
-              <li><strong className="text-[var(--text-primary)]">instagram_content_publish:</strong> To publish posts to Instagram</li>
             </ul>
             <p className="mt-4">
               We only access and store information necessary to provide our services.
