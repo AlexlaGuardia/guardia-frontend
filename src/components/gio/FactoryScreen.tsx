@@ -195,12 +195,14 @@ export default function FactoryScreen({ jwt, clientTier }: FactoryScreenProps) {
 
   const handleRetryStale = async () => {
     if (!jwt) return;
-    for (const item of staleItems) {
-      await fetch(`${API_BASE}/lobby/gallery/${item.id}/retry`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
-    }
+    await Promise.all(
+      staleItems.map((item) =>
+        fetch(`${API_BASE}/lobby/gallery/${item.id}/retry`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${jwt}` },
+        }).catch(() => {})
+      )
+    );
     loadFactory();
   };
 
@@ -257,22 +259,22 @@ export default function FactoryScreen({ jwt, clientTier }: FactoryScreenProps) {
 
         {/* ── Stale Warning ── */}
         {staleItems.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
             <div className="flex items-start gap-3">
-              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="1.5" className="flex-shrink-0 mt-0.5">
+              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="flex-shrink-0 mt-0.5 text-amber-500">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
               <div className="flex-1">
-                <p className="text-sm font-medium text-amber-800">
+                <p className="text-sm font-medium text-[var(--text-primary)]">
                   {staleItems.length} item{staleItems.length > 1 ? "s" : ""} got stuck
                 </p>
-                <p className="text-xs text-amber-700 mt-0.5">Something went wrong during processing.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">Something went wrong during processing.</p>
               </div>
               <button
                 onClick={handleRetryStale}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-700 border border-amber-300 hover:bg-amber-100 transition-all"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-500 border border-amber-500/30 hover:bg-amber-500/10 transition-all"
               >
                 Retry
               </button>
@@ -373,15 +375,15 @@ export default function FactoryScreen({ jwt, clientTier }: FactoryScreenProps) {
 
         {/* ── Budget Warning ── */}
         {postsUsed >= postsLimit && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
             <div className="flex items-start gap-3">
-              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="1.5" className="flex-shrink-0 mt-0.5">
+              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="flex-shrink-0 mt-0.5 text-amber-500">
                 <path d="M12 9v4M12 17h.01" />
                 <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
               <div>
-                <p className="text-sm font-medium text-amber-800">You&apos;ve used all {postsLimit} posts this month</p>
-                <p className="text-xs text-amber-700 mt-0.5">
+                <p className="text-sm font-medium text-[var(--text-primary)]">You&apos;ve used all {postsLimit} posts this month</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                   New uploads will be saved for next month.
                   {clientTier === "spark" && " Upgrade to Pro to unlock more."}
                 </p>
