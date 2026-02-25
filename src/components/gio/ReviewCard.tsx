@@ -85,7 +85,8 @@ export default function ReviewCard({ post, jwt, onApproved, onRejected, onMessag
       });
       const data = await res.json();
       if (data.success) {
-        onMessage("Approved! Scheduling shortly.");
+        const platformName = post.platform === 'facebook' ? 'Facebook' : post.platform === 'instagram' ? 'Instagram' : post.platform;
+        onMessage(`Approved! Scheduling to ${platformName}.`);
         onApproved();
       }
     } catch {
@@ -153,8 +154,11 @@ export default function ReviewCard({ post, jwt, onApproved, onRejected, onMessag
 
       {/* Meta */}
       <div className="p-3 border-t border-[var(--border)]">
-        <div className="flex items-center gap-1.5 mb-2">
+        <div className="flex items-center gap-1.5 mb-1.5">
           <PlatformBadge platform={post.platform} />
+          <span className="text-[10px] text-[var(--text-secondary)]">
+            Publishing to {post.platform === 'facebook' ? 'Facebook' : post.platform === 'instagram' ? 'Instagram' : post.platform}
+          </span>
           {post.holiday && (
             <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
               {post.holiday}

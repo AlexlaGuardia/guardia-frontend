@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, ExternalLink } from "lucide-react";
 
 export interface PostedItem {
   id: number;
@@ -114,6 +114,20 @@ export default function PostCard({ post, onClick }: PostCardProps) {
           <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
             {post.caption}
           </p>
+        )}
+
+        {/* View on platform link */}
+        {post.post_url && (
+          <a
+            href={post.post_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[10px] text-[var(--accent)] mt-1.5 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            View on {post.platform === 'facebook' ? 'Facebook' : post.platform === 'instagram' ? 'Instagram' : post.platform}
+            <ExternalLink size={10} />
+          </a>
         )}
       </div>
     </button>

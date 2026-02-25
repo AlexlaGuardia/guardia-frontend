@@ -860,6 +860,7 @@ const ConnectedAccountsSection = () => {
   }, []);
 
   const fbConnection = connections.find(c => c.platform === 'facebook');
+  const igConnection = connections.find(c => c.platform === 'instagram');
   const needsAttention = connections.some(c => c.needs_action);
 
   return (
@@ -871,7 +872,14 @@ const ConnectedAccountsSection = () => {
               <div className="w-5 h-5 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
             </div>
           ) : (
-            <ConnectedAccount platform="Facebook" icon={Icons.Facebook} connection={fbConnection} />
+            <>
+              <ConnectedAccount platform="Facebook" icon={Icons.Facebook} connection={fbConnection} />
+              {igConnection && igConnection.status !== 'disconnected' && (
+                <div className="mt-2">
+                  <ConnectedAccount platform="Instagram" icon={Icons.Instagram} connection={igConnection} />
+                </div>
+              )}
+            </>
           )}
         </div>
         {needsAttention && (
@@ -883,7 +891,9 @@ const ConnectedAccountsSection = () => {
 
       <Section title="Platform Add-ons">
         <div className="p-4 space-y-2">
-          <LockedPlatformCard platform="Instagram" icon={Icons.Instagram} />
+          {(!igConnection || igConnection.status === 'disconnected') && (
+            <LockedPlatformCard platform="Instagram" icon={Icons.Instagram} />
+          )}
           <LockedPlatformCard platform="TikTok" icon={Icons.TikTok} />
           <LockedPlatformCard platform="LinkedIn" icon={Icons.LinkedIn} />
           <LockedPlatformCard platform="YouTube" icon={Icons.YouTube} />
@@ -899,7 +909,7 @@ const ConnectedAccountsSection = () => {
 const FAQ_ITEMS = [
   { q: 'How do I upload photos?', a: 'Go to the Gallery tab and tap the upload button. You can select multiple images at once. Our AI will style them to match your brand.' },
   { q: 'When will my posts go live?', a: 'Posts are scheduled based on optimal engagement times for your audience. Check the Calendar tab to see your upcoming schedule.' },
-  { q: 'How do I connect Instagram?', a: 'Instagram is available as a platform add-on. Once purchased from the Add-ons store, you can connect it through your Account tab via Facebook\'s authorization flow.' },
+  { q: 'How do I connect Instagram?', a: 'Instagram connects through your Facebook page. If your page has a linked Instagram Business account, it appears automatically in Connected Accounts after connecting Facebook.' },
   { q: 'What\'s included in my plan?', a: 'Check the Manage Subscription section to see your current plan features and limits. You can upgrade anytime for more posts, images, and platform connections.' },
   { q: 'How do I change my posting schedule?', a: 'Your posting schedule is automatically optimized, but you can adjust individual post times from the Calendar tab by tapping on any scheduled post.' },
 ];

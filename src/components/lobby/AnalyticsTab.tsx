@@ -72,7 +72,7 @@ interface AnalyticsData {
   platform_breakdown: Record<string, PlatformData>;
   top_posts: TopPost[];
   content_insights: ContentInsights | null;
-  meta_notice: boolean;
+  last_synced: string | null;
   scheduled_count: number;
 }
 
@@ -171,8 +171,12 @@ export default function AnalyticsTab({ client, jwt, selectedPostId }: AnalyticsT
             {/* Content Insights */}
             <ContentInsightsSection insights={data.content_insights} />
 
-            {/* Meta Notice */}
-            {data.meta_notice && <MetaNotice />}
+            {/* Last Synced */}
+            {data.last_synced && (
+              <p className="text-[10px] text-[var(--text-muted)] text-center">
+                Engagement data last synced {new Date(data.last_synced).toLocaleString()}
+              </p>
+            )}
           </>
         ) : null}
 
@@ -660,29 +664,6 @@ function ContentInsightsSection({ insights }: { insights: ContentInsights | null
   );
 }
 
-// ============================================================================
-// META NOTICE
-// ============================================================================
-
-function MetaNotice() {
-  return (
-    <div className="rounded-2xl p-4" style={{ background: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
-      <div className="flex items-start gap-3">
-        <div className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#f59e0b" }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-sm font-medium" style={{ color: "#d97706" }}>Reach insights coming soon</p>
-          <p className="text-xs mt-0.5" style={{ color: "#b45309", opacity: 0.8 }}>
-            Full reach and impressions data will be available once Meta approves advanced insights access.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ============================================================================
 // SMART EMPTY STATE
