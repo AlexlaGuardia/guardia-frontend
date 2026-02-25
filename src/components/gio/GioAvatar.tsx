@@ -34,11 +34,35 @@ export default function GioAvatar({ onClick, unreadCount, size = 130, variant = 
           className="w-full h-full object-cover"
         />
       </div>
-      {unreadCount > 0 && (
+      {/* Notification overlay — empty tablet replaces Gio, same size/position */}
+      {unreadCount > 0 && isWidget && (
+        <div
+          className="absolute inset-0 pointer-events-none rounded-2xl overflow-hidden"
+        >
+          <Image
+            src="/images/gio/widget-empty.png"
+            alt="Notification"
+            width={size}
+            height={size}
+            className="w-full h-full object-cover"
+          />
+          {/* Red notification dot centered in the tablet screen */}
+          <span
+            className="absolute bg-red-500 rounded-full animate-pulse"
+            style={{
+              width: 14,
+              height: 14,
+              top: "45%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              boxShadow: "0 0 10px 3px rgba(239, 68, 68, 0.6)",
+            }}
+          />
+        </div>
+      )}
+      {unreadCount > 0 && !isWidget && (
         <span
-          className={`absolute min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-[var(--bg-base)] ${
-            isWidget ? "-bottom-1 -left-1" : "-top-1 -right-1"
-          }`}
+          className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-[var(--bg-base)]"
         >
           {unreadCount > 9 ? "9+" : unreadCount}
         </span>
