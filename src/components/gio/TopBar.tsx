@@ -44,7 +44,7 @@ export default function TopBar({
   return (
     <header
       className="flex-shrink-0 z-40 flex items-center px-4 gap-3 relative"
-      style={{ minHeight: 80, paddingTop: "env(safe-area-inset-top, 0px)" }}
+      style={{ minHeight: isDesktop ? 80 : 64, paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       {/* Brand */}
       <div className="flex items-center gap-2.5 min-w-0">
@@ -89,10 +89,10 @@ export default function TopBar({
 
       {/* Gio widget — overlaps header into content below */}
       <div className="absolute right-4 z-50" style={{ top: 0 }}>
-        <GioAvatar onClick={onGioClick} unreadCount={unreadCount} variant="widget" size={130} />
+        <GioAvatar onClick={onGioClick} unreadCount={unreadCount} variant="widget" size={isDesktop ? 130 : 90} />
       </div>
       {/* Spacer to reserve space for widget */}
-      <div style={{ width: 130 }} className="flex-shrink-0" />
+      <div style={{ width: isDesktop ? 130 : 90 }} className="flex-shrink-0" />
     </header>
   );
 }
