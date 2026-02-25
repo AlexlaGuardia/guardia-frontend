@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 /**
  * ReviewCard — Content awaiting client approval
@@ -60,6 +60,8 @@ function timeAgo(dateStr: string): string {
 export default function ReviewCard({ post, jwt, onApproved, onRejected, onMessage }: ReviewCardProps) {
   const [acting, setActing] = useState(false);
   const [heartPop, setHeartPop] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const handleImgError = useCallback(() => setImgError(true), []);
 
   const handleApprove = async () => {
     if (!jwt || acting) return;
@@ -124,11 +126,15 @@ export default function ReviewCard({ post, jwt, onApproved, onRejected, onMessag
     <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl overflow-hidden">
       {/* Image */}
       <div className="aspect-square bg-[var(--bg-surface)] relative overflow-hidden">
-        {post.image_url ? (
-          <img src={post.image_url} alt="Post preview" className="w-full h-full object-cover" />
+        {post.image_url && !imgError ? (
+          <img src={post.image_url} alt="Post preview" className="w-full h-full object-cover" onError={handleImgError} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+          <div className="w-full h-full flex items-center justify-center bg-[var(--bg-elevated)]">
+            <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
           </div>
         )}
         {/* Heart pop */}

@@ -89,7 +89,7 @@ export default function GioChatScreen({
         </button>
         <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
           <Image
-            src="/images/gio/casual.png"
+            src="/images/gio/avatar.png"
             alt="Giovanni"
             width={40}
             height={40}
@@ -112,7 +112,7 @@ export default function GioChatScreen({
                 alt="Giovanni waving"
                 width={80}
                 height={80}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top"
               />
             </div>
             <p className="text-base font-medium text-[var(--text-primary)]">Hey there!</p>

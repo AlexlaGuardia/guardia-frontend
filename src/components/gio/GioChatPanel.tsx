@@ -93,7 +93,7 @@ export default function GioChatPanel({
         {messages.length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 mx-auto mb-3 rounded-2xl overflow-hidden">
-              <img src="/images/gio/wave.png" alt="Giovanni" className="w-full h-full object-cover" />
+              <img src="/images/gio/wave.png" alt="Giovanni" className="w-full h-full object-cover object-top" />
             </div>
             <p className="text-sm text-[var(--text-muted)]">Ask Giovanni anything about your content.</p>
           </div>

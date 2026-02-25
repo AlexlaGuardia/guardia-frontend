@@ -15,13 +15,13 @@ export default function GioAvatar({ onClick, unreadCount, size = 44 }: GioAvatar
       className="relative rounded-lg transition-all active:scale-95 flex-shrink-0"
       aria-label="Chat with Giovanni"
     >
-      <div className="rounded-lg overflow-hidden">
+      <div className="rounded-lg overflow-hidden" style={{ width: size, height: size }}>
         <Image
-          src="/images/gio/casual.png"
+          src="/images/gio/avatar.png"
           alt="Giovanni"
           width={size}
           height={size}
-          className="object-contain"
+          className="w-full h-full object-cover"
         />
       </div>
       {unreadCount > 0 && (
