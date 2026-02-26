@@ -281,16 +281,16 @@ function ProfilePanel({ isOpen, onClose, profile, onSave }: ProfilePanelProps) {
       
       {/* Panel */}
       <div 
-        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{
           background: 'var(--bg-surface)',
           boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none'
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)] flex-shrink-0">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Edit Profile</h2>
-          <button 
+          <button
             onClick={onClose}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95"
             style={{
@@ -302,7 +302,7 @@ function ProfilePanel({ isOpen, onClose, profile, onSave }: ProfilePanelProps) {
           </button>
         </div>
 
-        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 140px)' }}>
+        <div className="p-4 space-y-6 overflow-y-auto flex-1 min-h-0">
           {/* Profile Image */}
           <div className="flex flex-col items-center">
             <div className="relative">
@@ -893,17 +893,17 @@ function HelpSupportPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
         onClick={onClose}
       />
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
       >
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)] flex-shrink-0">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Help & Support</h2>
           <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
             <Icons.X size={18} color="var(--text-muted)" />
           </button>
         </div>
 
-        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 70px)' }}>
+        <div className="p-4 space-y-6 overflow-y-auto flex-1 min-h-0">
           {/* FAQ */}
           <div>
             <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Frequently Asked Questions</h3>
@@ -1028,17 +1028,17 @@ function SecurityPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
         onClick={onClose}
       />
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
       >
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)] flex-shrink-0">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Privacy & Security</h2>
           <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
             <Icons.X size={18} color="var(--text-muted)" />
           </button>
         </div>
 
-        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 70px)' }}>
+        <div className="p-4 space-y-6 overflow-y-auto flex-1 min-h-0">
           {/* Change PIN */}
           <div>
             <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Change PIN</h3>
@@ -1165,17 +1165,17 @@ function BillingHistoryPanel({ isOpen, onClose }: { isOpen: boolean; onClose: ()
         onClick={onClose}
       />
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
       >
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)] flex-shrink-0">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Billing History</h2>
           <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
             <Icons.X size={18} color="var(--text-muted)" />
           </button>
         </div>
 
-        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 70px)' }}>
+        <div className="p-4 space-y-6 overflow-y-auto flex-1 min-h-0">
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="w-5 h-5 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />

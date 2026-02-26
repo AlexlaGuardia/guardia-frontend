@@ -348,7 +348,7 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
 
   // ── Render: Main ───────────────────────────────────────────
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 pb-28">
+    <div className="max-w-5xl mx-auto px-4 py-6 pb-28 xl:pb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -589,7 +589,7 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
 
                     {/* Actions */}
                     {editingBlock !== block.id && (
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button onClick={() => moveBlock(block.id, "up")}
                           disabled={idx === 0 || saving}
                           className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30">

@@ -483,7 +483,7 @@ function StoreScreenInner({ client, jwt }: StoreScreenProps) {
 
   return (
     <div className="h-full overflow-y-auto bg-[var(--bg-base)]">
-      <div className="max-w-2xl mx-auto px-4 py-6 pb-28 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 py-6 pb-28 xl:pb-6 space-y-6">
 
         {/* Page Header */}
         <div className="flex items-center gap-3">

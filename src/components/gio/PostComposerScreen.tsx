@@ -126,6 +126,7 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
       formData.append("caption", caption);
       formData.append("hashtags", hashtags);
       formData.append("platform", platform);
+      if (selectedDate) formData.append("scheduled_for", selectedDate);
 
       const res = await fetch(`${API_BASE}/post/manual`, {
         method: "POST",
@@ -165,13 +166,17 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Post queued!</h2>
+          <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
+            {selectedDate && selectedDate > new Date().toISOString().slice(0, 10) ? "Post scheduled!" : "Post queued!"}
+          </h2>
           <p className="text-sm text-[var(--text-secondary)] mb-6">
             Your post to{" "}
             <span className="font-medium" style={{ color: PLATFORM_META[platform]?.color || "var(--accent)" }}>
               {PLATFORM_META[platform]?.label || platform}
             </span>{" "}
-            will publish within 60 seconds.
+            {selectedDate && selectedDate > new Date().toISOString().slice(0, 10)
+              ? `is scheduled for ${new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
+              : "will publish within 60 seconds."}
           </p>
           <div className="flex flex-col gap-3">
             <button
@@ -377,7 +382,9 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
-              Post to {PLATFORM_META[platform]?.label || platform || "..."}
+              {selectedDate && selectedDate > new Date().toISOString().slice(0, 10)
+                ? `Schedule for ${new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                : `Post to ${PLATFORM_META[platform]?.label || platform || "..."}`}
             </>
           )}
         </button>

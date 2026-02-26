@@ -51,7 +51,7 @@ export default function PostDetail({ post, onBack }: PostDetailProps) {
   });
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-4 pb-24">
+    <div className="max-w-xl mx-auto px-4 py-4 pb-24 xl:pb-4">
       {/* Back button */}
       <button
         onClick={onBack}

@@ -94,18 +94,20 @@ export default function BillingSuccessPage() {
           </div>
 
           {/* CTA */}
-          <Link
-            href="/client"
-            className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-500 delay-300 hover:brightness-110 ${
+          <div
+            className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-500 delay-300 ${
               mounted ? "opacity-100" : "opacity-0"
             }`}
             style={{ background: "linear-gradient(135deg, #C9A227, #b8911f)" }}
           >
-            Go to Lobby
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+            <Mail className="w-4 h-4" />
+            Check Your Email
+          </div>
           <p className="text-xs text-[var(--text-muted)] mt-3">
-            You&rsquo;ll need the email link to create your login first.
+            Already set up?{" "}
+            <Link href="/client" className="text-[#C9A227] hover:underline">
+              Go to Lobby
+            </Link>
           </p>
         </div>
 

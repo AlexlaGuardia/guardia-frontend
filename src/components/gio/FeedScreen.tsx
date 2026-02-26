@@ -70,7 +70,7 @@ export default function FeedScreen({ jwt, onPostSelect, onNavigate }: FeedScreen
   // Loading skeleton
   if (loading) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-4 space-y-4 pb-24">
+      <div className="max-w-xl mx-auto px-4 py-4 space-y-4 pb-24 xl:pb-4">
         <SkeletonCard />
         <SkeletonCard />
         <SkeletonCard />
@@ -107,7 +107,7 @@ export default function FeedScreen({ jwt, onPostSelect, onNavigate }: FeedScreen
 
   // Feed
   return (
-    <div className="max-w-xl mx-auto px-4 py-4 space-y-4 pb-24">
+    <div className="max-w-xl mx-auto px-4 py-4 space-y-4 pb-24 xl:pb-4">
       {posts.map((post) => (
         <PostCard key={post.id} post={post} onClick={() => onPostSelect(post)} />
       ))}
