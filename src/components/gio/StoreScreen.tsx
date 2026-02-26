@@ -92,8 +92,8 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
     try {
       const res = await apiFetch(null, "/addons/catalog");
       if (!res.ok) throw new Error("Failed to load store catalog");
-      const data: CatalogData = await res.json();
-      setCatalog(data);
+      const json = await res.json();
+      setCatalog({ categories: json.catalog || json.categories || {} });
     } catch {
       setError("Could not load the store. Please try again.");
     }
