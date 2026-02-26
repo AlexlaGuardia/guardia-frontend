@@ -31,6 +31,7 @@ interface CalendarTabProps {
   client: ClientContext | null;
   jwt: string | null;
   onMessage: (msg: string) => void;
+  onDateSelect?: (date: string) => void;
 }
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -480,7 +481,7 @@ function SlotCreationModal({ day, month, year, jwt, onClose, onCreated, onMessag
 // Main Component
 // ─────────────────────────────────────────────────────────────
 
-export default function CalendarTab({ client: _client, jwt, onMessage }: CalendarTabProps) {
+export default function CalendarTab({ client: _client, jwt, onMessage, onDateSelect }: CalendarTabProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -758,6 +759,10 @@ export default function CalendarTab({ client: _client, jwt, onMessage }: Calenda
     setSelectedDay(day);
     setSelectedPosts(dayPosts);
     setSelectedPostIndex(0);
+    if (onDateSelect) {
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      onDateSelect(dateStr);
+    }
   };
 
   const openSlotModal = (day: number) => {

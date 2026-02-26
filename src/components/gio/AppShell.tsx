@@ -279,6 +279,10 @@ export default function AppShell() {
   const [activeScreen, setActiveScreen] = useState<Screen>("feed");
   const [selectedPost, setSelectedPost] = useState<PostedItem | null>(null);
 
+  // Post tab: calendar/composer toggle
+  const [showComposer, setShowComposer] = useState(false);
+  const [composerDate, setComposerDate] = useState<string | null>(null);
+
   // Responsive
   const [isMobile, setIsMobile] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -453,6 +457,10 @@ export default function AppShell() {
   const handleScreenChange = useCallback((screen: Screen) => {
     setActiveScreen(screen);
     setSelectedPost(null);
+    if (screen !== "post") {
+      setShowComposer(false);
+      setComposerDate(null);
+    }
   }, []);
 
   const handlePostSelect = useCallback((post: PostedItem) => {
@@ -525,7 +533,23 @@ export default function AppShell() {
       case "faro":
         return <FaroScreen jwt={jwt} client={client} />;
       case "post":
-        return <PostComposerScreen jwt={jwt} />;
+        if (showComposer) {
+          return (
+            <PostComposerScreen
+              jwt={jwt}
+              selectedDate={composerDate}
+              onBack={() => { setShowComposer(false); setComposerDate(null); }}
+              onComplete={() => { setShowComposer(false); setComposerDate(null); }}
+            />
+          );
+        }
+        return (
+          <CalendarScreen
+            {...screenProps}
+            onDateSelect={(date) => { setComposerDate(date); setShowComposer(true); }}
+            onNewPost={() => { setComposerDate(null); setShowComposer(true); }}
+          />
+        );
       case "store":
         return <StoreScreen client={client} jwt={jwt} />;
       case "factory":
@@ -535,7 +559,7 @@ export default function AppShell() {
       case "stats":
         return <StatsScreen {...screenProps} />;
       case "account":
-        return <AccountScreen onLogout={handleLogout} />;
+        return <AccountScreen jwt={jwt} onLogout={handleLogout} onNavigateToStore={() => setActiveScreen("store")} />;
       case "post-detail":
         return <PostDetail post={selectedPost} onBack={() => setActiveScreen("feed")} />;
       case "gio-chat":

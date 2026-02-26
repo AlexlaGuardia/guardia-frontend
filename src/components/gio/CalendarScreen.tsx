@@ -16,13 +16,12 @@ interface UpcomingPost {
   preview_url?: string;
 }
 
-/**
- * CalendarScreen — Gio App
- *
- * Composes the existing CalendarTab (month grid + slot management)
- * with an Upcoming section below showing scheduled posts.
- */
-export default function CalendarScreen({ client, jwt, onMessage, onPostSelect }: ScreenProps) {
+interface CalendarScreenProps extends ScreenProps {
+  onDateSelect?: (date: string) => void;
+  onNewPost?: () => void;
+}
+
+export default function CalendarScreen({ client, jwt, onMessage, onPostSelect, onDateSelect, onNewPost }: CalendarScreenProps) {
   const [upcoming, setUpcoming] = useState<UpcomingPost[]>([]);
   const [upcomingLoading, setUpcomingLoading] = useState(true);
 
@@ -71,9 +70,14 @@ export default function CalendarScreen({ client, jwt, onMessage, onPostSelect }:
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-[var(--bg-base)]">
+    <div className="h-full overflow-y-auto bg-[var(--bg-base)] relative">
       {/* Calendar Grid */}
-      <CalendarTab client={client as any} jwt={jwt} onMessage={onMessage || (() => {})} />
+      <CalendarTab
+        client={client as any}
+        jwt={jwt}
+        onMessage={onMessage || (() => {})}
+        onDateSelect={onDateSelect}
+      />
 
       {/* Upcoming Section */}
       <div className="border-t border-[var(--border-subtle)]">
@@ -176,6 +180,19 @@ export default function CalendarScreen({ client, jwt, onMessage, onPostSelect }:
         )}
       </div>
       </div>
+
+      {/* New Post FAB */}
+      {onNewPost && (
+        <button
+          onClick={onNewPost}
+          className="fixed bottom-24 right-5 md:absolute md:bottom-6 md:right-6 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 z-10"
+          style={{ background: "linear-gradient(135deg, #C9A227, #D4AF37)", boxShadow: "0 4px 20px rgba(201,162,39,0.4)" }}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

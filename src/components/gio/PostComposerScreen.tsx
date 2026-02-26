@@ -35,9 +35,12 @@ const PLATFORM_META: Record<string, { label: string; color: string }> = {
 
 interface PostComposerScreenProps {
   jwt: string | null;
+  selectedDate?: string | null;
+  onBack?: () => void;
+  onComplete?: () => void;
 }
 
-export default function PostComposerScreen({ jwt }: PostComposerScreenProps) {
+export default function PostComposerScreen({ jwt, selectedDate, onBack, onComplete }: PostComposerScreenProps) {
   // Platforms
   const [platforms, setPlatforms] = useState<ConnectedPlatform[]>([]);
   const [platformsLoading, setPlatformsLoading] = useState(true);
@@ -170,13 +173,23 @@ export default function PostComposerScreen({ jwt }: PostComposerScreenProps) {
             </span>{" "}
             will publish within 60 seconds.
           </p>
-          <button
-            onClick={handleReset}
-            className="px-6 py-3 rounded-2xl font-semibold text-sm text-white transition-all active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #C9A227, #D4AF37)", boxShadow: "0 4px 16px rgba(201,162,39,0.35)" }}
-          >
-            Post Another
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleReset}
+              className="px-6 py-3 rounded-2xl font-semibold text-sm text-white transition-all active:scale-[0.98]"
+              style={{ background: "linear-gradient(135deg, #C9A227, #D4AF37)", boxShadow: "0 4px 16px rgba(201,162,39,0.35)" }}
+            >
+              Post Another
+            </button>
+            {onComplete && (
+              <button
+                onClick={onComplete}
+                className="px-6 py-3 rounded-2xl font-semibold text-sm text-[var(--text-secondary)] bg-[var(--bg-elevated)] border border-[var(--border)] transition-all active:scale-[0.98] hover:border-[var(--text-muted)]"
+              >
+                Back to Calendar
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -208,7 +221,23 @@ export default function PostComposerScreen({ jwt }: PostComposerScreenProps) {
     <div className="h-full flex flex-col bg-[var(--bg-base)]">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3 flex-shrink-0">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Create Post</h2>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--bg-surface)] transition-colors">
+              <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Create Post</h2>
+            {selectedDate && (
+              <p className="text-xs text-[var(--accent)]">
+                {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+              </p>
+            )}
+          </div>
+        </div>
         {captionLen > 0 && (
           <span className={`text-xs font-medium ${captionLen > MAX_CAPTION ? "text-red-500" : "text-[var(--text-muted)]"}`}>
             {captionLen}/{MAX_CAPTION}
