@@ -3,97 +3,147 @@
 import { useState, useEffect, useRef } from "react";
 import StyleHeroShowcase from "@/components/StyleHeroShowcase";
 import {
-  Camera,
-  Palette,
   Check,
   ChevronDown,
-  Zap,
-  Star,
   ArrowRight,
   Sparkles,
   Menu,
   X,
-  MessageCircle,
+  Link2,
+  BarChart3,
+  Mail,
+  Palette,
+  Send,
+  Globe,
+  Cpu,
+  Calendar,
+  TrendingUp,
+  AtSign,
 } from "lucide-react";
 
 /* =============================================================================
    DATA
 ============================================================================= */
 
-const tiers = [
+const freeFeatures = [
   {
-    id: "spark",
-    name: "Spark",
-    price: 15,
-    tagline: "Consistent posts without the hassle",
-    icon: Zap,
-    color: "#C9A227",
-    features: [
-      "12 styled posts per month",
-      "Professional scheduling",
-      "Image upscaling",
-    ],
-    cta: "Start Spark",
-    href: "/intake/spark",
+    icon: Link2,
+    title: "Faro bio page",
+    desc: "Your link-in-bio at yourname.guardia.page. 6 themes, unlimited links, social icons.",
   },
   {
-    id: "pro",
-    name: "Pro",
-    price: 25,
-    tagline: "Posts + 24-hour engagement management",
-    icon: Star,
-    color: "#4338CA",
-    popular: true,
-    features: [
-      "20 styled posts per month",
-      "Professional scheduling",
-      "Image upscaling",
-      "24-hour post management",
-    ],
-    cta: "Get Started",
-    href: "/intake/pro",
+    icon: Send,
+    title: "Manual posting",
+    desc: "Upload a photo, write a caption, post to your connected platforms. No limits.",
+  },
+  {
+    icon: BarChart3,
+    title: "Basic analytics",
+    desc: "Page views, link clicks, and referrers. Know what's working.",
+  },
+  {
+    icon: Mail,
+    title: "Email capture",
+    desc: "Collect subscriber emails right from your Faro page. Export anytime.",
+  },
+  {
+    icon: Palette,
+    title: "6 clean themes",
+    desc: "From minimal to bold. Pick a theme, customize your page, publish in minutes.",
+  },
+  {
+    icon: Calendar,
+    title: "Content calendar",
+    desc: "See your upcoming and past posts in one place. Stay consistent.",
+  },
+];
+
+const addons = {
+  platforms: [
+    { name: "Instagram", price: "$1.99" },
+    { name: "Facebook", price: "$1.99" },
+    { name: "TikTok", price: "$1.99" },
+    { name: "X / Twitter", price: "$2.99" },
+    { name: "LinkedIn", price: "$1.99" },
+    { name: "Pinterest", price: "$1.99" },
+  ],
+  ai: [
+    { name: "AI Content Pipeline", price: "$4.99", desc: "Styling, captions, and scheduling — fully automatic." },
+    { name: "Auto-Scheduling", price: "$1.99", desc: "Posts go live at the best time for your audience." },
+  ],
+  extras: [
+    { name: "Advanced Analytics", price: "$1.99", desc: "Full breakdown of clicks, views, referrers, and growth." },
+    { name: "Custom Domain", price: "$0.99", desc: "Use your own domain for your Faro page." },
+    { name: "Email Marketing", price: "$2.99", desc: "Send campaigns to your Faro email subscribers." },
+  ],
+};
+
+const bundles = [
+  { name: "Starter Pack", price: "$8.99/mo", includes: "1 platform + AI Pipeline + Analytics", save: "$1" },
+  { name: "Growth Pack", price: "$16.99/mo", includes: "3 platforms + AI + Scheduling + Analytics", save: "$3" },
+  { name: "Full Stack", price: "$24.99/mo", includes: "Everything", save: "$5+" },
+];
+
+const competitors = [
+  { name: "Feature", guardia: "Guardia", linktree: "Linktree", beacons: "Beacons", later: "Later" },
+  { name: "Free bio page", guardia: true, linktree: true, beacons: true, later: false },
+  { name: "Custom themes", guardia: "6 free", linktree: "1 free", beacons: "Limited", later: "N/A" },
+  { name: "Email capture", guardia: "Free", linktree: "$24/mo", beacons: "$10/mo", later: "$25/mo" },
+  { name: "Basic analytics", guardia: "Free", linktree: "$5/mo", beacons: "Free", later: "$25/mo" },
+  { name: "Manual posting", guardia: "Free", linktree: "N/A", beacons: "N/A", later: "$25/mo" },
+  { name: "AI content", guardia: "$4.99/mo", linktree: "N/A", beacons: "N/A", later: "N/A" },
+  { name: "Platform connections", guardia: "From $1.99", linktree: "N/A", beacons: "N/A", later: "From $25/mo" },
+  { name: "SEO-optimized", guardia: true, linktree: false, beacons: true, later: false },
+  { name: "Pay for only what you use", guardia: true, linktree: false, beacons: false, later: false },
+];
+
+const faqs = [
+  {
+    q: "Is it really free?",
+    a: "Yes. Your Faro page, manual posting, basic analytics, and email capture are free. Not a trial, not freemium. Free. You only pay if you add optional tools from the Chloe Store.",
+  },
+  {
+    q: "What are add-ons?",
+    a: "Add-ons are individual tools you can subscribe to from the Chloe Store. Platform connections, AI features, advanced analytics — pick only what you need. Each has its own monthly price. Cancel any of them anytime.",
+  },
+  {
+    q: "How is this different from Linktree?",
+    a: "Guardia gives you more for free — email capture, analytics, and manual posting are included. Plus, we offer AI content creation and multi-platform scheduling as affordable add-ons. And your Faro page is SEO-optimized, unlike Linktree.",
+  },
+  {
+    q: "Can I post to Instagram, TikTok, etc.?",
+    a: "Yes. Each platform is a separate add-on starting at $1.99/mo. Connect the ones you use, skip the ones you don't. No bundling platforms you don't need.",
+  },
+  {
+    q: "What if I already have a Guardia account?",
+    a: "Your account will be upgraded automatically. You'll keep everything you have, and your Faro page will be created from your existing profile. No action needed.",
+  },
+  {
+    q: "Can I cancel add-ons anytime?",
+    a: "Yes. Each add-on cancels independently. No contracts, no commitments. Your free features stay forever.",
   },
 ];
 
 const steps = [
   {
-    icon: Camera,
-    title: "You send photos.",
-    desc: "Your shop, your food, your team. Snap it on your phone and send it over — we take it from there.",
+    num: "1",
+    title: "Create your page",
+    desc: "Sign up in 30 seconds. Your Faro page is live instantly.",
   },
   {
-    icon: Palette,
-    title: "We make them post-ready.",
-    desc: "Professional styling, captions that sound like you, hashtags that work. Scheduled for when your audience is online.",
+    num: "2",
+    title: "Make it yours",
+    desc: "Add links, pick a theme, write your bio. Drag to reorder.",
   },
   {
-    icon: MessageCircle,
-    title: "We manage the engagement.",
-    desc: "After every post goes live, we reply to comments and keep the conversation going for a full day.",
-  },
-];
-
-
-const faqs = [
-  {
-    q: "How fast do I see results?",
-    a: "Your first styled post goes live within 48 hours. Most clients see increased engagement within the first two weeks as consistent, professional content starts building momentum.",
+    num: "3",
+    title: "Share it everywhere",
+    desc: "Drop your link in your bio, email signature, or business card.",
   },
   {
-    q: "What does 24-hour post management mean?",
-    a: "After each post goes live, we monitor comments and reply on your behalf. We thank new followers, answer questions, and keep the conversation going — so you don't have to.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes. No contracts, no commitments. Cancel with one click whenever you want.",
-  },
-  {
-    q: "What if I don't like the captions?",
-    a: "We learn your voice during onboarding. Most clients approve 90%+ of captions on the first pass. Pro includes unlimited revisions.",
-  },
-  {
-    q: "What platforms do you post to?",
-    a: "All plans include Facebook posting. Additional platforms like Instagram, TikTok, LinkedIn, and YouTube are available as add-ons.",
+    num: "4",
+    title: "Grow with add-ons",
+    desc: "When you're ready, add AI posting, platform connections, or analytics from the Store.",
   },
 ];
 
@@ -148,7 +198,6 @@ function Nav() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
         <a href="/" className="flex items-center gap-2.5">
           <img src="/images/guardia-logo.png" alt="Guardia" className="w-9 h-9 object-contain" />
           <span className="text-[#2A2A2A] font-semibold tracking-tight font-[var(--font-fraunces)]">
@@ -156,40 +205,27 @@ function Nav() {
           </span>
         </a>
 
-        {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
-          <a href="#how" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">
-            How It Works
-          </a>
-          <a href="#results" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">
-            Results
-          </a>
-          <a href="#pricing" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">
-            Pricing
-          </a>
-          <a href="#faq" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">
-            FAQ
-          </a>
+          <a href="#features" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">Features</a>
+          <a href="#how" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">How It Works</a>
+          <a href="#addons" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">Add-Ons</a>
+          <a href="#compare" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">Compare</a>
+          <a href="#faq" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">FAQ</a>
         </div>
 
-        {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-3">
-          <a
-            href="/client"
-            className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors font-medium"
-          >
-            Client Login
+          <a href="/client" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors font-medium">
+            Log In
           </a>
           <a
-            href="/intake/pro"
+            href="/signup"
             className="inline-flex items-center gap-2 bg-[#4338CA] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#3730A3] transition-all hover:-translate-y-px"
           >
-            Get Started
+            Create Your Page
             <ArrowRight className="w-4 h-4" />
           </a>
         </div>
 
-        {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden p-2 text-[#2A2A2A]"
@@ -200,19 +236,16 @@ function Nav() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden bg-[#FAF6F1] border-t border-[#E8DDD3] px-4 py-4 space-y-3">
+          <a href="#features" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Features</a>
           <a href="#how" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">How It Works</a>
-          <a href="#results" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Results</a>
-          <a href="#pricing" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Pricing</a>
+          <a href="#addons" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Add-Ons</a>
+          <a href="#compare" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Compare</a>
           <a href="#faq" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">FAQ</a>
-          <a href="/client" onClick={() => setMobileOpen(false)} className="block text-sm text-[#635C54] font-medium py-2">Client Login</a>
-          <a
-            href="/intake/pro"
-            className="block text-center bg-[#4338CA] text-white font-semibold py-3 rounded-xl"
-          >
-            Get Started
+          <a href="/client" onClick={() => setMobileOpen(false)} className="block text-sm text-[#635C54] font-medium py-2">Log In</a>
+          <a href="/signup" className="block text-center bg-[#4338CA] text-white font-semibold py-3 rounded-xl">
+            Create Your Page
           </a>
         </div>
       )}
@@ -224,54 +257,84 @@ function Hero() {
   return (
     <section className="pt-32 pb-20 px-6">
       <div className="max-w-4xl mx-auto w-full text-center">
-        {/* Price anchor badge */}
         <div className="inline-flex items-center gap-2 bg-white border border-[#E8DDD3] rounded-full px-5 py-2.5 mb-8 shadow-[0_2px_8px_rgba(42,42,42,0.06)]">
-          <span className="text-sm font-semibold text-[#C9A227]">Starting at $15/month</span>
+          <span className="text-sm font-semibold text-[#C9A227]">Free forever</span>
         </div>
 
-        {/* Headline */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#2A2A2A] mb-6 leading-[1.1] font-[var(--font-fraunces)]">
-          Your photos.{" "}
-          <span className="text-[#C9A227]">Styled. Captioned. Posted.</span>
+          Your page. Your links.{" "}
+          <span className="text-[#4338CA]">No catch.</span>
         </h1>
 
-        {/* Subhead */}
         <p className="text-lg md:text-xl text-[#635C54] mb-4 max-w-2xl mx-auto leading-relaxed">
-          Send us your photos. We style them, write the captions,
-          post on schedule, and handle engagement — so you can run your business.
+          A bio page, manual posting, analytics, and email capture.
+          All free. Add AI tools and platform connections only when you need them.
         </p>
 
-        {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10 mt-10">
           <a
-            href="/intake/pro"
+            href="/signup"
             className="inline-flex items-center justify-center gap-2 bg-[#4338CA] text-white font-semibold px-8 py-4 rounded-xl hover:bg-[#3730A3] transition-all hover:-translate-y-px shadow-[0_4px_14px_rgba(67,56,202,0.3)]"
           >
-            Get Your First Post in 48 Hours
+            Create Your Page
             <ArrowRight className="w-5 h-5" />
           </a>
           <a
-            href="#results"
+            href="#features"
             className="inline-flex items-center justify-center gap-2 border-[1.5px] border-[#4338CA] text-[#4338CA] font-medium px-8 py-4 rounded-xl hover:bg-[#4338CA]/5 transition-colors"
           >
-            See Results
+            See What's Free
           </a>
         </div>
 
-        {/* Trust indicators */}
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-[#635C54]">
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-[#C9A227]" />
-            <span>No contracts</span>
+            <span>No credit card</span>
           </div>
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-[#C9A227]" />
-            <span>Cancel anytime</span>
+            <span>No hidden fees</span>
           </div>
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-[#C9A227]" />
-            <span>Posts live in 48 hours</span>
+            <span>Live in 30 seconds</span>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FreeFeatures() {
+  const { ref, visible } = useScrollReveal();
+
+  return (
+    <section id="features" className="py-24 px-6">
+      <div ref={ref} className="max-w-5xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
+            Everything you need. Free.
+          </h2>
+          <p className="text-[#635C54] text-lg max-w-xl mx-auto">
+            Not a trial. Not freemium. These features are yours forever.
+          </p>
+        </div>
+
+        <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          {freeFeatures.map((f, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl p-7 border border-[#E8DDD3] shadow-[0_4px_20px_rgba(42,42,42,0.06)] hover:shadow-[0_8px_40px_rgba(42,42,42,0.1)] transition-shadow"
+              style={{ transitionDelay: `${i * 80}ms` }}
+            >
+              <div className="w-11 h-11 rounded-lg bg-[#4338CA]/8 flex items-center justify-center mb-5">
+                <f.icon className="w-5 h-5 text-[#4338CA]" />
+              </div>
+              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">{f.title}</h3>
+              <p className="text-[#635C54] text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -282,37 +345,27 @@ function HowItWorks() {
   const { ref, visible } = useScrollReveal();
 
   return (
-    <section id="how" className="py-24 px-6">
+    <section id="how" className="py-24 px-6 bg-[#F0E8E0]">
       <div ref={ref} className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            How it works.
+            Live in 30 seconds.
           </h2>
           <p className="text-[#635C54] text-lg">
-            Three steps. Zero effort on your end.
+            Four steps. No setup fees. No waiting.
           </p>
         </div>
 
-        <div className={`grid md:grid-cols-3 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div className={`grid md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           {steps.map((step, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-xl p-8 border border-[#E8DDD3] shadow-[0_4px_20px_rgba(42,42,42,0.08)] hover:shadow-[0_8px_40px_rgba(42,42,42,0.12)] transition-shadow"
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#C9A227]/10 flex items-center justify-center mb-6">
-                <step.icon className="w-6 h-6 text-[#C9A227]" />
+            <div key={i} className="text-center" style={{ transitionDelay: `${i * 100}ms` }}>
+              <div className="w-12 h-12 rounded-full bg-[#4338CA] text-white text-lg font-bold flex items-center justify-center mx-auto mb-5">
+                {step.num}
               </div>
-              <div className="inline-flex items-center gap-2 text-sm text-[#C9A227] font-semibold mb-2">
-                <span className="w-6 h-6 rounded-full bg-[#C9A227] text-white text-xs flex items-center justify-center font-bold">
-                  {i + 1}
-                </span>
-                Step {i + 1}
-              </div>
-              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-3 font-[var(--font-fraunces)]">
+              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2 font-[var(--font-fraunces)]">
                 {step.title}
               </h3>
-              <p className="text-[#635C54] leading-relaxed">{step.desc}</p>
+              <p className="text-[#635C54] text-sm leading-relaxed">{step.desc}</p>
             </div>
           ))}
         </div>
@@ -321,23 +374,23 @@ function HowItWorks() {
   );
 }
 
-
-function StyleShowcase() {
+function AIShowcase() {
   const { ref, visible } = useScrollReveal();
 
   return (
-    <section id="results" className="py-24 px-6 bg-[#F0E8E0]">
+    <section className="py-24 px-6">
       <div ref={ref} className="max-w-6xl mx-auto">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-[#C9A227]/10 border border-[#C9A227]/20 rounded-full px-4 py-2 mb-6">
             <Sparkles className="w-4 h-4 text-[#C9A227]" />
-            <span className="text-sm font-medium text-[#C9A227]">Styled by Guardia</span>
+            <span className="text-sm font-medium text-[#C9A227]">Optional add-on</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            From phone photo to post-ready.
+            AI Content Pipeline.
           </h2>
           <p className="text-[#635C54] max-w-2xl mx-auto">
-            Your photos, professionally styled and ready to post. Drag to compare.
+            Send a photo. We style it, write the caption, and post it on schedule.
+            $4.99/mo when you're ready for it.
           </p>
         </div>
 
@@ -349,170 +402,175 @@ function StyleShowcase() {
           <p className="text-[#635C54] mb-4">
             Works for any business. Bakeries, salons, restaurants, fitness — you name it.
           </p>
-          <a
-            href="/intake/pro"
-            className="inline-flex items-center gap-2 text-[#4338CA] hover:text-[#3730A3] font-medium transition-colors"
-          >
-            Get your first post in 48 hours
-            <ArrowRight className="w-4 h-4" />
-          </a>
         </div>
       </div>
     </section>
   );
 }
 
-function Pricing() {
+function AddOns() {
   const { ref, visible } = useScrollReveal();
 
   return (
-    <section id="pricing" className="py-24 px-6 bg-[#F0E8E0]">
+    <section id="addons" className="py-24 px-6 bg-[#F0E8E0]">
       <div ref={ref} className="max-w-5xl mx-auto">
         <div className="text-center mb-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            Simple pricing. Real results.
+            Pay only for what you use.
           </h2>
-          <p className="text-[#635C54] mb-2">
-            No hidden fees. No contracts. Cancel anytime.
+          <p className="text-[#635C54] mb-2 max-w-xl mx-auto">
+            The Chloe Store. Individual add-ons, each on its own monthly price.
+            No bundles forced. Cancel any add-on anytime.
           </p>
         </div>
 
-        <div className={`mt-12 grid md:grid-cols-2 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          {/* Spark */}
-          <div className="bg-white rounded-2xl p-8 border border-[#E8DDD3] shadow-[0_4px_20px_rgba(42,42,42,0.08)]">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#C9A227]/10">
-                <Zap className="w-5 h-5 text-[#C9A227]" />
-              </div>
-              <h3 className="text-2xl font-bold text-[#2A2A2A] font-[var(--font-fraunces)]">Spark</h3>
+        <div className={`mt-12 space-y-10 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          {/* Platforms */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Globe className="w-5 h-5 text-[#4338CA]" />
+              <h3 className="text-lg font-semibold text-[#2A2A2A]">Platform Connections</h3>
             </div>
-            <p className="text-[#635C54] mb-6">{tiers[0].tagline}</p>
-
-            <div className="flex items-baseline gap-1 mb-6">
-              <span className="text-4xl font-bold text-[#2A2A2A]">$15</span>
-              <span className="text-[#635C54]">/mo</span>
-            </div>
-
-            <ul className="space-y-3 mb-8">
-              {tiers[0].features.map((feature, j) => (
-                <li key={j} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-[#C9A227]" />
-                  <span className="text-[#3D3D3D]">{feature}</span>
-                </li>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {addons.platforms.map((a, i) => (
+                <div key={i} className="bg-white rounded-xl px-5 py-4 border border-[#E8DDD3] flex items-center justify-between">
+                  <span className="text-[#2A2A2A] font-medium text-sm">{a.name}</span>
+                  <span className="text-[#4338CA] font-semibold text-sm">{a.price}/mo</span>
+                </div>
               ))}
-            </ul>
-
-            <a
-              href="/intake/spark"
-              className="block w-full text-center font-semibold py-4 rounded-xl border-2 border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white transition-all"
-            >
-              Start Spark
-            </a>
+            </div>
           </div>
 
-          {/* Pro */}
-          <div className="relative bg-white rounded-2xl p-8 border-2 border-[#4338CA]/30 shadow-[0_12px_48px_rgba(67,56,202,0.12)]">
-            <div className="absolute -top-3 left-6">
-              <span className="text-xs font-bold px-4 py-1.5 rounded-full bg-[#4338CA] text-white uppercase tracking-wide">
-                Most Popular
-              </span>
+          {/* AI */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Cpu className="w-5 h-5 text-[#4338CA]" />
+              <h3 className="text-lg font-semibold text-[#2A2A2A]">AI Tools</h3>
             </div>
-
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#4338CA]/10">
-                <Star className="w-5 h-5 text-[#4338CA]" />
-              </div>
-              <h3 className="text-2xl font-bold text-[#2A2A2A] font-[var(--font-fraunces)]">Pro</h3>
-            </div>
-            <p className="text-[#635C54] mb-6">{tiers[1].tagline}</p>
-
-            <div className="flex items-baseline gap-1 mb-6">
-              <span className="text-4xl font-bold text-[#2A2A2A]">$25</span>
-              <span className="text-[#635C54]">/mo</span>
-            </div>
-
-            <ul className="space-y-3 mb-8">
-              {tiers[1].features.map((feature, j) => (
-                <li key={j} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-[#4338CA]" />
-                  <span className="text-[#3D3D3D]">{feature}</span>
-                </li>
+            <div className="grid md:grid-cols-2 gap-3">
+              {addons.ai.map((a, i) => (
+                <div key={i} className="bg-white rounded-xl px-5 py-4 border border-[#E8DDD3]">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[#2A2A2A] font-medium">{a.name}</span>
+                    <span className="text-[#4338CA] font-semibold text-sm">{a.price}/mo</span>
+                  </div>
+                  <p className="text-[#635C54] text-sm">{a.desc}</p>
+                </div>
               ))}
-            </ul>
+            </div>
+          </div>
 
-            <a
-              href="/intake/pro"
-              className="block w-full text-center font-semibold py-4 rounded-xl bg-[#4338CA] text-white hover:bg-[#3730A3] transition-all hover:-translate-y-px shadow-[0_4px_14px_rgba(67,56,202,0.3)] text-lg"
-            >
-              Get Started
-            </a>
+          {/* Extras */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-[#4338CA]" />
+              <h3 className="text-lg font-semibold text-[#2A2A2A]">Extras</h3>
+            </div>
+            <div className="grid md:grid-cols-3 gap-3">
+              {addons.extras.map((a, i) => (
+                <div key={i} className="bg-white rounded-xl px-5 py-4 border border-[#E8DDD3]">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[#2A2A2A] font-medium text-sm">{a.name}</span>
+                    <span className="text-[#4338CA] font-semibold text-sm">{a.price}/mo</span>
+                  </div>
+                  <p className="text-[#635C54] text-sm">{a.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bundles */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4 text-center">Save with bundles</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {bundles.map((b, i) => (
+                <div key={i} className="bg-white rounded-xl p-5 border border-[#E8DDD3] text-center">
+                  <h4 className="font-semibold text-[#2A2A2A] mb-1">{b.name}</h4>
+                  <p className="text-2xl font-bold text-[#4338CA] mb-2">{b.price}</p>
+                  <p className="text-sm text-[#635C54] mb-2">{b.includes}</p>
+                  <span className="inline-block text-xs font-semibold text-[#C9A227] bg-[#C9A227]/10 px-3 py-1 rounded-full">
+                    {b.save}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Cost examples */}
+          <div className="mt-8 bg-white rounded-xl p-6 border border-[#E8DDD3]">
+            <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4 text-center">What real creators pay</h3>
+            <div className="grid md:grid-cols-4 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-[#2A2A2A]">$0</p>
+                <p className="text-sm text-[#635C54] mt-1">Casual creator. Manual posting, free page.</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2A2A2A]">~$7</p>
+                <p className="text-sm text-[#635C54] mt-1">Growing. Instagram + AI Pipeline.</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2A2A2A]">~$13</p>
+                <p className="text-sm text-[#635C54] mt-1">Serious. 2 platforms + AI + scheduling + analytics.</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2A2A2A]">~$25</p>
+                <p className="text-sm text-[#635C54] mt-1">Full stack. Everything. Still cheaper than competitors.</p>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
 
-        {/* What's Included — Detail Breakdown */}
-        <div className={`mt-16 transition-all duration-700 delay-200 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <h3 className="text-2xl font-bold text-[#2A2A2A] text-center mb-10 font-[var(--font-fraunces)]">
-            What&apos;s included
-          </h3>
+function Comparison() {
+  const { ref, visible } = useScrollReveal();
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Spark Detail */}
-            <div className="bg-white/60 rounded-2xl p-8 border border-[#E8DDD3]">
-              <div className="flex items-center gap-2 mb-5">
-                <Zap className="w-5 h-5 text-[#C9A227]" />
-                <h4 className="text-lg font-bold text-[#2A2A2A] font-[var(--font-fraunces)]">Spark</h4>
-                <span className="text-sm text-[#635C54] ml-1">$15/mo</span>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="font-medium text-[#2A2A2A] mb-1">12 styled posts per month</p>
-                  <p className="text-sm text-[#635C54] leading-relaxed">Send us your photos and we transform them into scroll-stopping social media posts. Professional styling, every time.</p>
-                </div>
-                <div>
-                  <p className="font-medium text-[#2A2A2A] mb-1">Captions & hashtags</p>
-                  <p className="text-sm text-[#635C54] leading-relaxed">We write captions that sound like you — not a robot. Plus optimized hashtags to help new customers find you.</p>
-                </div>
-                <div>
-                  <p className="font-medium text-[#2A2A2A] mb-1">Professional scheduling</p>
-                  <p className="text-sm text-[#635C54] leading-relaxed">Posts go live at the best times for your audience. Consistent posting builds trust and keeps you top of mind.</p>
-                </div>
-                <div>
-                  <p className="font-medium text-[#2A2A2A] mb-1">Image upscaling</p>
-                  <p className="text-sm text-[#635C54] leading-relaxed">Phone photos get AI-enhanced to look crisp and professional. No blurry images on your feed.</p>
-                </div>
-              </div>
-            </div>
+  return (
+    <section id="compare" className="py-24 px-6">
+      <div ref={ref} className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
+            More for less.
+          </h2>
+          <p className="text-[#635C54] text-lg">
+            See how Guardia stacks up against the rest.
+          </p>
+        </div>
 
-            {/* Pro Detail */}
-            <div className="bg-white/60 rounded-2xl p-8 border border-[#4338CA]/20">
-              <div className="flex items-center gap-2 mb-5">
-                <Star className="w-5 h-5 text-[#4338CA]" />
-                <h4 className="text-lg font-bold text-[#2A2A2A] font-[var(--font-fraunces)]">Pro</h4>
-                <span className="text-sm text-[#635C54] ml-1">$25/mo</span>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="font-medium text-[#2A2A2A] mb-1">20 styled posts per month</p>
-                  <p className="text-sm text-[#635C54] leading-relaxed">More posts means more visibility. Everything in Spark, with higher volume to keep your brand active and growing.</p>
-                </div>
-                <div>
-                  <p className="font-medium text-[#2A2A2A] mb-1">Captions, hashtags & scheduling</p>
-                  <p className="text-sm text-[#635C54] leading-relaxed">All the content creation and scheduling from Spark, plus a dedicated style profile tailored to your brand voice.</p>
-                </div>
-                <div>
-                  <p className="font-medium text-[#2A2A2A] mb-1">Image upscaling</p>
-                  <p className="text-sm text-[#635C54] leading-relaxed">Same AI-enhanced image quality. Every photo looks its best before it hits your feed.</p>
-                </div>
-                <div className="pt-3 mt-3 border-t border-[#4338CA]/10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className="w-4 h-4 text-[#4338CA]" />
-                    <p className="font-medium text-[#4338CA]">24-hour post management</p>
-                  </div>
-                  <p className="text-sm text-[#635C54] leading-relaxed">After every post goes live, we monitor and reply to comments on your behalf for a full day. We thank followers, answer questions, and keep the conversation going — so you don&apos;t have to.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className={`overflow-x-auto transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b-2 border-[#E8DDD3]">
+                <th className="text-left py-3 px-4 text-[#635C54] font-medium">Feature</th>
+                <th className="text-center py-3 px-4 text-[#4338CA] font-bold">Guardia</th>
+                <th className="text-center py-3 px-4 text-[#635C54] font-medium">Linktree</th>
+                <th className="text-center py-3 px-4 text-[#635C54] font-medium hidden md:table-cell">Beacons</th>
+                <th className="text-center py-3 px-4 text-[#635C54] font-medium hidden md:table-cell">Later</th>
+              </tr>
+            </thead>
+            <tbody>
+              {competitors.slice(1).map((row, i) => (
+                <tr key={i} className="border-b border-[#E8DDD3]/60">
+                  <td className="py-3 px-4 text-[#2A2A2A] font-medium">{row.name}</td>
+                  {[row.guardia, row.linktree, row.beacons, row.later].map((val, j) => (
+                    <td key={j} className={`py-3 px-4 text-center ${j >= 2 ? "hidden md:table-cell" : ""}`}>
+                      {val === true ? (
+                        <Check className="w-5 h-5 text-[#C9A227] mx-auto" />
+                      ) : val === false ? (
+                        <span className="text-[#D4D0CC]">—</span>
+                      ) : (
+                        <span className={j === 0 ? "font-semibold text-[#4338CA]" : "text-[#635C54]"}>
+                          {val as string}
+                        </span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -524,7 +582,7 @@ function FAQ() {
   const { ref, visible } = useScrollReveal();
 
   return (
-    <section id="faq" className="py-24 px-6">
+    <section id="faq" className="py-24 px-6 bg-[#F0E8E0]">
       <div ref={ref} className="max-w-2xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] text-center mb-12 font-[var(--font-fraunces)]">
           Frequently asked questions
@@ -562,28 +620,28 @@ function FAQ() {
 
 function FinalCTA() {
   return (
-    <section className="py-24 px-6 bg-[#F0E8E0]">
+    <section className="py-24 px-6">
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-          Start posting this week.
+          Start creating. It's free.
         </h2>
         <p className="text-lg text-[#635C54] mb-2">
-          Your first styled post goes live within 48 hours.
+          Your Faro page is live the moment you sign up.
         </p>
         <p className="text-lg text-[#2A2A2A] font-medium mb-8">
-          We write it. We post it. We manage it.
+          Bio page. Links. Analytics. Email capture. All yours.
         </p>
 
         <a
-          href="/intake/pro"
+          href="/signup"
           className="inline-flex items-center gap-2 bg-[#4338CA] text-white font-semibold px-8 py-4 rounded-xl hover:bg-[#3730A3] transition-all hover:-translate-y-px shadow-[0_4px_14px_rgba(67,56,202,0.3)] text-lg"
         >
-          Get Started
+          Create Your Page
           <ArrowRight className="w-5 h-5" />
         </a>
 
         <p className="mt-6 text-sm text-[#635C54]">
-          From $15/mo &middot; Cancel anytime
+          Free forever &middot; No credit card required
         </p>
       </div>
     </section>
@@ -604,12 +662,8 @@ function Footer() {
         </p>
 
         <div className="flex gap-6 text-sm text-[#635C54]">
-          <a href="/privacy" className="hover:text-[#2A2A2A] transition-colors">
-            Privacy
-          </a>
-          <a href="/terms" className="hover:text-[#2A2A2A] transition-colors">
-            Terms
-          </a>
+          <a href="/privacy" className="hover:text-[#2A2A2A] transition-colors">Privacy</a>
+          <a href="/terms" className="hover:text-[#2A2A2A] transition-colors">Terms</a>
         </div>
       </div>
     </footer>
@@ -628,7 +682,7 @@ const structuredData = {
       "name": "Guardia",
       "url": "https://guardiacontent.com",
       "logo": "https://guardiacontent.com/images/guardia-logo.png",
-      "description": "Social media management for local businesses. We style your photos, write captions, and post on schedule.",
+      "description": "Free creator platform with bio pages, manual posting, analytics, and modular add-ons.",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Northumberland",
@@ -639,8 +693,7 @@ const structuredData = {
         "@type": "ContactPoint",
         "email": "support@guardiacontent.com",
         "contactType": "customer service"
-      },
-      "sameAs": []
+      }
     },
     {
       "@type": "WebSite",
@@ -659,32 +712,15 @@ const structuredData = {
       }))
     },
     {
-      "@type": "Service",
-      "name": "Guardia Social Media Management",
-      "provider": { "@type": "Organization", "name": "Guardia" },
-      "description": "Professional social media management for local businesses including photo styling, caption writing, scheduling, and engagement management.",
-      "areaServed": "US",
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "Plans",
-        "itemListElement": [
-          {
-            "@type": "Offer",
-            "name": "Spark",
-            "description": "12 styled posts per month with professional scheduling and image upscaling",
-            "price": "15",
-            "priceCurrency": "USD",
-            "priceSpecification": { "@type": "UnitPriceSpecification", "price": "15", "priceCurrency": "USD", "unitText": "month" }
-          },
-          {
-            "@type": "Offer",
-            "name": "Pro",
-            "description": "20 styled posts per month with 24-hour engagement management",
-            "price": "25",
-            "priceCurrency": "USD",
-            "priceSpecification": { "@type": "UnitPriceSpecification", "price": "25", "priceCurrency": "USD", "unitText": "month" }
-          }
-        ]
+      "@type": "SoftwareApplication",
+      "name": "Guardia",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Free creator platform with bio page, manual posting, analytics, and email capture"
       }
     }
   ]
@@ -699,9 +735,11 @@ export default function LandingPage() {
       />
       <Nav />
       <Hero />
+      <FreeFeatures />
       <HowItWorks />
-      <StyleShowcase />
-      <Pricing />
+      <AIShowcase />
+      <AddOns />
+      <Comparison />
       <FAQ />
       <FinalCTA />
       <Footer />
