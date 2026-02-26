@@ -1,0 +1,354 @@
+/* ── Faro Page Themes ────────────────────────────────────── */
+/* Pure CSS — no Tailwind for SSR performance.                */
+/* Shared layout + 6 theme overrides via CSS custom props.    */
+
+/* ── Base Layout ──────────────────────────────────────────── */
+.faro-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px 32px;
+  background: var(--faro-bg);
+  color: var(--faro-text);
+  font-family: var(--faro-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 480px) {
+  .faro-page { padding: 32px 16px 24px; }
+}
+
+.faro-inner {
+  width: 100%;
+  max-width: 680px;
+}
+
+/* ── Profile ──────────────────────────────────────────────── */
+.faro-profile {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.faro-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 16px;
+  box-shadow: var(--faro-shadow);
+}
+
+.faro-display-name {
+  font-family: var(--faro-font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--faro-text);
+}
+
+.faro-bio {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--faro-text-secondary);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Blocks Container ─────────────────────────────────────── */
+.faro-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Link Block ───────────────────────────────────────────── */
+.faro-block-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  padding: 0 20px;
+  border-radius: var(--faro-radius);
+  background: var(--faro-surface);
+  border: 1px solid var(--faro-border);
+  color: var(--faro-text);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: var(--faro-shadow);
+}
+
+.faro-block-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ── Header Block ─────────────────────────────────────────── */
+.faro-block-header {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--faro-text-secondary);
+  padding: 16px 0 4px;
+}
+
+/* ── Text Block ───────────────────────────────────────────── */
+.faro-block-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--faro-text-secondary);
+  padding: 4px 0;
+}
+
+/* ── Social Icons Block ───────────────────────────────────── */
+.faro-block-social {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.faro-social-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--faro-text);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.faro-social-icon:hover {
+  opacity: 0.7;
+}
+
+.faro-social-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ── Email Capture Block ──────────────────────────────────── */
+.faro-block-email {
+  padding: 8px 0;
+}
+
+.faro-email-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--faro-text);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.faro-email-form {
+  display: flex;
+  gap: 8px;
+}
+
+.faro-email-input {
+  flex: 1;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: var(--faro-radius);
+  border: 1px solid var(--faro-border);
+  background: var(--faro-bg);
+  color: var(--faro-text);
+  font-size: 15px;
+  font-family: var(--faro-font);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.faro-email-input:focus {
+  border-color: var(--faro-accent);
+}
+
+.faro-email-input::placeholder {
+  color: var(--faro-text-secondary);
+  opacity: 0.6;
+}
+
+.faro-email-button {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: var(--faro-radius);
+  background: var(--faro-accent);
+  color: var(--faro-bg);
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--faro-font);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.faro-email-button:hover {
+  background: var(--faro-accent-hover);
+}
+
+@media (max-width: 480px) {
+  .faro-email-form {
+    flex-direction: column;
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.faro-footer {
+  text-align: center;
+  margin-top: 48px;
+  padding-top: 24px;
+}
+
+.faro-footer a {
+  font-size: 12px;
+  color: var(--faro-text-secondary);
+  opacity: 0.5;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.faro-footer a:hover {
+  opacity: 0.8;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/* Theme Overrides                                             */
+/* ════════════════════════════════════════════════════════════ */
+
+/* ── Clean (Default) ──────────────────────────────────────── */
+[data-faro-theme="clean"] {
+  --faro-bg: #FFFFFF;
+  --faro-surface: #F7F7F8;
+  --faro-text: #1A1A1A;
+  --faro-text-secondary: #6B7280;
+  --faro-accent: #1A1A1A;
+  --faro-accent-hover: #404040;
+  --faro-border: #E5E7EB;
+  --faro-radius: 12px;
+  --faro-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --faro-font: "Inter", system-ui, sans-serif;
+  --faro-font-heading: "Inter", system-ui, sans-serif;
+}
+
+/* ── Midnight ─────────────────────────────────────────────── */
+[data-faro-theme="midnight"] {
+  --faro-bg: #0A0A0B;
+  --faro-surface: #141416;
+  --faro-text: #F0F0F0;
+  --faro-text-secondary: #8B8B8B;
+  --faro-accent: #FFFFFF;
+  --faro-accent-hover: #D4D4D4;
+  --faro-border: #222225;
+  --faro-radius: 12px;
+  --faro-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --faro-font: "Inter", system-ui, sans-serif;
+  --faro-font-heading: "Inter", system-ui, sans-serif;
+}
+
+/* ── Sand ─────────────────────────────────────────────────── */
+[data-faro-theme="sand"] {
+  --faro-bg: #FAF6F1;
+  --faro-surface: #F0E8E0;
+  --faro-text: #2A2A2A;
+  --faro-text-secondary: #635C54;
+  --faro-accent: #2A2A2A;
+  --faro-accent-hover: #4A4A4A;
+  --faro-border: #E8DDD3;
+  --faro-radius: 14px;
+  --faro-shadow: 0 2px 8px rgba(42,42,42,0.06);
+  --faro-font: "DM Sans", system-ui, sans-serif;
+  --faro-font-heading: "DM Sans", system-ui, sans-serif;
+}
+
+/* ── Bold ─────────────────────────────────────────────────── */
+[data-faro-theme="bold"] {
+  --faro-bg: #FFFDF7;
+  --faro-surface: #1A1A1A;
+  --faro-text: #1A1A1A;
+  --faro-text-secondary: #555555;
+  --faro-accent: #1A1A1A;
+  --faro-accent-hover: #333333;
+  --faro-border: #1A1A1A;
+  --faro-radius: 0px;
+  --faro-shadow: none;
+  --faro-font: "Space Grotesk", system-ui, sans-serif;
+  --faro-font-heading: "Space Grotesk", system-ui, sans-serif;
+}
+
+[data-faro-theme="bold"] .faro-block-link {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+[data-faro-theme="bold"] .faro-block-link:hover {
+  background: #FFFFFF;
+  color: #1A1A1A;
+  border: 2px solid #1A1A1A;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-faro-theme="bold"] .faro-avatar {
+  border-radius: 0;
+  border: 3px solid #1A1A1A;
+}
+
+/* ── Bloom ────────────────────────────────────────────────── */
+[data-faro-theme="bloom"] {
+  --faro-bg: #FDF8F6;
+  --faro-surface: #FFFFFF;
+  --faro-text: #2D2D2D;
+  --faro-text-secondary: #8E7E76;
+  --faro-accent: #D4727E;
+  --faro-accent-hover: #C2606C;
+  --faro-border: #F0E4DF;
+  --faro-radius: 24px;
+  --faro-shadow: 0 2px 12px rgba(212,114,126,0.08);
+  --faro-font: "DM Sans", system-ui, sans-serif;
+  --faro-font-heading: "DM Sans", system-ui, sans-serif;
+}
+
+[data-faro-theme="bloom"] .faro-avatar {
+  border: 2px solid #F0E4DF;
+}
+
+[data-faro-theme="bloom"] .faro-email-button {
+  background: linear-gradient(135deg, #D4727E, #C2606C);
+  color: #FFFFFF;
+}
+
+/* ── Neon ─────────────────────────────────────────────────── */
+[data-faro-theme="neon"] {
+  --faro-bg: #09090B;
+  --faro-surface: #111113;
+  --faro-text: #E4E4E7;
+  --faro-text-secondary: #71717A;
+  --faro-accent: #22D3EE;
+  --faro-accent-hover: #06B6D4;
+  --faro-border: #1E1E22;
+  --faro-radius: 10px;
+  --faro-shadow: 0 0 20px rgba(34,211,238,0.08);
+  --faro-font: "Space Grotesk", system-ui, sans-serif;
+  --faro-font-heading: "Space Grotesk", system-ui, sans-serif;
+}
+
+[data-faro-theme="neon"] .faro-block-link:hover {
+  border-color: #22D3EE;
+  box-shadow: 0 0 8px rgba(34,211,238,0.3);
+  transform: none;
+}
+
+[data-faro-theme="neon"] .faro-avatar {
+  box-shadow: 0 0 12px rgba(34,211,238,0.4);
+}
+
+[data-faro-theme="neon"] .faro-email-button {
+  color: #09090B;
+}

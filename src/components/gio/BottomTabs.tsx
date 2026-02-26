@@ -3,11 +3,11 @@
 import TabIcon from "./TabIcon";
 import type { Screen } from "./TopBar";
 
-const tabs: { screen: Screen; label: string; icon: "Home" | "Sparkles" | "CalendarDays" | "BarChart3" | "CircleUserRound" }[] = [
+const tabs: { screen: Screen; label: string; icon: "Home" | "Link2" | "PenSquare" | "Store" | "CircleUserRound" }[] = [
   { screen: "feed", label: "Feed", icon: "Home" },
-  { screen: "factory", label: "Factory", icon: "Sparkles" },
-  { screen: "calendar", label: "Calendar", icon: "CalendarDays" },
-  { screen: "stats", label: "Stats", icon: "BarChart3" },
+  { screen: "faro", label: "Faro", icon: "Link2" },
+  { screen: "post", label: "Post", icon: "PenSquare" },
+  { screen: "store", label: "Store", icon: "Store" },
   { screen: "account", label: "Account", icon: "CircleUserRound" },
 ];
 

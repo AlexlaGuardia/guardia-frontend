@@ -12,7 +12,7 @@ export interface ClientContext {
   id: string;
   business_name: string;
   contact_name: string;
-  tier: "spark" | "pro" | "unleashed";
+  tier: "free" | "spark" | "pro" | "unleashed";
   preferred_style?: string;
   industry?: string;
   pending_uploads: number;
@@ -35,7 +35,7 @@ export interface Message {
 }
 
 type AuthState = "loading" | "setup" | "login" | "authenticated";
-export type TabletTab = "calendar" | "gallery" | "styles" | "analytics" | "engage" | "account";
+export type TabletTab = "calendar" | "gallery" | "styles" | "analytics" | "engage" | "account" | "faro" | "store" | "post";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -43,6 +43,7 @@ const API_BASE = "https://api.guardiacontent.com";
 // TIER COLORS
 // ============================================
 export const tierColors: Record<string, { bg: string; text: string; accent: string }> = {
+  free: { bg: "bg-emerald-500/20", text: "text-emerald-300", accent: "emerald-500" },
   spark: { bg: "bg-amber-500/20", text: "text-amber-300", accent: "amber-500" },
   pro: { bg: "bg-blue-500/20", text: "text-blue-300", accent: "blue-500" },
   unleashed: { bg: "bg-violet-500/20", text: "text-violet-300", accent: "violet-500" },
@@ -310,8 +311,8 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
   };
 
   const handleSubmit = async () => {
-    if (!username.trim() || pin.length !== 4) {
-      setError(mode === "setup" ? "Please enter a username and 4-digit PIN." : "Please enter your username and PIN.");
+    if (!username.trim() || pin.length < 4 || pin.length > 6) {
+      setError(mode === "setup" ? "Please enter a username and 4-6 digit PIN." : "Please enter your username and PIN.");
       return;
     }
 
@@ -471,14 +472,14 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
                   </div>
 
                   <div>
-                    <label className="block text-[var(--text-secondary)] text-sm mb-2">{mode === "setup" ? "4-Digit PIN" : "PIN"}</label>
+                    <label className="block text-[var(--text-secondary)] text-sm mb-2">{mode === "setup" ? "4-6 Digit PIN" : "PIN"}</label>
                     <input
                       type="password"
                       inputMode="numeric"
                       pattern="[0-9]*"
-                      maxLength={4}
+                      maxLength={6}
                       value={pin}
-                      onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                      onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
                       placeholder="••••"
                       className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)] transition-all text-center tracking-[0.5em] text-xl"
                       onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -494,7 +495,7 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
 
                   <button
                     onClick={handleSubmit}
-                    disabled={loading || !username.trim() || pin.length !== 4}
+                    disabled={loading || !username.trim() || pin.length < 4}
                     className="w-full py-3 bg-[var(--accent)] text-white font-semibold rounded-xl hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                   >
                     {loading ? (
@@ -508,12 +509,20 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
                   </button>
 
                   {mode === "login" && (
-                    <button
-                      onClick={() => setRecoveryMode(true)}
-                      className="w-full text-center text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
-                    >
-                      Forgot your PIN?
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setRecoveryMode(true)}
+                        className="w-full text-center text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+                      >
+                        Forgot your PIN?
+                      </button>
+                      <a
+                        href="/signup"
+                        className="block w-full text-center text-sm text-[var(--accent)] hover:underline transition-colors"
+                      >
+                        Sign up free
+                      </a>
+                    </div>
                   )}
                 </>
               )}

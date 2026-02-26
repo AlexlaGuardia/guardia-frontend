@@ -9,7 +9,7 @@ export interface GioClient {
   id: string;
   business_name: string;
   contact_name: string;
-  tier: "spark" | "pro" | "unleashed";
+  tier: "free" | "spark" | "pro" | "unleashed";
   preferred_style?: string;
   industry?: string;
   pending_uploads: number;
@@ -20,6 +20,8 @@ export interface GioClient {
   facebook_connected?: boolean;
   instagram_connected?: boolean;
   needs_platform_setup?: boolean;
+  faro_slug?: string;
+  active_addons?: string[];
 }
 
 export interface ScreenProps {
