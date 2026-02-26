@@ -50,6 +50,12 @@ const THEMES: Record<string, {
   bold:     { bg: "#FFFDF7", accent: "#1A1A1A", text: "#1A1A1A", surface: "#1A1A1A", border: "#1A1A1A", radius: "0px",  label: "Bold" },
   bloom:    { bg: "#FDF8F6", accent: "#D4727E", text: "#2D2D2D", surface: "#FFFFFF", border: "#F0E4DF", radius: "24px", label: "Bloom" },
   neon:     { bg: "#09090B", accent: "#22D3EE", text: "#E4E4E7", surface: "#111113", border: "#1E1E22", radius: "10px", label: "Neon" },
+  forest:   { bg: "#F4F7F4", accent: "#2D5A3D", text: "#1A2E1A", surface: "#E8F0E8", border: "#D1DDD1", radius: "14px", label: "Forest" },
+  ocean:    { bg: "#F0F5FA", accent: "#1E5A8A", text: "#1A2A3A", surface: "#E0EBF5", border: "#C8D8E8", radius: "16px", label: "Ocean" },
+  sunset:   { bg: "#FFF8F4", accent: "#D4612A", text: "#2A1A0A", surface: "#FFE8D8", border: "#F0D0B8", radius: "16px", label: "Sunset" },
+  lavender: { bg: "#F8F4FC", accent: "#7E57C2", text: "#2A1A3A", surface: "#EDE4F5", border: "#DDD0E8", radius: "20px", label: "Lavender" },
+  slate:    { bg: "#F4F5F7", accent: "#475569", text: "#1E293B", surface: "#E8EBF0", border: "#CBD5E1", radius: "10px", label: "Slate" },
+  ember:    { bg: "#0E0C0A", accent: "#E8863A", text: "#F0E8E0", surface: "#1A1614", border: "#2A2420", radius: "12px", label: "Ember" },
 };
 
 const BLOCK_TYPES = [

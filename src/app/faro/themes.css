@@ -352,3 +352,121 @@
 [data-faro-theme="neon"] .faro-email-button {
   color: #09090B;
 }
+
+/* ── Forest ──────────────────────────────────────────────── */
+[data-faro-theme="forest"] {
+  --faro-bg: #F4F7F4;
+  --faro-surface: #E8F0E8;
+  --faro-text: #1A2E1A;
+  --faro-text-secondary: #4A6A4A;
+  --faro-accent: #2D5A3D;
+  --faro-accent-hover: #1E4A2D;
+  --faro-border: #D1DDD1;
+  --faro-radius: 14px;
+  --faro-shadow: 0 2px 8px rgba(45,90,61,0.06);
+  --faro-font: "DM Sans", system-ui, sans-serif;
+  --faro-font-heading: "DM Sans", system-ui, sans-serif;
+}
+
+/* ── Ocean ───────────────────────────────────────────────── */
+[data-faro-theme="ocean"] {
+  --faro-bg: #F0F5FA;
+  --faro-surface: #E0EBF5;
+  --faro-text: #1A2A3A;
+  --faro-text-secondary: #5A7A9A;
+  --faro-accent: #1E5A8A;
+  --faro-accent-hover: #0E4A7A;
+  --faro-border: #C8D8E8;
+  --faro-radius: 16px;
+  --faro-shadow: 0 2px 8px rgba(30,90,138,0.06);
+  --faro-font: "Inter", system-ui, sans-serif;
+  --faro-font-heading: "Inter", system-ui, sans-serif;
+}
+
+/* ── Sunset ──────────────────────────────────────────────── */
+[data-faro-theme="sunset"] {
+  --faro-bg: #FFF8F4;
+  --faro-surface: #FFE8D8;
+  --faro-text: #2A1A0A;
+  --faro-text-secondary: #8A6A4A;
+  --faro-accent: #D4612A;
+  --faro-accent-hover: #B85020;
+  --faro-border: #F0D0B8;
+  --faro-radius: 16px;
+  --faro-shadow: 0 2px 8px rgba(212,97,42,0.08);
+  --faro-font: "DM Sans", system-ui, sans-serif;
+  --faro-font-heading: "DM Sans", system-ui, sans-serif;
+}
+
+[data-faro-theme="sunset"] .faro-email-button {
+  background: linear-gradient(135deg, #D4612A, #E88A4A);
+  color: #FFFFFF;
+}
+
+/* ── Lavender ────────────────────────────────────────────── */
+[data-faro-theme="lavender"] {
+  --faro-bg: #F8F4FC;
+  --faro-surface: #EDE4F5;
+  --faro-text: #2A1A3A;
+  --faro-text-secondary: #7A6A8A;
+  --faro-accent: #7E57C2;
+  --faro-accent-hover: #6A42B0;
+  --faro-border: #DDD0E8;
+  --faro-radius: 20px;
+  --faro-shadow: 0 2px 12px rgba(126,87,194,0.08);
+  --faro-font: "DM Sans", system-ui, sans-serif;
+  --faro-font-heading: "DM Sans", system-ui, sans-serif;
+}
+
+[data-faro-theme="lavender"] .faro-avatar {
+  border: 2px solid #DDD0E8;
+}
+
+[data-faro-theme="lavender"] .faro-email-button {
+  background: linear-gradient(135deg, #7E57C2, #9C7ADB);
+  color: #FFFFFF;
+}
+
+/* ── Slate ───────────────────────────────────────────────── */
+[data-faro-theme="slate"] {
+  --faro-bg: #F4F5F7;
+  --faro-surface: #E8EBF0;
+  --faro-text: #1E293B;
+  --faro-text-secondary: #64748B;
+  --faro-accent: #475569;
+  --faro-accent-hover: #334155;
+  --faro-border: #CBD5E1;
+  --faro-radius: 10px;
+  --faro-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  --faro-font: "Inter", system-ui, sans-serif;
+  --faro-font-heading: "Inter", system-ui, sans-serif;
+}
+
+/* ── Ember ───────────────────────────────────────────────── */
+[data-faro-theme="ember"] {
+  --faro-bg: #0E0C0A;
+  --faro-surface: #1A1614;
+  --faro-text: #F0E8E0;
+  --faro-text-secondary: #8A7A6A;
+  --faro-accent: #E8863A;
+  --faro-accent-hover: #D0762A;
+  --faro-border: #2A2420;
+  --faro-radius: 12px;
+  --faro-shadow: 0 0 16px rgba(232,134,58,0.08);
+  --faro-font: "Space Grotesk", system-ui, sans-serif;
+  --faro-font-heading: "Space Grotesk", system-ui, sans-serif;
+}
+
+[data-faro-theme="ember"] .faro-block-link:hover {
+  border-color: #E8863A;
+  box-shadow: 0 0 8px rgba(232,134,58,0.3);
+  transform: none;
+}
+
+[data-faro-theme="ember"] .faro-avatar {
+  box-shadow: 0 0 12px rgba(232,134,58,0.3);
+}
+
+[data-faro-theme="ember"] .faro-email-button {
+  color: #0E0C0A;
+}
