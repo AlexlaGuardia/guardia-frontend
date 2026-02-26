@@ -173,7 +173,7 @@ function CardFormInner({ addon, clientSecret, jwt, onSuccess, onCancel }: CardFo
           <div>
             <h3 className="text-base font-semibold text-[var(--text-primary)]">Add payment method</h3>
             <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Subscribe to {addon.name} &middot; {addon.price_display}/mo
+              Subscribe to {addon.name} &middot; ${(addon.price_cents / 100).toFixed(2)}/mo
             </p>
           </div>
           <button
@@ -226,13 +226,13 @@ function CardFormInner({ addon, clientSecret, jwt, onSuccess, onCancel }: CardFo
             ) : (
               <span className="flex items-center justify-center gap-2">
                 <CreditCard className="w-4 h-4" />
-                Subscribe &middot; {addon.price_display}/mo
+                Subscribe &middot; ${(addon.price_cents / 100).toFixed(2)}/mo
               </span>
             )}
           </button>
 
           <p className="text-[11px] text-[var(--text-muted)] text-center">
-            Your card will be charged {addon.price_display} monthly. Cancel anytime from your Account tab.
+            Your card will be charged ${(addon.price_cents / 100).toFixed(2)}/mo. Cancel anytime from your Account tab.
           </p>
         </div>
       </div>
@@ -593,7 +593,7 @@ function StoreScreenInner({ client, jwt }: StoreScreenProps) {
                     {/* Price + Toggle */}
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
                       <span className="text-sm font-semibold text-[var(--text-primary)] tabular-nums">
-                        {addon.price_display}
+                        ${(addon.price_cents / 100).toFixed(2)}
                         <span className="text-xs font-normal text-[var(--text-muted)]">/mo</span>
                       </span>
 
