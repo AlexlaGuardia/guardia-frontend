@@ -3,13 +3,15 @@
 import { ScreenProps } from "./types";
 import AnalyticsTab from "../lobby/AnalyticsTab";
 import CommentsInbox from "../lobby/CommentsInbox";
+import FaroAnalyticsSection from "./FaroAnalyticsSection";
 
 /**
  * StatsScreen — Gio App
  *
- * Merges Analytics + Comments Inbox into one scrollable view.
+ * Merges Analytics + Comments Inbox + Faro Analytics into one scrollable view.
  * - Top: KPI cards, engagement chart, platform breakdown, top posts (from AnalyticsTab)
- * - Bottom: Comments inbox with reply actions (from CommentsInbox)
+ * - Middle: Comments inbox with reply actions (from CommentsInbox)
+ * - Bottom: Faro bio page analytics (views, clicks, emails, CTR)
  *
  * AnalyticsTab's root div uses h-full overflow-y-auto, which we override
  * via [&>*] selector so it flows naturally within our scroll container.
@@ -29,6 +31,13 @@ export default function StatsScreen({ client, jwt, onPostSelect: _onPostSelect }
             Engagement
           </h3>
           <CommentsInbox clientId={client.id} jwt={jwt} />
+        </div>
+      )}
+
+      {/* Faro page analytics section */}
+      {jwt && (
+        <div className="px-4 md:px-6 pb-8 max-w-3xl mx-auto">
+          <FaroAnalyticsSection jwt={jwt} faroSlug={client?.faro_slug} />
         </div>
       )}
     </div>
