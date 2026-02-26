@@ -73,7 +73,7 @@ export default function CalendarScreen({ client, jwt, onMessage, onPostSelect }:
   return (
     <div className="h-full overflow-y-auto bg-[var(--bg-base)]">
       {/* Calendar Grid */}
-      <CalendarTab client={client} jwt={jwt} onMessage={onMessage || (() => {})} />
+      <CalendarTab client={client as any} jwt={jwt} onMessage={onMessage || (() => {})} />
 
       {/* Upcoming Section */}
       <div className="border-t border-[var(--border-subtle)]">

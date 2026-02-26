@@ -105,6 +105,36 @@ export default function TabletMode({
               label="Engage"
             />
             <TabButton
+              active={activeTab === "faro"}
+              onClick={() => setActiveTab("faro")}
+              icon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+              }
+              label="Faro"
+            />
+            <TabButton
+              active={activeTab === "post"}
+              onClick={() => setActiveTab("post")}
+              icon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                </svg>
+              }
+              label="Post"
+            />
+            <TabButton
+              active={activeTab === "store"}
+              onClick={() => setActiveTab("store")}
+              icon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              }
+              label="Store"
+            />
+            <TabButton
               active={activeTab === "account"}
               onClick={() => setActiveTab("account")}
               badge={needsSetup ? "!" : undefined}
@@ -185,6 +215,45 @@ export default function TabletMode({
             <div className="h-full overflow-y-auto p-6">
               <div className="max-w-3xl mx-auto">
                 <CommentsInbox clientId={client.id} jwt={jwt} />
+              </div>
+            </div>
+          )}
+          {activeTab === "faro" && (
+            <div className="h-full overflow-y-auto p-6">
+              <div className="max-w-2xl mx-auto text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-500/10 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Your Faro Page</h2>
+                <p className="text-[var(--text-secondary)]">Faro editor loading...</p>
+              </div>
+            </div>
+          )}
+          {activeTab === "post" && (
+            <div className="h-full overflow-y-auto p-6">
+              <div className="max-w-2xl mx-auto text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Create a Post</h2>
+                <p className="text-[var(--text-secondary)]">Post composer loading...</p>
+              </div>
+            </div>
+          )}
+          {activeTab === "store" && (
+            <div className="h-full overflow-y-auto p-6">
+              <div className="max-w-2xl mx-auto text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Add-on Store</h2>
+                <p className="text-[var(--text-secondary)]">Store loading...</p>
               </div>
             </div>
           )}
