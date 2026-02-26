@@ -5,6 +5,7 @@ import {
   Link2, Type, Share2, Mail, AlignLeft, Plus, Trash2,
   ChevronUp, ChevronDown, Eye, EyeOff, Pencil, X,
   Check, Globe, ExternalLink, Loader2, Image as ImageIcon,
+  Copy, Sparkles,
 } from "lucide-react";
 import type { GioClient } from "./types";
 
@@ -77,7 +78,7 @@ interface FaroScreenProps {
   client: GioClient | null;
 }
 
-export default function FaroScreen({ jwt }: FaroScreenProps) {
+export default function FaroScreen({ jwt, client }: FaroScreenProps) {
   const [page, setPage] = useState<FaroPage | null>(null);
   const [blocks, setBlocks] = useState<FaroBlock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +99,16 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
   const [blockTitle, setBlockTitle] = useState("");
   const [blockUrl, setBlockUrl] = useState("");
 
+  const [copied, setCopied] = useState(false);
+
   const resetBlockForm = () => { setBlockTitle(""); setBlockUrl(""); };
+
+  const copyUrl = () => {
+    if (!page) return;
+    navigator.clipboard.writeText(`https://guardia.page/${page.slug}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // ── Load Page ──────────────────────────────────────────────
   const loadPage = useCallback(async () => {
@@ -257,9 +267,9 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center">
           <Globe className="w-8 h-8 text-[var(--accent)]" />
         </div>
-        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Your Faro page is coming</h2>
+        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Your link page is on the way</h2>
         <p className="text-sm text-[var(--text-muted)]">
-          Your personal bio page will be created automatically. Check back soon!
+          One link for your bio, your posts, your business. It&apos;ll be ready shortly.
         </p>
       </div>
     );
@@ -295,42 +305,65 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
         )}
         {/* Blocks */}
         <div className="w-full space-y-3">
-          {blocks.filter(b => b.is_visible).map(block => {
-            if (block.type === "link") return (
-              <div key={block.id} className="w-full py-3.5 px-5 text-center text-sm font-medium"
-                style={{
-                  background: page.theme === "bold" ? theme.surface : theme.surface,
-                  color: page.theme === "bold" ? theme.bg : theme.text,
-                  borderRadius: theme.radius, border: `1px solid ${theme.border}`,
-                }}>
-                {block.title || "Link"}
-              </div>
-            );
-            if (block.type === "header") return (
-              <div key={block.id} className="text-xs uppercase tracking-wider font-medium pt-4 pb-1"
-                style={{ color: theme.text, opacity: 0.5 }}>
-                {block.title}
-              </div>
-            );
-            if (block.type === "text") return (
-              <p key={block.id} className="text-sm px-2" style={{ color: theme.text, opacity: 0.7 }}>
-                {block.title}
-              </p>
-            );
-            if (block.type === "email_capture") return (
-              <div key={block.id} className="w-full flex gap-2">
-                <div className="flex-1 py-2.5 px-4 text-sm"
-                  style={{ background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: theme.radius, color: theme.text, opacity: 0.5 }}>
-                  your@email.com
+          {blocks.filter(b => b.is_visible).length > 0 ? (
+            blocks.filter(b => b.is_visible).map(block => {
+              if (block.type === "link") return (
+                <div key={block.id} className="w-full py-3.5 px-5 text-center text-sm font-medium"
+                  style={{
+                    background: theme.surface,
+                    color: page.theme === "bold" ? theme.bg : theme.text,
+                    borderRadius: theme.radius, border: `1px solid ${theme.border}`,
+                  }}>
+                  {block.title || "Link"}
                 </div>
-                <div className="py-2.5 px-4 text-sm font-medium"
-                  style={{ background: theme.accent, color: theme.bg, borderRadius: theme.radius }}>
-                  Subscribe
+              );
+              if (block.type === "header") return (
+                <div key={block.id} className="text-xs uppercase tracking-wider font-medium pt-4 pb-1"
+                  style={{ color: theme.text, opacity: 0.5 }}>
+                  {block.title}
                 </div>
+              );
+              if (block.type === "text") return (
+                <p key={block.id} className="text-sm px-2" style={{ color: theme.text, opacity: 0.7 }}>
+                  {block.title}
+                </p>
+              );
+              if (block.type === "email_capture") return (
+                <div key={block.id} className="w-full flex gap-2">
+                  <div className="flex-1 py-2.5 px-4 text-sm"
+                    style={{ background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: theme.radius, color: theme.text, opacity: 0.5 }}>
+                    your@email.com
+                  </div>
+                  <div className="py-2.5 px-4 text-sm font-medium"
+                    style={{ background: theme.accent, color: theme.bg, borderRadius: theme.radius }}>
+                    Subscribe
+                  </div>
+                </div>
+              );
+              if (block.type === "social") return (
+                <div key={block.id} className="flex justify-center gap-3 py-2">
+                  {["IG", "X", "YT"].map(p => (
+                    <div key={p} className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium"
+                      style={{ border: `1px solid ${theme.border}`, color: theme.text }}>
+                      {p}
+                    </div>
+                  ))}
+                </div>
+              );
+              return null;
+            })
+          ) : (
+            /* Placeholder blocks — show what the page could look like */
+            <div className="space-y-3" style={{ opacity: 0.35 }}>
+              <div className="w-full py-3.5 px-5 text-center text-sm font-medium"
+                style={{ background: theme.surface, color: page.theme === "bold" ? theme.bg : theme.text, borderRadius: theme.radius, border: `1px solid ${theme.border}` }}>
+                My Website
               </div>
-            );
-            if (block.type === "social") return (
-              <div key={block.id} className="flex justify-center gap-3 py-2">
+              <div className="w-full py-3.5 px-5 text-center text-sm font-medium"
+                style={{ background: theme.surface, color: page.theme === "bold" ? theme.bg : theme.text, borderRadius: theme.radius, border: `1px solid ${theme.border}` }}>
+                Book a Session
+              </div>
+              <div className="flex justify-center gap-3 py-2">
                 {["IG", "X", "YT"].map(p => (
                   <div key={p} className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium"
                     style={{ border: `1px solid ${theme.border}`, color: theme.text }}>
@@ -338,9 +371,21 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
                   </div>
                 ))}
               </div>
-            );
-            return null;
-          })}
+              <div className="w-full flex gap-2">
+                <div className="flex-1 py-2.5 px-4 text-sm"
+                  style={{ background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: theme.radius, color: theme.text }}>
+                  your@email.com
+                </div>
+                <div className="py-2.5 px-4 text-sm font-medium"
+                  style={{ background: theme.accent, color: theme.bg, borderRadius: theme.radius }}>
+                  Subscribe
+                </div>
+              </div>
+              <p className="text-xs text-center pt-2" style={{ color: theme.text }}>
+                Add blocks to build your page
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -352,8 +397,8 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-semibold text-[var(--text-primary)]">Faro Page</h1>
-          <p className="text-sm text-[var(--text-muted)]">Your personal bio page</p>
+          <h1 className="text-lg font-semibold text-[var(--text-primary)]">Your Link Page</h1>
+          <p className="text-sm text-[var(--text-muted)]">One link for everything — share it in your bio</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowPreview(!showPreview)}
@@ -389,17 +434,26 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
 
           {/* Slug */}
           <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
-            <label className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2 block">Page URL</label>
+            <label className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2 block">Your Link</label>
             <div className="flex items-center gap-2">
               <span className="text-sm text-[var(--text-muted)] flex-shrink-0">guardia.page/</span>
               <input type="text" value={editSlug}
                 onChange={e => setEditSlug(e.target.value.toLowerCase().replace(/[^a-z0-9\-_]/g, ""))}
                 className="flex-1 px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
                 maxLength={30} />
-              {editSlug !== page.slug && (
+              {editSlug !== page.slug ? (
                 <button onClick={saveSlug} disabled={saving}
                   className="px-3 py-2 text-sm font-medium bg-[var(--accent)] text-white rounded-lg hover:bg-[var(--accent-hover)] disabled:opacity-50">
                   Save
+                </button>
+              ) : (
+                <button onClick={copyUrl}
+                  className={`px-3 py-2 text-sm font-medium rounded-lg border transition-all flex items-center gap-1.5 ${
+                    copied
+                      ? "bg-green-500/10 text-green-400 border-green-500/20"
+                      : "text-[var(--text-secondary)] border-[var(--border)] hover:bg-[var(--bg-surface)]"
+                  }`}>
+                  {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy</>}
                 </button>
               )}
             </div>
@@ -409,7 +463,7 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
           <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5 space-y-4">
             <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">Profile</h3>
             <div>
-              <label className="text-sm text-[var(--text-secondary)] mb-1 block">Profile Image URL</label>
+              <label className="text-sm text-[var(--text-secondary)] mb-1 block">Profile Image</label>
               <div className="flex items-center gap-3">
                 {editImageUrl ? (
                   <img src={editImageUrl} alt="" className="w-12 h-12 rounded-full object-cover border border-[var(--border)]" />
@@ -419,7 +473,7 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
                   </div>
                 )}
                 <input type="url" value={editImageUrl} onChange={e => setEditImageUrl(e.target.value)}
-                  placeholder="https://example.com/photo.jpg"
+                  placeholder="Paste an image URL"
                   className="flex-1 px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
               </div>
             </div>
@@ -536,9 +590,43 @@ export default function FaroScreen({ jwt }: FaroScreenProps) {
 
             {/* Block list */}
             {blocks.length === 0 ? (
-              <p className="text-sm text-[var(--text-muted)] text-center py-8">
-                No blocks yet. Add links, headers, or widgets to build your page.
-              </p>
+              <div className="space-y-2 py-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles size={14} className="text-[var(--accent)]" />
+                  <span className="text-sm text-[var(--text-secondary)]">Quick start — tap to add</span>
+                </div>
+                {[
+                  { type: "link", title: "My Website", url: "https://", icon: Link2, desc: "Link to your website" },
+                  { type: "link", title: "Book with Me", url: "https://", icon: Link2, desc: "Booking or scheduling link" },
+                  { type: "social", title: "Social Links", url: "", icon: Share2, desc: "Your social media profiles" },
+                  { type: "email_capture", title: "Join My List", url: "", icon: Mail, desc: "Collect emails from visitors" },
+                ].map((suggestion, i) => (
+                  <button key={i}
+                    onClick={() => {
+                      if (suggestion.type === "social") {
+                        addBlock("social");
+                      } else if (suggestion.type === "email_capture") {
+                        setBlockTitle(suggestion.title);
+                        addBlock("email_capture");
+                      } else {
+                        setBlockTitle(suggestion.title);
+                        setBlockUrl(suggestion.url);
+                        setNewBlockType(suggestion.type);
+                        setAddingBlock(true);
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 p-3 bg-[var(--bg-surface)] border border-dashed border-[var(--border)] rounded-xl hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-all text-left group">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--accent)]/10 transition-colors">
+                      <suggestion.icon size={14} className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-[var(--text-primary)]">{suggestion.title}</div>
+                      <div className="text-xs text-[var(--text-muted)]">{suggestion.desc}</div>
+                    </div>
+                    <Plus size={14} className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
+                  </button>
+                ))}
+              </div>
             ) : (
               <div className="space-y-2">
                 {blocks.map((block, idx) => (
