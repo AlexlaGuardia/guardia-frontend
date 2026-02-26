@@ -12,6 +12,8 @@ import AccountScreen from "./AccountScreen";
 import GioChatScreen from "./GioChatScreen";
 import GioChatPanel from "./GioChatPanel";
 import PostComposerScreen from "./PostComposerScreen";
+import FaroScreen from "./FaroScreen";
+import StoreScreen from "./StoreScreen";
 import { useGioChat } from "./chat-logic";
 import { useGioNotifications } from "@/hooks/useGioNotifications";
 import type { GioClient } from "./types";
@@ -521,11 +523,11 @@ export default function AppShell() {
       case "feed":
         return <FeedScreen jwt={jwt} onPostSelect={handlePostSelect} onNavigate={handleScreenChange} />;
       case "faro":
-        return <PlaceholderScreen icon="link" title="Your Faro Page" subtitle="Bio page editor loading..." color="violet" />;
+        return <FaroScreen jwt={jwt} client={client} />;
       case "post":
         return <PostComposerScreen jwt={jwt} />;
       case "store":
-        return <PlaceholderScreen icon="store" title="Add-on Store" subtitle="Store loading..." color="amber" />;
+        return <StoreScreen client={client} jwt={jwt} />;
       case "factory":
         return <FactoryScreen jwt={jwt} clientTier={client?.tier} />;
       case "calendar":
