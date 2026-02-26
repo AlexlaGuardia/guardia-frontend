@@ -195,7 +195,7 @@ export default function MyServicesSection({ jwt, onNavigateToStore }: MyServices
                 </span>
               ) : (
                 <span className="text-xs text-[var(--text-muted)] tabular-nums flex-shrink-0 ml-3">
-                  {addon.price_display}/mo
+                  ${(addon.price_cents / 100).toFixed(2)}/mo
                 </span>
               )}
             </div>

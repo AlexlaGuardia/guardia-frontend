@@ -503,12 +503,13 @@ interface UsageStatsProps {
 }
 
 const UsageStats = ({ used, total, period }: UsageStatsProps) => {
-  const percentage = Math.round((used / total) * 100);
-  
+  const isUnlimited = total >= 9999;
+  const percentage = isUnlimited ? 0 : Math.round((used / total) * 100);
+
   return (
-    <div 
+    <div
       className="p-4 rounded-2xl"
-      style={{ 
+      style={{
         background: 'var(--bg-surface)',
         boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}`
       }}
@@ -517,35 +518,39 @@ const UsageStats = ({ used, total, period }: UsageStatsProps) => {
         <h3 className="text-sm font-medium" style={{ color: tokens.text.secondary }}>Monthly Usage</h3>
         <span className="text-xs" style={{ color: tokens.text.tertiary }}>{period}</span>
       </div>
-      
-      {/* Progress track */}
-      <div 
+
+      {/* Progress track — hide for unlimited plans */}
+      {!isUnlimited && (
+      <div
         className="h-2 rounded-full overflow-hidden mb-2"
-        style={{ 
+        style={{
           background: 'var(--bg-base)',
           boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5)'
         }}
       >
-        <div 
+        <div
           className="h-full rounded-full transition-all"
-          style={{ 
+          style={{
             width: `${percentage}%`,
-            background: percentage > 80 
-              ? 'linear-gradient(90deg, #ef4444, #f87171)' 
+            background: percentage > 80
+              ? 'linear-gradient(90deg, #ef4444, #f87171)'
               : 'linear-gradient(90deg, #f59e0b, #fbbf24)',
             boxShadow: `0 0 8px ${percentage > 80 ? 'rgba(239,68,68,0.4)' : 'rgba(245,158,11,0.4)'}`
           }}
         />
       </div>
+      )}
       
       <div className="flex items-center justify-between">
         <span className="text-sm" style={{ color: tokens.text.primary }}>
           <span className="font-semibold">{used}</span>
-          <span style={{ color: tokens.text.tertiary }}> / {total} posts</span>
+          <span style={{ color: tokens.text.tertiary }}> / {total >= 9999 ? "Unlimited" : `${total}`} posts</span>
         </span>
-        <span className="text-xs" style={{ color: percentage > 80 ? '#ef4444' : tokens.text.tertiary }}>
-          {percentage}% used
-        </span>
+        {total < 9999 && (
+          <span className="text-xs" style={{ color: percentage > 80 ? '#ef4444' : tokens.text.tertiary }}>
+            {percentage}% used
+          </span>
+        )}
       </div>
     </div>
   );
