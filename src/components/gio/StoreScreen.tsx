@@ -9,10 +9,21 @@ import {
   Loader2,
   ExternalLink,
   ShoppingBag,
+  X,
+  AlertTriangle,
+  CreditCard,
 } from "lucide-react";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import type { GioClient } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.guardiacontent.com";
+
+const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
+
+// Addons hidden from store display (AI products — SCC-1 backend also filters these)
+const HIDDEN_SLUGS = new Set(["ai_pipeline", "auto_scheduling"]);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -23,6 +34,7 @@ interface AddonItem {
   description: string;
   price_cents: number;
   price_display: string;
+  is_listed?: boolean;
 }
 
 interface ActiveAddon {
@@ -42,14 +54,18 @@ interface ActiveData {
   addons: ActiveAddon[];
   monthly_total_cents: number;
   monthly_total_display: string;
+  has_payment_method?: boolean;
 }
 
 // ── Category Config ────────────────────────────────────────────────────────────
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; order: number }> = {
+  platform:  { label: "Platforms", icon: Globe, order: 0 },
   platforms: { label: "Platforms", icon: Globe, order: 0 },
-  ai:        { label: "AI & Automation", icon: Sparkles, order: 1 },
+  bundle:    { label: "Bundles", icon: ShoppingBag, order: 1 },
+  tool:      { label: "Tools", icon: Wrench, order: 2 },
   tools:     { label: "Tools", icon: Wrench, order: 2 },
+  ai:        { label: "AI & Automation", icon: Sparkles, order: 3 },
 };
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -72,9 +88,204 @@ async function apiFetch(jwt: string | null, path: string, method = "GET", body?:
   });
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Card Form (Stripe Elements) ──────────────────────────────────────────────
 
-export default function StoreScreen({ client, jwt }: StoreScreenProps) {
+interface CardFormProps {
+  addon: AddonItem;
+  clientSecret: string | null;
+  jwt: string;
+  onSuccess: (message: string) => void;
+  onCancel: () => void;
+}
+
+function CardFormInner({ addon, clientSecret, jwt, onSuccess, onCancel }: CardFormProps) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    if (!stripe || !elements) return;
+    setProcessing(true);
+    setCardError(null);
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) { setProcessing(false); return; }
+
+    if (clientSecret) {
+      // Confirm payment for the already-created incomplete subscription
+      const { error: confirmError } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: cardElement },
+      });
+      if (confirmError) {
+        setCardError(confirmError.message || "Payment failed. Please try again.");
+        setProcessing(false);
+        return;
+      }
+      onSuccess(`${addon.name} activated!`);
+    } else {
+      // No client_secret — create payment method first, then subscribe with it
+      const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardElement,
+      });
+      if (pmError) {
+        setCardError(pmError.message || "Card error. Please try again.");
+        setProcessing(false);
+        return;
+      }
+      try {
+        const res = await apiFetch(jwt, "/addons/subscribe", "POST", {
+          addon_slug: addon.slug,
+          payment_method_id: paymentMethod.id,
+        });
+        const json = await res.json();
+        if (res.ok && json.success) {
+          if (json.requires_action && json.client_secret) {
+            // SCA required — confirm the payment
+            const { error: scaError } = await stripe.confirmCardPayment(json.client_secret);
+            if (scaError) {
+              setCardError(scaError.message || "Authentication failed.");
+              setProcessing(false);
+              return;
+            }
+          }
+          onSuccess(json.message || `${addon.name} activated!`);
+        } else {
+          setCardError(json.detail || json.message || "Subscription failed.");
+        }
+      } catch {
+        setCardError("Request failed. Check your connection.");
+      }
+    }
+    setProcessing(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
+
+      {/* Card form */}
+      <div className="relative w-full max-w-md mx-4 mb-4 sm:mb-0 rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+          <div>
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Add payment method</h3>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              Subscribe to {addon.name} &middot; {addon.price_display}/mo
+            </p>
+          </div>
+          <button
+            onClick={onCancel}
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-elevated)] hover:bg-[var(--bg-base)] transition-colors"
+          >
+            <X className="w-4 h-4 text-[var(--text-muted)]" />
+          </button>
+        </div>
+
+        {/* Card input */}
+        <div className="p-4 space-y-4">
+          <div className="rounded-xl p-4 bg-[var(--bg-base)]" style={{ boxShadow: "inset 0 2px 4px rgba(0,0,0,0.3)" }}>
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: "16px",
+                    color: "var(--text-primary, #e5e5e5)",
+                    "::placeholder": { color: "var(--text-muted, #666)" },
+                  },
+                  invalid: { color: "#ef4444" },
+                },
+              }}
+            />
+          </div>
+
+          {cardError && (
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+              <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-red-400">{cardError}</p>
+            </div>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={processing || !stripe}
+            className="w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50"
+            style={{
+              background: "linear-gradient(145deg, var(--accent), var(--accent-hover, #7c3aed))",
+              color: "white",
+              boxShadow: "0 2px 8px rgba(167,139,250,0.3)",
+            }}
+          >
+            {processing ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Subscribe &middot; {addon.price_display}/mo
+              </span>
+            )}
+          </button>
+
+          <p className="text-[11px] text-[var(--text-muted)] text-center">
+            Your card will be charged {addon.price_display} monthly. Cancel anytime from your Account tab.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Unsubscribe Confirmation ─────────────────────────────────────────────────
+
+interface UnsubscribeDialogProps {
+  addon: AddonItem;
+  onConfirm: () => void;
+  onCancel: () => void;
+  processing: boolean;
+}
+
+function UnsubscribeDialog({ addon, onConfirm, onCancel, processing }: UnsubscribeDialogProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
+      <div className="relative w-full max-w-sm mx-4 mb-4 sm:mb-0 rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl p-5 text-center">
+        <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-red-500/10 flex items-center justify-center">
+          <AlertTriangle className="w-6 h-6 text-red-400" />
+        </div>
+        <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">
+          Remove {addon.name}?
+        </h3>
+        <p className="text-sm text-[var(--text-muted)] mb-5">
+          This will be prorated. You&apos;ll lose access at the end of your current billing period.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-2.5 text-sm font-medium rounded-xl border border-[var(--border)] text-[var(--text-secondary)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-base)] transition-colors"
+          >
+            Keep it
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={processing}
+            className="flex-1 py-2.5 text-sm font-semibold rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+          >
+            {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Unsubscribe"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ───────────────────────────────────────────────────────────
+
+function StoreScreenInner({ client, jwt }: StoreScreenProps) {
   const [catalog, setCatalog] = useState<CatalogData | null>(null);
   const [activeData, setActiveData] = useState<ActiveData | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -83,6 +294,11 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // Payment flow state
+  const [cardFormAddon, setCardFormAddon] = useState<AddonItem | null>(null);
+  const [cardFormSecret, setCardFormSecret] = useState<string | null>(null);
+  const [unsubConfirmAddon, setUnsubConfirmAddon] = useState<AddonItem | null>(null);
 
   // ── Data Loading ─────────────────────────────────────────────────────────
 
@@ -125,20 +341,49 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
     setTimeout(() => setToastMsg(null), 3000);
   };
 
-  // ── Toggle Subscribe / Unsubscribe ───────────────────────────────────────
+  // ── Subscribe / Unsubscribe ────────────────────────────────────────────
 
   const isActive = (slug: string) =>
     activeData?.addons.some((a) => a.slug === slug) ?? false;
 
-  const handleToggle = async (addon: AddonItem) => {
+  const handleSubscribe = async (addon: AddonItem) => {
     if (!jwt) return;
     setTogglingSlug(addon.slug);
+
     try {
-      const action = isActive(addon.slug) ? "unsubscribe" : "subscribe";
-      const res = await apiFetch(jwt, `/addons/${action}`, "POST", { addon_slug: addon.slug });
+      const res = await apiFetch(jwt, "/addons/subscribe", "POST", { addon_slug: addon.slug });
+      const json = await res.json();
+
+      if (res.ok && json.success) {
+        if (json.requires_action && json.client_secret) {
+          // Subscription created but payment incomplete — show card form
+          setCardFormSecret(json.client_secret);
+          setCardFormAddon(addon);
+        } else {
+          showToast(json.message || `${addon.name} activated!`);
+          await loadActive();
+        }
+      } else if (res.status === 402) {
+        // Payment required — try with card form via new subscribe
+        setCardFormAddon(addon);
+      } else {
+        showToast(json.message || json.detail || "Something went wrong. Try again.");
+      }
+    } catch {
+      showToast("Request failed. Check your connection.");
+    }
+    setTogglingSlug(null);
+  };
+
+  const handleUnsubscribeConfirm = async () => {
+    if (!jwt || !unsubConfirmAddon) return;
+    setTogglingSlug(unsubConfirmAddon.slug);
+
+    try {
+      const res = await apiFetch(jwt, "/addons/unsubscribe", "POST", { addon_slug: unsubConfirmAddon.slug });
       const json = await res.json();
       if (res.ok && json.success) {
-        showToast(json.message || (action === "subscribe" ? `${addon.name} activated` : `${addon.name} removed`));
+        showToast(json.message || `${unsubConfirmAddon.name} removed`);
         await loadActive();
       } else {
         showToast(json.message || "Something went wrong. Try again.");
@@ -147,6 +392,22 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
       showToast("Request failed. Check your connection.");
     }
     setTogglingSlug(null);
+    setUnsubConfirmAddon(null);
+  };
+
+  const handleToggle = (addon: AddonItem) => {
+    if (isActive(addon.slug)) {
+      setUnsubConfirmAddon(addon);
+    } else {
+      handleSubscribe(addon);
+    }
+  };
+
+  const handleCardSuccess = async (message: string) => {
+    showToast(message);
+    setCardFormAddon(null);
+    setCardFormSecret(null);
+    await loadActive();
   };
 
   // ── Billing Portal ───────────────────────────────────────────────────────
@@ -168,7 +429,7 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
     setPortalLoading(false);
   };
 
-  // ── Sorted Categories ─────────────────────────────────────────────────────
+  // ── Filter & Sort Categories ────────────────────────────────────────────
 
   const sortedCategories: Array<{ key: string; label: string; icon: React.ElementType; addons: AddonItem[] }> =
     catalog
@@ -177,8 +438,10 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
             key,
             label: CATEGORY_META[key]?.label ?? key,
             icon: CATEGORY_META[key]?.icon ?? ShoppingBag,
-            addons,
+            // Client-side filter: hide unlisted AI addons
+            addons: addons.filter((a) => !HIDDEN_SLUGS.has(a.slug) && a.is_listed !== false),
           }))
+          .filter(({ addons }) => addons.length > 0)
           .sort((a, b) => {
             const orderA = CATEGORY_META[a.key]?.order ?? 99;
             const orderB = CATEGORY_META[b.key]?.order ?? 99;
@@ -229,7 +492,7 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
           </div>
           <div>
             <h1 className="text-lg font-semibold text-[var(--text-primary)] leading-tight">Add-on Store</h1>
-            <p className="text-sm text-[var(--text-muted)]">Extend your plan with individual features</p>
+            <p className="text-sm text-[var(--text-muted)]">Extend your account with individual features</p>
           </div>
         </div>
 
@@ -350,7 +613,7 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
                           {toggling ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
                           ) : active ? (
-                            "Unsubscribe"
+                            "Remove"
                           ) : (
                             "Subscribe"
                           )}
@@ -376,14 +639,34 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
           </div>
         )}
 
-        {/* Client tier hint */}
-        {client && client.tier !== "free" && (
+        {/* Billing hint */}
+        {jwt && (
           <p className="text-xs text-[var(--text-muted)] text-center pb-2">
-            Add-ons supplement your {client.tier} plan and are billed monthly.
+            Add-ons are billed monthly. Manage active services from your Account tab.
           </p>
         )}
-
       </div>
+
+      {/* Card Form Modal */}
+      {cardFormAddon && jwt && (
+        <CardFormInner
+          addon={cardFormAddon}
+          clientSecret={cardFormSecret}
+          jwt={jwt}
+          onSuccess={handleCardSuccess}
+          onCancel={() => { setCardFormAddon(null); setCardFormSecret(null); }}
+        />
+      )}
+
+      {/* Unsubscribe Confirmation */}
+      {unsubConfirmAddon && (
+        <UnsubscribeDialog
+          addon={unsubConfirmAddon}
+          onConfirm={handleUnsubscribeConfirm}
+          onCancel={() => setUnsubConfirmAddon(null)}
+          processing={togglingSlug === unsubConfirmAddon.slug}
+        />
+      )}
 
       {/* Toast */}
       {toastMsg && (
@@ -393,4 +676,18 @@ export default function StoreScreen({ client, jwt }: StoreScreenProps) {
       )}
     </div>
   );
+}
+
+// ── Wrapper with Stripe Provider ─────────────────────────────────────────────
+
+export default function StoreScreen(props: StoreScreenProps) {
+  if (stripePromise) {
+    return (
+      <Elements stripe={stripePromise} options={{ appearance: { theme: "night" } }}>
+        <StoreScreenInner {...props} />
+      </Elements>
+    );
+  }
+  // Stripe not configured — render without payment capability
+  return <StoreScreenInner {...props} />;
 }

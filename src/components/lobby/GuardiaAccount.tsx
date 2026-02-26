@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import MyServicesSection from '../gio/MyServicesSection';
 
 /**
  * GUARDIA ACCOUNT — Settings & Profile
@@ -45,6 +46,7 @@ const tokens = {
     spark: '#f59e0b',
     pro: '#3b82f6',
     unleashed: '#8b5cf6',
+    free: 'var(--text-muted)',
   },
   shadow: {
     inset: '0 1px 3px rgba(0,0,0,0.08)',
@@ -72,7 +74,7 @@ interface UserProfile {
   business_name: string;
   contact_name: string;
   contact_email: string;
-  tier: 'spark' | 'pro' | 'unleashed';
+  tier?: 'free' | 'spark' | 'pro' | 'unleashed';
   username: string;
   profile_image_url?: string;
 }
@@ -414,29 +416,6 @@ function ProfilePanel({ isOpen, onClose, profile, onSave }: ProfilePanelProps) {
             </div>
           </div>
 
-          {/* Tier badge (read-only) */}
-          {profile?.tier && (
-            <div 
-              className="p-4 rounded-xl"
-              style={{
-                background: 'var(--bg-surface)',
-                boxShadow: tokens.shadow.inset
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-[var(--text-muted)]">Current Plan</span>
-                <div 
-                  className="px-3 py-1 rounded-full text-xs font-medium capitalize"
-                  style={{
-                    backgroundColor: `${tokens.tier[profile.tier]}20`,
-                    color: tokens.tier[profile.tier]
-                  }}
-                >
-                  {profile.tier}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Save Button */}
@@ -469,25 +448,24 @@ function ProfilePanel({ isOpen, onClose, profile, onSave }: ProfilePanelProps) {
 interface ProfileHeaderProps {
   name: string;
   email: string;
-  tier: 'spark' | 'pro' | 'unleashed';
   imageUrl?: string;
   onClick: () => void;
 }
 
-const ProfileHeader = ({ name, email, tier, imageUrl, onClick }: ProfileHeaderProps) => {
+const ProfileHeader = ({ name, email, imageUrl, onClick }: ProfileHeaderProps) => {
   return (
-    <button 
+    <button
       onClick={onClick}
       className="w-full p-5 rounded-2xl flex items-center gap-4 text-left transition-all active:scale-[0.99]"
-      style={{ 
+      style={{
         background: 'var(--bg-surface)',
         boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}`
       }}
     >
       {/* Avatar */}
-      <div 
+      <div
         className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold overflow-hidden flex-shrink-0"
-        style={{ 
+        style={{
           background: imageUrl ? 'none' : `linear-gradient(145deg, ${tokens.accent.glow}, ${tokens.bg.elevated})`,
           boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)'
         }}
@@ -498,7 +476,7 @@ const ProfileHeader = ({ name, email, tier, imageUrl, onClick }: ProfileHeaderPr
           <span style={{ color: tokens.accent.primary }}>{name.charAt(0)}</span>
         )}
       </div>
-      
+
       {/* Info */}
       <div className="flex-1 min-w-0">
         <h2 className="text-lg font-semibold truncate" style={{ color: tokens.text.primary }}>
@@ -507,16 +485,6 @@ const ProfileHeader = ({ name, email, tier, imageUrl, onClick }: ProfileHeaderPr
         <p className="text-sm truncate" style={{ color: tokens.text.tertiary }}>
           {email}
         </p>
-        <div 
-          className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full text-xs font-medium"
-          style={{ 
-            backgroundColor: `${tokens.tier[tier]}20`,
-            color: tokens.tier[tier],
-          }}
-        >
-          <span className="capitalize">{tier}</span>
-          <span>Plan</span>
-        </div>
       </div>
 
       {/* Edit indicator */}
@@ -910,7 +878,7 @@ const FAQ_ITEMS = [
   { q: 'How do I upload photos?', a: 'Go to the Gallery tab and tap the upload button. You can select multiple images at once. Our AI will style them to match your brand.' },
   { q: 'When will my posts go live?', a: 'Posts are scheduled based on optimal engagement times for your audience. Check the Calendar tab to see your upcoming schedule.' },
   { q: 'How do I connect Instagram?', a: 'Instagram connects through your Facebook page. If your page has a linked Instagram Business account, it appears automatically in Connected Accounts after connecting Facebook.' },
-  { q: 'What\'s included in my plan?', a: 'Check the Manage Subscription section to see your current plan features and limits. You can upgrade anytime for more posts, images, and platform connections.' },
+  { q: 'How do add-ons work?', a: 'Visit the Store tab to browse and subscribe to add-ons like platform connections, analytics, and more. Your active services are shown in the My Services section of your Account.' },
   { q: 'How do I change my posting schedule?', a: 'Your posting schedule is automatically optimized, but you can adjust individual post times from the Calendar tab by tapping on any scheduled post.' },
 ];
 
@@ -1280,159 +1248,21 @@ function BillingHistoryPanel({ isOpen, onClose }: { isOpen: boolean; onClose: ()
   );
 }
 
-// =============================================================================
-// SUBSCRIPTION PANEL
-// =============================================================================
-const TIER_INFO: Record<string, { name: string; price: number; images: number; posts: number; platforms: string; videos: number; revisions: number; features: string[] }> = {
-  spark: { name: 'Spark', price: 15, images: 2, posts: 12, platforms: 'Facebook', videos: 0, revisions: 0, features: ['AI-styled images', 'Auto-captions & hashtags', 'Scheduled posting', 'Facebook posting'] },
-  pro: { name: 'Pro', price: 25, images: 5, posts: 20, platforms: 'Facebook', videos: 2, revisions: 2, features: ['Everything in Spark', 'Video content', 'Engagement monitoring', 'GBP integration', 'Review responses'] },
-  unleashed: { name: 'Unleashed', price: 299, images: 10, posts: 30, platforms: 'Facebook', videos: 8, revisions: 99, features: ['Everything in Pro', 'Strategy calls', 'Priority support (4hr)'] },
-};
-
-function SubscriptionPanel({ isOpen, onClose, tier }: { isOpen: boolean; onClose: () => void; tier: string }) {
-  const [portalLoading, setPortalLoading] = useState(false);
-
-  const handleManagePlan = async () => {
-    setPortalLoading(true);
-    const jwt = localStorage.getItem('guardia_jwt');
-    try {
-      const res = await fetch(`${API_BASE}/lobby/client/billing-portal`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' }
-      });
-      const data = await res.json();
-      if (data.portal_url) {
-        window.open(data.portal_url, '_blank');
-      } else {
-        window.location.href = 'mailto:support@guardiacontent.com?subject=Plan Change Request';
-      }
-    } catch (err) {
-      console.error('Portal error:', err);
-    }
-    setPortalLoading(false);
-  };
-
-  const currentTier = TIER_INFO[tier] || TIER_INFO.spark;
-
-  return (
-    <>
-      <div
-        className={`fixed inset-0 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-        onClick={onClose}
-      />
-      <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ background: 'var(--bg-surface)', boxShadow: isOpen ? '-4px 0 24px rgba(0,0,0,0.5)' : 'none' }}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Manage Subscription</h2>
-          <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95" style={{ background: 'var(--bg-elevated)', boxShadow: tokens.shadow.button }}>
-            <Icons.X size={18} color="var(--text-muted)" />
-          </button>
-        </div>
-
-        <div className="p-4 space-y-6 overflow-y-auto" style={{ height: 'calc(100% - 140px)' }}>
-          {/* Current Plan */}
-          <div className="rounded-2xl p-4" style={{
-            background: 'var(--bg-surface)',
-            boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}`,
-            border: `1px solid ${tokens.tier[tier as keyof typeof tokens.tier] || tokens.text.tertiary}40`
-          }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="px-2.5 py-1 rounded-full text-xs font-medium capitalize" style={{
-                  backgroundColor: `${tokens.tier[tier as keyof typeof tokens.tier]}20`,
-                  color: tokens.tier[tier as keyof typeof tokens.tier]
-                }}>
-                  {currentTier.name}
-                </div>
-                <span className="text-xs" style={{ color: tokens.text.tertiary }}>Current Plan</span>
-              </div>
-              <span className="text-lg font-semibold" style={{ color: tokens.text.primary }}>${currentTier.price}<span className="text-xs font-normal" style={{ color: tokens.text.tertiary }}>/mo</span></span>
-            </div>
-            <div className="space-y-1.5">
-              {currentTier.features.map((f, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Icons.Check size={14} color={tokens.tier[tier as keyof typeof tokens.tier]} />
-                  <span className="text-xs" style={{ color: tokens.text.secondary }}>{f}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Plan Comparison */}
-          <div>
-            <h3 className="text-xs font-medium uppercase tracking-wider mb-3 px-1" style={{ color: tokens.text.tertiary }}>Plan Comparison</h3>
-            <div className="rounded-2xl overflow-x-auto" style={{ background: 'var(--bg-surface)', boxShadow: `${tokens.shadow.inset}, ${tokens.shadow.raised}` }}>
-              <div className="min-w-[320px]">
-              {/* Header */}
-              <div className="grid grid-cols-4 p-3 border-b border-[var(--border-subtle)]">
-                <span className="text-xs" style={{ color: tokens.text.tertiary }}></span>
-                {Object.entries(TIER_INFO).map(([key, t]) => (
-                  <div key={key} className="text-center">
-                    <span className="text-xs font-medium" style={{ color: key === tier ? tokens.tier[key as keyof typeof tokens.tier] : tokens.text.secondary }}>{t.name}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Rows */}
-              {[
-                { label: 'Price', key: 'price', format: (v: number) => `$${v}` },
-                { label: 'Posts/mo', key: 'posts' },
-                { label: 'Images/mo', key: 'images' },
-                { label: 'Platforms', key: 'platforms' },
-                { label: 'Videos/mo', key: 'videos' },
-              ].map(row => (
-                <div key={row.label} className="grid grid-cols-4 p-3 border-b border-[var(--border-subtle)] last:border-0">
-                  <span className="text-xs" style={{ color: tokens.text.tertiary }}>{row.label}</span>
-                  {Object.entries(TIER_INFO).map(([key, t]) => {
-                    const val = t[row.key as keyof typeof t];
-                    const display = row.format ? row.format(val as number) : (val === 99 ? '∞' : String(val === 0 ? '-' : val));
-                    return (
-                      <div key={key} className="text-center">
-                        <span className="text-xs font-medium" style={{ color: key === tier ? tokens.text.primary : tokens.text.secondary }}>{display}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Manage Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[var(--border-subtle)]" style={{ background: 'var(--bg-base)' }}>
-          <button
-            onClick={handleManagePlan}
-            disabled={portalLoading}
-            className="w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.98]"
-            style={{
-              background: 'linear-gradient(145deg, #f59e0b, #d97706)',
-              boxShadow: '0 2px 8px rgba(245,158,11,0.3), inset 0 1px 1px rgba(255,255,255,0.2)',
-              color: 'white'
-            }}
-          >
-            {portalLoading ? 'Opening...' : 'Manage Plan'}
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
 
 // =============================================================================
 // MAIN COMPONENT
 // =============================================================================
-export default function GuardiaAccount({ onLogout }: { onLogout?: () => void } = {}) {
+export default function GuardiaAccount({ jwt: jwtProp, onLogout, onNavigateToStore }: { jwt?: string | null; onLogout?: () => void; onNavigateToStore?: () => void } = {}) {
   const [notifications, setNotifications] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profilePanelOpen, setProfilePanelOpen] = useState(false);
-  const [subscriptionPanelOpen, setSubscriptionPanelOpen] = useState(false);
   const [billingPanelOpen, setBillingPanelOpen] = useState(false);
   const [securityPanelOpen, setSecurityPanelOpen] = useState(false);
   const [helpPanelOpen, setHelpPanelOpen] = useState(false);
+
+  // Prefer prop jwt, fall back to localStorage
+  const jwt = jwtProp || (typeof window !== 'undefined' ? localStorage.getItem('guardia_jwt') : null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -1505,7 +1335,6 @@ export default function GuardiaAccount({ onLogout }: { onLogout?: () => void } =
             <ProfileHeader
               name={profile?.contact_name || profile?.business_name || 'User'}
               email={profile?.contact_email || ''}
-              tier={profile?.tier || 'spark'}
               imageUrl={profile?.profile_image_url}
               onClick={() => setProfilePanelOpen(true)}
             />
@@ -1517,12 +1346,14 @@ export default function GuardiaAccount({ onLogout }: { onLogout?: () => void } =
           <UsageSection />
         </div>
 
+        {/* My Services */}
+        <MyServicesSection jwt={jwt} onNavigateToStore={onNavigateToStore} />
+
         {/* Connected Accounts */}
         <ConnectedAccountsSection />
 
-        {/* Subscription */}
-        <Section title="Subscription">
-          <MenuItem icon={Icons.CreditCard} label="Manage Subscription" onClick={() => setSubscriptionPanelOpen(true)} />
+        {/* Billing */}
+        <Section title="Billing">
           <MenuItem icon={Icons.BarChart} label="Billing History" onClick={() => setBillingPanelOpen(true)} />
         </Section>
 
@@ -1551,7 +1382,6 @@ export default function GuardiaAccount({ onLogout }: { onLogout?: () => void } =
         profile={profile}
         onSave={handleSaveProfile}
       />
-      <SubscriptionPanel isOpen={subscriptionPanelOpen} onClose={() => setSubscriptionPanelOpen(false)} tier={profile?.tier || 'spark'} />
       <BillingHistoryPanel isOpen={billingPanelOpen} onClose={() => setBillingPanelOpen(false)} />
       <SecurityPanel isOpen={securityPanelOpen} onClose={() => setSecurityPanelOpen(false)} />
       <HelpSupportPanel isOpen={helpPanelOpen} onClose={() => setHelpPanelOpen(false)} />
