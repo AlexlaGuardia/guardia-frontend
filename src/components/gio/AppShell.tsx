@@ -11,6 +11,7 @@ import StatsScreen from "./StatsScreen";
 import AccountScreen from "./AccountScreen";
 import GioChatScreen from "./GioChatScreen";
 import GioChatPanel from "./GioChatPanel";
+import PostComposerScreen from "./PostComposerScreen";
 import { useGioChat } from "./chat-logic";
 import { useGioNotifications } from "@/hooks/useGioNotifications";
 import type { GioClient } from "./types";
@@ -215,21 +216,49 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
             </div>
           </div>
 
-          <p className="text-center text-[var(--text-muted)] text-sm mt-6">
-            Need help? Contact{" "}
-            <a href="mailto:support@guardiacontent.com" className="text-[var(--accent)] hover:underline">support@guardiacontent.com</a>
-          </p>
-          <div className="text-center mt-4">
-            <a href="/" className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[var(--accent)] border border-[var(--accent)]/30 rounded-xl hover:bg-[var(--accent)]/10 transition-all">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-              Get Started
-            </a>
+          <div className="text-center mt-6 space-y-3">
+            <p className="text-[var(--text-secondary)] text-sm">
+              Don&rsquo;t have an account?{" "}
+              <a href="/signup" className="text-[var(--accent)] hover:underline font-medium">Sign up free</a>
+            </p>
+            <p className="text-[var(--text-muted)] text-sm">
+              Need help? Contact{" "}
+              <a href="mailto:support@guardiacontent.com" className="text-[var(--accent)] hover:underline">support@guardiacontent.com</a>
+            </p>
           </div>
         </div>
       </div>
     </main>
+  );
+}
+
+// ============================================
+// PLACEHOLDER — replaced by SCC-2/3/4/5
+// ============================================
+function PlaceholderScreen({ icon, title, subtitle, color }: { icon: string; title: string; subtitle: string; color: string }) {
+  const colorMap: Record<string, { bg: string; text: string }> = {
+    violet: { bg: "bg-violet-500/10", text: "text-violet-400" },
+    emerald: { bg: "bg-emerald-500/10", text: "text-emerald-400" },
+    amber: { bg: "bg-amber-500/10", text: "text-amber-400" },
+  };
+  const c = colorMap[color] || colorMap.violet;
+  const iconPaths: Record<string, string> = {
+    link: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1",
+    plus: "M12 4v16m8-8H4",
+    store: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z",
+  };
+  return (
+    <div className="h-full flex items-center justify-center p-6">
+      <div className="text-center">
+        <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl ${c.bg} flex items-center justify-center`}>
+          <svg className={`w-8 h-8 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={iconPaths[icon] || iconPaths.link} />
+          </svg>
+        </div>
+        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">{title}</h2>
+        <p className="text-[var(--text-secondary)]">{subtitle}</p>
+      </div>
+    </div>
   );
 }
 
@@ -303,15 +332,18 @@ export default function AppShell() {
     const hour = new Date().getHours();
     const timeGreeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
     const name = ctx.contact_name || "there";
+    const isFreeUser = ctx.tier === "free";
     let status = "";
     if (ctx.scheduled_posts > 0) {
       status = ` You have ${ctx.scheduled_posts} post${ctx.scheduled_posts > 1 ? "s" : ""} scheduled.`;
     }
-    if (ctx.pending_uploads > 0) {
+    if (!isFreeUser && ctx.pending_uploads > 0) {
       status += ` ${ctx.pending_uploads} image${ctx.pending_uploads > 1 ? "s" : ""} awaiting styling.`;
     }
     if (ctx.needs_platform_setup) {
-      status += " To start posting automatically, connect your Facebook in the Account tab.";
+      status += isFreeUser
+        ? " Connect a platform in Account to start posting."
+        : " To start posting automatically, connect your Facebook in the Account tab.";
     }
     return `${timeGreeting}, ${name}! Welcome back.${status} How can I help you today?`;
   };
@@ -379,11 +411,22 @@ export default function AppShell() {
     setAuthState("authenticated");
 
     if (isSetup) {
-      setActiveScreen("factory");
-      gioChat.setMessages([{
-        role: "assistant",
-        content: `Welcome to Guardia, ${clientData.contact_name || "there"}! I've opened your Factory to get started. Upload some photos and we'll style them up — your first posts go live this week.`,
-      }]);
+      // Paid users (setup via invite link) → Factory
+      // Free users (signed up at /signup) → Faro page
+      const isFreeUser = clientData.tier === "free";
+      if (isFreeUser) {
+        setActiveScreen("faro");
+        gioChat.setMessages([{
+          role: "assistant",
+          content: `Welcome to Guardia, ${clientData.contact_name || "there"}! Your Faro page is ready — let's set it up. Add your bio, links, and pick a theme to make it yours.`,
+        }]);
+      } else {
+        setActiveScreen("factory");
+        gioChat.setMessages([{
+          role: "assistant",
+          content: `Welcome to Guardia, ${clientData.contact_name || "there"}! I've opened your Factory to get started. Upload some photos and we'll style them up — your first posts go live this week.`,
+        }]);
+      }
       window.history.replaceState({}, "", "/client");
     } else {
       await loadContext(token);
@@ -477,6 +520,12 @@ export default function AppShell() {
     switch (activeScreen) {
       case "feed":
         return <FeedScreen jwt={jwt} onPostSelect={handlePostSelect} onNavigate={handleScreenChange} />;
+      case "faro":
+        return <PlaceholderScreen icon="link" title="Your Faro Page" subtitle="Bio page editor loading..." color="violet" />;
+      case "post":
+        return <PostComposerScreen jwt={jwt} />;
+      case "store":
+        return <PlaceholderScreen icon="store" title="Add-on Store" subtitle="Store loading..." color="amber" />;
       case "factory":
         return <FactoryScreen jwt={jwt} clientTier={client?.tier} />;
       case "calendar":

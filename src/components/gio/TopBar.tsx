@@ -3,19 +3,13 @@
 import TabIcon from "./TabIcon";
 import GioAvatar from "./GioAvatar";
 
-export type Screen = "feed" | "factory" | "calendar" | "stats" | "account" | "post-detail" | "gio-chat";
+export type Screen = "feed" | "faro" | "post" | "store" | "account" | "post-detail" | "gio-chat" | "factory" | "calendar" | "stats";
 
-const tierColors: Record<string, { bg: string; text: string }> = {
-  spark: { bg: "bg-amber-500/20", text: "text-amber-600" },
-  pro: { bg: "bg-blue-500/20", text: "text-blue-600" },
-  unleashed: { bg: "bg-violet-500/20", text: "text-violet-600" },
-};
-
-const tabs: { screen: Screen; label: string; icon: "Home" | "Sparkles" | "CalendarDays" | "BarChart3" | "CircleUserRound" }[] = [
+const tabs: { screen: Screen; label: string; icon: "Home" | "Link2" | "PenSquare" | "Store" | "CircleUserRound" }[] = [
   { screen: "feed", label: "Feed", icon: "Home" },
-  { screen: "factory", label: "Factory", icon: "Sparkles" },
-  { screen: "calendar", label: "Calendar", icon: "CalendarDays" },
-  { screen: "stats", label: "Stats", icon: "BarChart3" },
+  { screen: "faro", label: "Faro", icon: "Link2" },
+  { screen: "post", label: "Post", icon: "PenSquare" },
+  { screen: "store", label: "Store", icon: "Store" },
   { screen: "account", label: "Account", icon: "CircleUserRound" },
 ];
 
@@ -31,14 +25,12 @@ interface TopBarProps {
 
 export default function TopBar({
   clientName,
-  tier,
   activeScreen,
   onScreenChange,
   onGioClick,
   unreadCount,
   isDesktop,
 }: TopBarProps) {
-  const colors = tierColors[tier || "spark"] || tierColors.spark;
   const activeBase = activeScreen === "post-detail" ? "feed" : activeScreen === "gio-chat" ? "feed" : activeScreen;
 
   return (
@@ -49,16 +41,9 @@ export default function TopBar({
       {/* Brand */}
       <div className="flex items-center gap-2.5 min-w-0">
         <img src="/images/guardia-logo.png" alt="Guardia" className="w-8 h-8 object-contain flex-shrink-0" />
-        <div className="min-w-0">
-          <span className="text-sm font-semibold text-[var(--text-primary)] truncate block leading-tight">
-            {clientName || "Guardia"}
-          </span>
-          {tier && (
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${colors.bg} ${colors.text} capitalize`}>
-              {tier}
-            </span>
-          )}
-        </div>
+        <span className="text-sm font-semibold text-[var(--text-primary)] truncate block leading-tight">
+          {clientName || "Guardia"}
+        </span>
       </div>
 
       {/* Desktop tabs */}

@@ -1,12 +1,12 @@
 "use client";
 
-import { Home, Sparkles, CalendarDays, BarChart3, CircleUserRound } from "lucide-react";
+import { Home, Link2, PenSquare, Store, CircleUserRound } from "lucide-react";
 
 const iconMap = {
   Home,
-  Sparkles,
-  CalendarDays,
-  BarChart3,
+  Link2,
+  PenSquare,
+  Store,
   CircleUserRound,
 } as const;
 
