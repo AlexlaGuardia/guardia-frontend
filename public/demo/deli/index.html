@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>On the Roll — Deli & Subs | Northumberland, PA</title>
+<meta name="description" content="Fresh. Local. Legendary. Family-owned deli in Northumberland, PA. Real Philly rolls, Dietz & Watson meats, homemade mac & cheese. Tues–Sat 10am–7pm.">
+<meta property="og:title" content="On the Roll — Deli & Subs | Northumberland, PA">
+<meta property="og:description" content="Fresh. Local. Legendary. Real Philly rolls, Dietz & Watson meats, homemade sides.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lenis@1.1.20/dist/lenis.css">
+<style>
+/* ===================================================
+   ON THE ROLL — Deli & Subs
+   Guardia Intelligence — VIPstart Demo
+   GSAP + Lenis scroll storytelling
+   Warm, hearty, welcoming
+   =================================================== */
+
+:root {
+  /* Warm Creams */
+  --cream: #FAF6F1;
+  --cream-warm: #FBF5EC;
+
+  /* Honey / Mustard */
+  --honey: #D4A04A;
+  --honey-deep: #B8892E;
+  --honey-light: #E4BE7A;
+
+  /* Brick Red */
+  --brick: #9B4D3A;
+  --brick-light: #C06B56;
+
+  /* Neutrals */
+  --charcoal: #2A2A2A;
+  --charcoal-light: #3D3D3D;
+  --warmgray: #7A7068;
+  --warmgray-light: #9A938B;
+
+  /* Depth */
+  --walnut: #5C4A3A;
+  --parchment: #E8DDD3;
+  --parchment-dark: #D4C5B8;
+
+  /* Shadows */
+  --shadow-soft: 0 4px 20px rgba(42, 32, 20, 0.08);
+  --shadow-medium: 0 8px 40px rgba(42, 32, 20, 0.12);
+  --shadow-lift: 0 12px 48px rgba(42, 32, 20, 0.18);
+  --radius: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Lenis overrides */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Source Sans 3', -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* === GRAIN OVERLAY === */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* === BUTCHER STRIPE DIVIDER === */
+.butcher-divider {
+  height: 8px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--brick) 0px,
+    var(--brick) 8px,
+    var(--cream) 8px,
+    var(--cream) 16px,
+    var(--honey) 16px,
+    var(--honey) 24px,
+    var(--cream) 24px,
+    var(--cream) 32px
+  );
+}
+@media (max-width: 768px) {
+  .butcher-divider { height: 6px; }
+}
+.butcher-divider-thin {
+  height: 3px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--brick) 0px,
+    var(--brick) 6px,
+    transparent 6px,
+    transparent 12px,
+    var(--honey) 12px,
+    var(--honey) 18px,
+    transparent 18px,
+    transparent 24px
+  );
+}
+
+/* === NAVIGATION === */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 0 2rem;
+  transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
+  background: transparent;
+}
+nav.scrolled {
+  background: rgba(250, 246, 241, 0.96);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 20px rgba(42, 32, 20, 0.1);
+}
+nav.scrolled::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--brick) 0px,
+    var(--brick) 6px,
+    transparent 6px,
+    transparent 12px,
+    var(--honey) 12px,
+    var(--honey) 18px,
+    transparent 18px,
+    transparent 24px
+  );
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+.logo-text {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.4s ease;
+}
+.logo-text em {
+  font-style: normal;
+  color: var(--honey-light);
+  font-weight: 700;
+  transition: color 0.4s ease;
+}
+nav.scrolled .logo-text { color: var(--charcoal); }
+nav.scrolled .logo-text em { color: var(--honey-deep); }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 400;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+nav.scrolled .nav-links a { color: var(--charcoal); }
+.nav-links a:hover { color: var(--honey); }
+.nav-phone {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+nav.scrolled .nav-phone {
+  color: var(--brick);
+  border-color: var(--brick-light);
+}
+.nav-phone:hover {
+  background: var(--honey);
+  color: #fff;
+  border-color: var(--honey);
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-phone { display: none; }
+  .nav-inner { height: 56px; padding: 0 1rem; }
+  nav { padding: 0 1rem; }
+  .logo-text { font-size: 1.05rem; }
+}
+
+/* === SECTION HELPERS === */
+.section-label {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 300;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.section-title {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.section-lede {
+  font-family: 'Lora', serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--warmgray);
+}
+.section-padding {
+  padding: 6rem 2rem;
+}
+@media (max-width: 768px) {
+  .section-padding { padding: 4rem 1.5rem; }
+}
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* === HERO === */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  background: var(--walnut);
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 70%, rgba(212,160,74,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 30%, rgba(155,77,58,0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 90%, rgba(42,28,18,0.5) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Deli counter pattern background */
+.hero-tiles {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 60px,
+      rgba(255,255,255,0.5) 60px,
+      rgba(255,255,255,0.5) 61px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(255,255,255,0.5) 60px,
+      rgba(255,255,255,0.5) 61px
+    );
+  pointer-events: none;
+}
+
+/* Badge watermark */
+.hero-badge-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 420px;
+  height: 420px;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+  max-width: 820px;
+}
+.hero-eyebrow {
+  display: inline-block;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 300;
+  font-size: 0.75rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--honey-light);
+  margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 7.5vw, 6rem);
+  color: var(--cream-warm);
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.5rem;
+}
+.hero h1 .on-the {
+  font-size: clamp(1.5rem, 3.5vw, 2.8rem);
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  display: block;
+  color: rgba(251,245,236,0.7);
+  margin-bottom: 0.2rem;
+}
+.hero h1 .roll {
+  color: var(--honey-light);
+  display: block;
+}
+.hero-rule {
+  width: 60px;
+  height: 3px;
+  background: var(--honey);
+  margin: 1.5rem auto;
+  border-radius: 2px;
+}
+.hero-tagline {
+  font-family: 'Lora', serif;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  color: rgba(255,255,255,0.8);
+  font-weight: 400;
+  font-style: italic;
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.01em;
+}
+.hero-pills {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+.hero-pill {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+}
+.hero-cta {
+  display: inline-block;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+  background: var(--honey);
+  padding: 1rem 2.8rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 24px rgba(212,160,74,0.35);
+}
+.hero-cta:hover {
+  background: var(--honey-light);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(212,160,74,0.45);
+}
+
+/* Deli basket decoration */
+.hero-deco {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 180px;
+  background: linear-gradient(to top, rgba(42,28,18,0.6) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 2;
+}
+.scroll-indicator span {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+}
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+@keyframes scrollBounce {
+  0%, 100% { transform: scaleY(1); opacity: 0.9; }
+  50% { transform: scaleY(0.4); opacity: 0.4; }
+}
+@media (max-width: 768px) {
+  .hero-content { padding: 1.5rem 1rem; }
+  .hero h1 { font-size: clamp(2.4rem, 10vw, 3.5rem); }
+  .hero h1 .on-the { font-size: clamp(1.1rem, 5vw, 1.8rem); }
+  .hero-badge-watermark { width: 300px; height: 300px; }
+  .scroll-indicator { bottom: 1.5rem; }
+  .scroll-line { height: 30px; }
+}
+
+/* === INTRO STRIP === */
+.intro-strip {
+  background: var(--honey);
+  padding: 1.2rem 2rem;
+  overflow: hidden;
+}
+.intro-strip-inner {
+  display: flex;
+  gap: 4rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.strip-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+}
+.strip-item .strip-icon {
+  font-size: 1.1rem;
+}
+.strip-item span {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+}
+@media (max-width: 768px) {
+  .intro-strip-inner { gap: 2rem; }
+  .strip-item span { font-size: 0.72rem; letter-spacing: 0.08em; }
+}
+
+/* === MENU SECTION === */
+.menu {
+  background: var(--cream);
+}
+.menu-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+.menu-header .section-label { color: var(--honey-deep); }
+.menu-header .section-title {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  color: var(--charcoal);
+}
+.menu-header .section-lede {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Category tabs */
+.menu-categories {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+.menu-cat-btn {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warmgray);
+  background: transparent;
+  border: 1px solid var(--parchment-dark);
+  padding: 0.55rem 1.4rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.menu-cat-btn:hover,
+.menu-cat-btn.active {
+  background: var(--honey);
+  color: #fff;
+  border-color: var(--honey);
+}
+
+/* Menu grid */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+@media (max-width: 1024px) {
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .menu-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+.menu-card {
+  background: var(--cream-warm);
+  border: 1px solid var(--parchment);
+  border-radius: var(--radius);
+  padding: 1.75rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.menu-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--honey-deep), var(--honey-light));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+.menu-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+.menu-card:hover::before {
+  transform: scaleX(1);
+}
+.menu-card.featured {
+  background: var(--charcoal);
+  border-color: var(--charcoal-light);
+  grid-column: span 1;
+}
+.menu-card.featured::before {
+  background: linear-gradient(90deg, var(--honey), var(--honey-light));
+  transform: scaleX(1);
+}
+.menu-card.featured .item-name { color: var(--cream-warm); }
+.menu-card.featured .item-desc { color: rgba(250,246,241,0.65); }
+.menu-card.featured .item-price { color: var(--honey-light); }
+.menu-card.featured .item-badge {
+  background: var(--honey);
+  color: var(--charcoal);
+}
+.item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.item-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--charcoal);
+  line-height: 1.2;
+}
+.item-price {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--honey-deep);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.item-badge {
+  display: inline-block;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--parchment);
+  color: var(--warmgray);
+  padding: 0.2rem 0.65rem;
+  border-radius: 50px;
+  margin-bottom: 0.5rem;
+}
+.item-desc {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  color: var(--warmgray);
+  line-height: 1.6;
+}
+
+/* Menu section group headings */
+.menu-section-head {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  margin-top: 1rem;
+}
+.menu-section-head h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--charcoal);
+  white-space: nowrap;
+}
+.menu-section-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--parchment-dark);
+}
+
+/* Special offer card */
+.specials-card {
+  background: linear-gradient(135deg, var(--brick) 0%, var(--walnut) 100%);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  margin-top: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+.specials-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+.specials-card::after {
+  content: '';
+  position: absolute;
+  bottom: -20px; left: -20px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  pointer-events: none;
+}
+.specials-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--honey-light);
+  margin-bottom: 0.75rem;
+}
+.specials-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+.specials-desc {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.75);
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+}
+.specials-cta {
+  display: inline-block;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+  background: var(--honey);
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.specials-cta:hover {
+  background: var(--honey-light);
+  transform: translateY(-1px);
+}
+
+/* === STORY SECTION === */
+.story {
+  background: var(--parchment);
+}
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .story-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+.story-visual {
+  position: relative;
+}
+.story-photo-main {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: linear-gradient(160deg, var(--walnut) 0%, var(--charcoal) 100%);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lift);
+}
+.story-photo-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(212,160,74,0.15) 0%, transparent 55%),
+    radial-gradient(circle at 75% 75%, rgba(155,77,58,0.12) 0%, transparent 50%);
+}
+.story-photo-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.story-counter-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.5) 0px,
+      rgba(255,255,255,0.5) 1px,
+      transparent 1px,
+      transparent 20px
+    );
+  pointer-events: none;
+}
+.story-deco-text {
+  font-family: 'Oswald', sans-serif;
+  font-size: 4rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.06);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.story-photo-badge {
+  position: absolute;
+  bottom: -1.5rem; right: -1.5rem;
+  width: 110px; height: 110px;
+  background: var(--honey);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-medium);
+  z-index: 2;
+}
+.story-photo-badge .badge-num {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  line-height: 1;
+}
+.story-photo-badge .badge-text {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.52rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(42,42,42,0.7);
+  text-align: center;
+  line-height: 1.2;
+}
+@media (max-width: 768px) {
+  .story-photo-badge {
+    width: 90px; height: 90px;
+    bottom: -1rem; right: -0.5rem;
+  }
+  .story-photo-badge .badge-num { font-size: 1.5rem; }
+}
+
+.story-text { padding: 1rem 0; }
+.story-text .section-label { color: var(--brick-light); }
+.story-text .section-title {
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  color: var(--charcoal);
+  margin-bottom: 1.25rem;
+}
+.story-lead {
+  font-family: 'Lora', serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--brick);
+  margin-bottom: 1.25rem;
+  line-height: 1.65;
+}
+.story-body {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1rem;
+  color: var(--warmgray);
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+.story-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--parchment-dark);
+}
+.fact-item { text-align: center; }
+.fact-num {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--honey-deep);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.fact-label {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.82rem;
+  color: var(--warmgray);
+  line-height: 1.4;
+}
+@media (max-width: 768px) {
+  .story-facts { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .fact-num { font-size: 1.8rem; }
+}
+
+/* === PHILLY ROLL SECTION === */
+.philly {
+  background: var(--charcoal);
+  position: relative;
+  overflow: hidden;
+}
+.philly::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 50%, rgba(212,160,74,0.08) 0%, transparent 45%),
+    radial-gradient(circle at 90% 50%, rgba(155,77,58,0.1) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* Diagonal texture lines */
+.philly::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255,255,255,0.5) 0px,
+    rgba(255,255,255,0.5) 1px,
+    transparent 1px,
+    transparent 30px
+  );
+  pointer-events: none;
+}
+
+.philly-inner {
+  position: relative;
+  z-index: 2;
+}
+.philly-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+.philly-header .section-label { color: var(--honey-light); }
+.philly-header .section-title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  color: var(--cream-warm);
+}
+.philly-header .section-lede {
+  color: rgba(250,246,241,0.6);
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.philly-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+@media (max-width: 768px) {
+  .philly-features { grid-template-columns: 1fr; }
+}
+.philly-feature {
+  background: rgba(42,42,42,0.6);
+  padding: 2.5rem 2rem;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.3s ease;
+}
+.philly-feature:hover {
+  background: rgba(60,48,38,0.8);
+}
+.philly-feature:nth-child(2n) { border-right: none; }
+@media (max-width: 768px) {
+  .philly-feature { border-right: none; }
+}
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(212,160,74,0.12);
+  border: 1px solid rgba(212,160,74,0.2);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  font-size: 1.2rem;
+}
+.feature-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cream-warm);
+  margin-bottom: 0.6rem;
+}
+.feature-body {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.92rem;
+  color: rgba(250,246,241,0.55);
+  line-height: 1.7;
+}
+
+.philly-callout {
+  text-align: center;
+  padding: 3rem 2rem;
+  border: 1px solid rgba(212,160,74,0.15);
+  border-radius: var(--radius);
+  background: rgba(212,160,74,0.04);
+}
+.philly-callout-quote {
+  font-family: 'Lora', serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+  font-style: italic;
+  color: var(--honey-light);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.philly-callout-attr {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(250,246,241,0.4);
+}
+
+/* === REVIEWS SECTION === */
+.reviews {
+  background: var(--cream);
+}
+.reviews-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+.reviews-header .section-label { color: var(--honey-deep); }
+.reviews-header .section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  color: var(--charcoal);
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 1024px) {
+  .reviews-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .reviews-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+.review-card {
+  background: var(--cream-warm);
+  border: 1px solid var(--parchment);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+.review-stars {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  color: var(--honey);
+  font-size: 0.9rem;
+}
+.review-text {
+  font-family: 'Lora', serif;
+  font-size: 0.98rem;
+  font-style: italic;
+  color: var(--charcoal-light);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+.review-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.reviewer-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--honey) 0%, var(--honey-deep) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.reviewer-avatar span {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+.reviewer-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--charcoal);
+  text-transform: uppercase;
+}
+.reviewer-local {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.8rem;
+  color: var(--warmgray-light);
+}
+.review-quote-mark {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  font-family: 'Lora', serif;
+  font-size: 3rem;
+  color: var(--parchment-dark);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* === VISIT SECTION === */
+.visit {
+  background: linear-gradient(160deg, var(--walnut) 0%, var(--charcoal) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.visit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(212,160,74,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(155,77,58,0.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+.visit-inner {
+  position: relative;
+  z-index: 2;
+}
+.visit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .visit-grid { grid-template-columns: 1fr; gap: 3rem; }
+}
+
+.visit-left .section-label { color: var(--honey-light); }
+.visit-left .section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--cream-warm);
+  margin-bottom: 1.25rem;
+}
+.visit-intro {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: rgba(250,246,241,0.7);
+  margin-bottom: 2.5rem;
+  line-height: 1.65;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+.contact-icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(212,160,74,0.12);
+  border: 1px solid rgba(212,160,74,0.2);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+.contact-detail-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--honey-light);
+  margin-bottom: 0.3rem;
+}
+.contact-detail-value {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1.05rem;
+  color: var(--cream-warm);
+  line-height: 1.5;
+}
+.contact-detail-value a {
+  color: var(--cream-warm);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.contact-detail-value a:hover { color: var(--honey-light); }
+
+.visit-cta-block {
+  margin-top: 2.5rem;
+  padding: 1.75rem;
+  background: rgba(212,160,74,0.08);
+  border: 1px solid rgba(212,160,74,0.15);
+  border-radius: var(--radius);
+}
+.visit-cta-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--honey-light);
+  margin-bottom: 0.75rem;
+}
+.visit-cta-text {
+  font-family: 'Lora', serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: rgba(250,246,241,0.75);
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+.btn-primary {
+  display: inline-block;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+  background: var(--honey);
+  padding: 0.85rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  background: var(--honey-light);
+  transform: translateY(-1px);
+}
+
+/* Hours panel */
+.hours-panel {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hours-panel-header {
+  background: var(--honey);
+  padding: 1rem 1.5rem;
+}
+.hours-panel-header h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--charcoal);
+}
+.hours-list {
+  list-style: none;
+}
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.2s ease;
+}
+.hours-row:last-child { border-bottom: none; }
+.hours-row:hover { background: rgba(255,255,255,0.03); }
+.hours-row.today { background: rgba(212,160,74,0.07); }
+.hours-day {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cream-warm);
+}
+.hours-row.today .hours-day { color: var(--honey-light); }
+.hours-time {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(250,246,241,0.6);
+}
+.hours-row.today .hours-time { color: rgba(228,190,122,0.85); }
+.hours-closed { color: rgba(250,246,241,0.3) !important; }
+
+.delivery-badge {
+  margin: 1.5rem 0 0;
+  background: rgba(212,160,74,0.08);
+  border: 1px solid rgba(212,160,74,0.15);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+.delivery-badge-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--honey-light);
+  margin-bottom: 0.3rem;
+}
+.delivery-badge-text {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.92rem;
+  color: rgba(250,246,241,0.65);
+}
+
+/* Map placeholder */
+.map-placeholder {
+  margin-top: 1.5rem;
+  aspect-ratio: 16/7;
+  background: linear-gradient(135deg, rgba(92,74,58,0.4) 0%, rgba(42,42,42,0.6) 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.map-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 40px);
+}
+.map-dot {
+  width: 14px;
+  height: 14px;
+  background: var(--honey);
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 0 4px rgba(212,160,74,0.2), 0 0 0 8px rgba(212,160,74,0.08);
+}
+.map-label {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+/* === FOOTER === */
+footer {
+  background: var(--charcoal);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3.5rem 2rem 2.5rem;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3rem;
+  align-items: start;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+@media (max-width: 768px) {
+  .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+}
+.footer-brand .brand-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cream-warm);
+  margin-bottom: 0.4rem;
+}
+.footer-brand .brand-name em {
+  font-style: normal;
+  color: var(--honey);
+}
+.footer-brand .brand-tagline {
+  font-family: 'Lora', serif;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: rgba(250,246,241,0.4);
+  margin-bottom: 1.25rem;
+}
+.footer-brand .brand-address {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.88rem;
+  color: rgba(250,246,241,0.45);
+  line-height: 1.6;
+}
+.footer-social {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+@media (max-width: 768px) {
+  .footer-social { align-items: flex-start; flex-direction: row; }
+}
+.footer-social-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(250,246,241,0.3);
+  margin-bottom: 0.25rem;
+}
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(250,246,241,0.55);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.social-link:hover { color: var(--honey-light); }
+.social-icon {
+  width: 30px;
+  height: 30px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.social-link:hover .social-icon {
+  background: rgba(212,160,74,0.12);
+  border-color: rgba(212,160,74,0.2);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-copy {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.8rem;
+  color: rgba(250,246,241,0.25);
+}
+.footer-credit {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.8rem;
+  color: rgba(250,246,241,0.25);
+}
+.footer-credit a {
+  color: var(--honey);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  opacity: 0.7;
+}
+.footer-credit a:hover { opacity: 1; }
+
+/* === SCROLL ANIMATION UTILITIES === */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-32px);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(32px);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+</style>
+</head>
+<body>
+
+<!-- GRAIN handled by CSS -->
+
+<!-- === NAVIGATION === -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="logo-text"><em>On the Roll</em> — Deli</a>
+    <ul class="nav-links">
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#story">Our Story</a></li>
+      <li><a href="#philly">The Roll</a></li>
+      <li><a href="#visit">Visit</a></li>
+    </ul>
+    <a href="tel:+15701234567" class="nav-phone">(570) 123-4567</a>
+  </div>
+</nav>
+
+<!-- === HERO === -->
+<section class="hero" id="hero">
+  <div class="hero-tiles"></div>
+
+  <!-- SVG Badge Watermark -->
+  <svg class="hero-badge-watermark" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="150" cy="150" r="138" fill="none" stroke="#fff" stroke-width="2"/>
+    <circle cx="150" cy="150" r="120" fill="none" stroke="#fff" stroke-width="0.5"/>
+    <circle cx="150" cy="150" r="100" fill="none" stroke="#fff" stroke-width="1.5"/>
+    <path id="topArc" d="M 40,150 A 110,110 0 0,1 260,150" fill="none"/>
+    <text font-family="Oswald,sans-serif" font-size="13" font-weight="400" letter-spacing="6" text-transform="uppercase" fill="#fff">
+      <textPath href="#topArc" startOffset="8%">NORTHUMBERLAND — PENNSYLVANIA</textPath>
+    </text>
+    <path id="botArc" d="M 45,160 A 110,110 0 0,0 255,160" fill="none"/>
+    <text font-family="Oswald,sans-serif" font-size="11" font-weight="300" letter-spacing="4" fill="#fff">
+      <textPath href="#botArc" startOffset="15%">SINCE 2008 — FAMILY OWNED</textPath>
+    </text>
+    <text x="150" y="155" text-anchor="middle" font-family="Oswald,sans-serif" font-size="28" font-weight="700" fill="#fff" letter-spacing="4">DELI</text>
+    <line x1="80" y1="162" x2="130" y2="162" stroke="#fff" stroke-width="1"/>
+    <line x1="170" y1="162" x2="220" y2="162" stroke="#fff" stroke-width="1"/>
+  </svg>
+
+  <div class="hero-content" id="hero-content">
+    <p class="hero-eyebrow" id="hero-eyebrow">Northumberland, PA — Est. 2008</p>
+    <h1 id="hero-h1">
+      <span class="on-the">On the</span>
+      <span class="roll">Roll</span>
+    </h1>
+    <div class="hero-rule" id="hero-rule"></div>
+    <p class="hero-tagline" id="hero-tagline">Fresh. Local. Legendary.</p>
+    <div class="hero-pills" id="hero-pills">
+      <span class="hero-pill">Philly Rolls</span>
+      <span class="hero-pill">Dietz &amp; Watson Meats</span>
+      <span class="hero-pill">Homemade Sides</span>
+      <span class="hero-pill">Delivery Available</span>
+    </div>
+    <a href="#visit" class="hero-cta" id="hero-cta">Order or Visit</a>
+  </div>
+
+  <div class="hero-deco"></div>
+
+  <div class="scroll-indicator" id="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Intro strip -->
+<div class="butcher-divider"></div>
+<div class="intro-strip">
+  <div class="intro-strip-inner">
+    <div class="strip-item"><span class="strip-icon">🥖</span><span>Real Philly Rolls</span></div>
+    <div class="strip-item"><span class="strip-icon">🏡</span><span>Family Owned</span></div>
+    <div class="strip-item"><span class="strip-icon">🚗</span><span>Delivery Available</span></div>
+    <div class="strip-item"><span class="strip-icon">🌿</span><span>Fresh Daily</span></div>
+  </div>
+</div>
+<div class="butcher-divider"></div>
+
+<!-- === MENU SECTION === -->
+<section class="menu section-padding" id="menu">
+  <div class="container">
+
+    <div class="menu-header reveal">
+      <p class="section-label">What We Make</p>
+      <h2 class="section-title">The Menu</h2>
+      <p class="section-lede">Every sandwich built to order. Every side made in-house. No shortcuts, no shortcuts, no shortcuts.</p>
+    </div>
+
+    <!-- Signature Subs -->
+    <div class="menu-section-head reveal">
+      <h3>Signature Subs</h3>
+      <div class="menu-section-rule"></div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-card featured reveal">
+        <div class="item-badge">House Favorite</div>
+        <div class="item-header">
+          <div class="item-name">The Valley Classic</div>
+          <div class="item-price">$11.99</div>
+        </div>
+        <p class="item-desc">Dietz &amp; Watson roast beef, provolone, caramelized onions, horseradish aioli, lettuce &amp; tomato on a fresh Philly roll. The one that started it all.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-badge">Staff Pick</div>
+        <div class="item-header">
+          <div class="item-name">Italian Combo</div>
+          <div class="item-price">$12.49</div>
+        </div>
+        <p class="item-desc">Capicola, salami, pepperoni, ham, sharp provolone, banana peppers, oil &amp; oregano. Stacked high on an authentic Philly roll.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-header">
+          <div class="item-name">Turkey Club</div>
+          <div class="item-price">$10.99</div>
+        </div>
+        <p class="item-desc">Dietz &amp; Watson oven-roasted turkey, crispy bacon, Swiss, lettuce, tomato, and a light honey mustard on a soft Philly roll.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-header">
+          <div class="item-name">Chicken Cutlet</div>
+          <div class="item-price">$11.49</div>
+        </div>
+        <p class="item-desc">Hand-breaded chicken cutlet, fresh mozzarella, roasted peppers, basil, and a drizzle of house garlic oil. Pressed golden and served hot.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-badge">Seasonal</div>
+        <div class="item-header">
+          <div class="item-name">Tuna Melt</div>
+          <div class="item-price">$9.99</div>
+        </div>
+        <p class="item-desc">House-made tuna salad with celery and red onion, melted American, and diced dill pickles on a toasted Philly roll.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-header">
+          <div class="item-name">Veggie Loaded</div>
+          <div class="item-price">$9.49</div>
+        </div>
+        <p class="item-desc">Fresh cucumber, roasted red pepper, avocado, spinach, Swiss, sun-dried tomato spread, and balsamic glaze. Hearty and satisfying.</p>
+      </div>
+    </div>
+
+    <!-- Fresh Salads -->
+    <div class="menu-section-head reveal" style="margin-top: 3rem;">
+      <h3>Fresh Salads</h3>
+      <div class="menu-section-rule"></div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-card reveal">
+        <div class="item-header">
+          <div class="item-name">Garden Chop</div>
+          <div class="item-price">$9.49</div>
+        </div>
+        <p class="item-desc">Romaine, cucumber, cherry tomatoes, red onion, kalamata olives, pepperoncini, and house Italian vinaigrette. Made to order.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-badge">Popular</div>
+        <div class="item-header">
+          <div class="item-name">Deli Classic Caesar</div>
+          <div class="item-price">$10.49</div>
+        </div>
+        <p class="item-desc">Crisp romaine, shaved Parmesan, house-made Caesar dressing, croutons, and optional grilled chicken or turkey. Light and satisfying.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-header">
+          <div class="item-name">Valley Harvest</div>
+          <div class="item-price">$11.49</div>
+        </div>
+        <p class="item-desc">Mixed greens, sliced granny smith, candied walnuts, dried cranberry, crumbled gorgonzola, grilled turkey, honey-cider vinaigrette.</p>
+      </div>
+    </div>
+
+    <!-- Homemade Sides -->
+    <div class="menu-section-head reveal" style="margin-top: 3rem;">
+      <h3>Homemade Sides</h3>
+      <div class="menu-section-rule"></div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-card featured reveal">
+        <div class="item-badge">Fan Favorite</div>
+        <div class="item-header">
+          <div class="item-name">Mac &amp; Cheese</div>
+          <div class="item-price">$3.99</div>
+        </div>
+        <p class="item-desc">Slow-cooked, four-cheese blend — sharp cheddar, Gruyere, smoked gouda, American. Baked with a breadcrumb crust. Get a cup. Or a quart. No judgment.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-header">
+          <div class="item-name">Old-Fashioned Potato Salad</div>
+          <div class="item-price">$2.99</div>
+        </div>
+        <p class="item-desc">Grandma's recipe. Yukon Golds, yellow mustard, celery, sweet relish, creamy mayo. Made fresh every morning.</p>
+      </div>
+      <div class="menu-card reveal">
+        <div class="item-header">
+          <div class="item-name">Coleslaw</div>
+          <div class="item-price">$2.49</div>
+        </div>
+        <p class="item-desc">Crisp green cabbage, carrot, sweet and tangy dressing. The kind of coleslaw you actually want to eat.</p>
+      </div>
+    </div>
+
+    <!-- Daily Specials callout -->
+    <div class="specials-card reveal">
+      <p class="specials-label">Always Changing</p>
+      <h3 class="specials-title">Daily Specials</h3>
+      <p class="specials-desc">Every Tuesday through Saturday we run a special — a different sub, seasonal salad, or rotating soup. Call ahead or stop in to see what's on today.</p>
+      <a href="tel:+15701234567" class="specials-cta">Call for Today's Special</a>
+    </div>
+
+  </div>
+</section>
+
+<div class="butcher-divider"></div>
+
+<!-- === STORY SECTION === -->
+<section class="story section-padding" id="story">
+  <div class="container">
+    <div class="story-grid">
+
+      <div class="story-visual reveal-left">
+        <div class="story-photo-main">
+          <div class="story-counter-pattern"></div>
+          <div class="story-deco-text">DELI</div>
+          <span class="story-photo-label">On the Roll — Northumberland, PA</span>
+        </div>
+        <div class="story-photo-badge">
+          <div class="badge-num">16+</div>
+          <div class="badge-text">Years<br>Serving</div>
+        </div>
+      </div>
+
+      <div class="story-text reveal-right">
+        <p class="section-label">Born &amp; Raised</p>
+        <h2 class="section-title">A Valley<br>Institution</h2>
+        <p class="story-lead">"We grew up in this valley. We opened this shop for the people who grew up here too."</p>
+        <p class="story-body">On the Roll started in 2008 as a small counter operation on Queen Street. No franchise, no formula — just a family recipe book, a commitment to real ingredients, and a belief that a great sandwich can make someone's day better.</p>
+        <p class="story-body">We use Dietz &amp; Watson meats because quality matters. We bake fresh every morning because shortcuts show. We're open Tuesday through Saturday because that's what works for a real neighborhood deli, not a corporate location count.</p>
+        <p class="story-body">Northumberland isn't just where we work. It's home.</p>
+        <div class="story-facts">
+          <div class="fact-item">
+            <div class="fact-num">16+</div>
+            <div class="fact-label">Years in the Valley</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-num">D&amp;W</div>
+            <div class="fact-label">Meats, Always</div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-num">0</div>
+            <div class="fact-label">Frozen Sides</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="butcher-divider"></div>
+
+<!-- === PHILLY ROLL SECTION === -->
+<section class="philly section-padding" id="philly">
+  <div class="philly-inner container">
+
+    <div class="philly-header reveal">
+      <p class="section-label">What Sets Us Apart</p>
+      <h2 class="section-title">The Philly Roll<br>Difference</h2>
+      <p class="section-lede">Not a hoagie roll. Not a kaiser. A real Philly roll — chewy crust, soft center, holds up to anything. Here's why it matters.</p>
+    </div>
+
+    <div class="philly-features reveal">
+      <div class="philly-feature">
+        <div class="feature-icon">🥖</div>
+        <div class="feature-title">Authentic Philly Rolls</div>
+        <p class="feature-body">Delivered fresh every morning from a Pennsylvania bakery. The crust has the right snap. The interior has the right give. Every sub starts here.</p>
+      </div>
+      <div class="philly-feature">
+        <div class="feature-icon">🥩</div>
+        <div class="feature-title">Dietz &amp; Watson Meats</div>
+        <p class="feature-body">We've carried Dietz &amp; Watson since day one. No mystery meats. No cheap fillers. Real deli-quality cuts sliced fresh at the counter — every single day.</p>
+      </div>
+      <div class="philly-feature">
+        <div class="feature-icon">🧀</div>
+        <div class="feature-title">Real Cheese, Always</div>
+        <p class="feature-body">Sharp provolone, fresh mozzarella, smoked Gruyere. We don't use the plastic stuff. Cheese is a texture and a flavor — it should taste like something.</p>
+      </div>
+      <div class="philly-feature">
+        <div class="feature-icon">🌿</div>
+        <div class="feature-title">Fresh. Every Morning.</div>
+        <p class="feature-body">Produce prepped same-day. Sides made in-house. Rolls baked fresh. We don't hold over. If it's from yesterday, it doesn't go on a sandwich. Simple rule.</p>
+      </div>
+    </div>
+
+    <div class="philly-callout reveal">
+      <p class="philly-callout-quote">"You can taste the difference when someone cares about the roll."</p>
+      <p class="philly-callout-attr">— On the Roll, Northumberland PA</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="butcher-divider"></div>
+
+<!-- === REVIEWS SECTION === -->
+<section class="reviews section-padding" id="reviews">
+  <div class="container">
+
+    <div class="reviews-header reveal">
+      <p class="section-label">From the Community</p>
+      <h2 class="section-title">What the Locals Say</h2>
+    </div>
+
+    <div class="reviews-grid">
+
+      <div class="review-card reveal">
+        <div class="review-quote-mark">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">I've been coming here since they first opened. The Valley Classic is the best sandwich in the county, full stop. My kids ask for the mac and cheese by name.</p>
+        <div class="review-footer">
+          <div class="reviewer-avatar"><span>JR</span></div>
+          <div>
+            <div class="reviewer-name">Jim R.</div>
+            <div class="reviewer-local">Northumberland, PA — Regular since 2009</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal">
+        <div class="review-quote-mark">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">Ordered delivery for our whole office. Every sandwich was exactly right, still warm, roll held up perfectly. This is the spot for a working lunch in the valley.</p>
+        <div class="review-footer">
+          <div class="reviewer-avatar"><span>SB</span></div>
+          <div>
+            <div class="reviewer-name">Sarah B.</div>
+            <div class="reviewer-local">Milton, PA — Office Catering Regular</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal">
+        <div class="review-quote-mark">"</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">That Philly roll is no joke. Been to actual Philly shops and honestly this holds its own. The Italian Combo on a busy Saturday is worth the wait every time.</p>
+        <div class="review-footer">
+          <div class="reviewer-avatar"><span>TM</span></div>
+          <div>
+            <div class="reviewer-name">Tyler M.</div>
+            <div class="reviewer-local">Sunbury, PA — Weekly Visitor</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<div class="butcher-divider"></div>
+
+<!-- === VISIT SECTION === -->
+<section class="visit section-padding" id="visit">
+  <div class="visit-inner container">
+    <div class="visit-grid">
+
+      <div class="visit-left">
+        <p class="section-label">Come Find Us</p>
+        <h2 class="section-title">Order &amp;<br>Visit</h2>
+        <p class="visit-intro">Call ahead for pickup or delivery — we'll have it ready when you arrive. Walk-ins always welcome.</p>
+
+        <div class="contact-item reveal">
+          <div class="contact-icon">📍</div>
+          <div>
+            <div class="contact-detail-label">Address</div>
+            <div class="contact-detail-value">92 Queen Street<br>Northumberland, PA 17857</div>
+          </div>
+        </div>
+
+        <div class="contact-item reveal">
+          <div class="contact-icon">📞</div>
+          <div>
+            <div class="contact-detail-label">Phone</div>
+            <div class="contact-detail-value"><a href="tel:+15701234567">(570) 123-4567</a></div>
+          </div>
+        </div>
+
+        <div class="contact-item reveal">
+          <div class="contact-icon">📬</div>
+          <div>
+            <div class="contact-detail-label">Email</div>
+            <div class="contact-detail-value"><a href="mailto:hello@ontherolldeli.com">hello@ontherolldeli.com</a></div>
+          </div>
+        </div>
+
+        <div class="visit-cta-block reveal">
+          <div class="visit-cta-label">Call Ahead &amp; Save Time</div>
+          <p class="visit-cta-text">Pickup is ready in 15 minutes. Delivery runs Tuesday through Saturday, 10:30am to 6:30pm within 5 miles of Queen Street.</p>
+          <a href="tel:+15701234567" class="btn-primary">Call for Pickup or Delivery</a>
+        </div>
+      </div>
+
+      <div class="visit-right reveal-right">
+
+        <div class="hours-panel">
+          <div class="hours-panel-header">
+            <h3>Hours This Week</h3>
+          </div>
+          <ul class="hours-list">
+            <li class="hours-row hours-closed">
+              <span class="hours-day">Sunday</span>
+              <span class="hours-time hours-closed">Closed</span>
+            </li>
+            <li class="hours-row hours-closed">
+              <span class="hours-day">Monday</span>
+              <span class="hours-time hours-closed">Closed</span>
+            </li>
+            <li class="hours-row today">
+              <span class="hours-day">Tuesday</span>
+              <span class="hours-time">10:00 AM – 7:00 PM</span>
+            </li>
+            <li class="hours-row">
+              <span class="hours-day">Wednesday</span>
+              <span class="hours-time">10:00 AM – 7:00 PM</span>
+            </li>
+            <li class="hours-row">
+              <span class="hours-day">Thursday</span>
+              <span class="hours-time">10:00 AM – 7:00 PM</span>
+            </li>
+            <li class="hours-row">
+              <span class="hours-day">Friday</span>
+              <span class="hours-time">10:00 AM – 7:00 PM</span>
+            </li>
+            <li class="hours-row">
+              <span class="hours-day">Saturday</span>
+              <span class="hours-time">10:00 AM – 7:00 PM</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="delivery-badge reveal">
+          <div class="delivery-badge-label">Delivery Window</div>
+          <div class="delivery-badge-text">Tuesday – Saturday &nbsp;|&nbsp; 10:30 AM – 6:30 PM &nbsp;|&nbsp; Within 5 miles</div>
+        </div>
+
+        <div class="map-placeholder">
+          <div class="map-grid"></div>
+          <div class="map-dot"></div>
+          <div class="map-label">92 Queen Street, Northumberland, PA 17857</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- === FOOTER === -->
+<div class="butcher-divider"></div>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="brand-name"><em>On the Roll</em> — Deli &amp; Subs</div>
+        <div class="brand-tagline">Fresh. Local. Legendary.</div>
+        <div class="brand-address">92 Queen Street, Northumberland, PA 17857<br>Tues–Sat 10am–7pm &nbsp;|&nbsp; (570) 123-4567</div>
+      </div>
+      <div class="footer-social">
+        <div class="footer-social-label">Find us online</div>
+        <a href="#" class="social-link">
+          <div class="social-icon">f</div>
+          Facebook
+        </a>
+        <a href="#" class="social-link">
+          <div class="social-icon">in</div>
+          Instagram
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">&copy; 2025 On the Roll Deli &amp; Subs. All rights reserved.</div>
+      <div class="footer-credit">Website by <a href="https://guardiacontent.com" target="_blank">Guardia Intelligence</a></div>
+    </div>
+  </div>
+</footer>
+
+<!-- === SCRIPTS === -->
+<script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function() {
+
+  /* === LENIS SMOOTH SCROLL === */
+  const lenis = new Lenis({
+    duration: 1.15,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smooth: true,
+    smoothTouch: false
+  });
+
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  // Anchor link smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) lenis.scrollTo(target, { offset: -70 });
+    });
+  });
+
+  /* === NAV SCROLL STATE === */
+  const nav = document.getElementById('nav');
+  lenis.on('scroll', function(e) {
+    if (e.scroll > 60) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  });
+
+  /* === GSAP + ScrollTrigger === */
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* Hero entrance sequence */
+  const heroTl = gsap.timeline({ delay: 0.15 });
+  heroTl
+    .from('#hero-eyebrow', { opacity: 0, y: 20, duration: 0.7, ease: 'power3.out' })
+    .from('#hero-h1 .on-the', { opacity: 0, y: 30, duration: 0.65, ease: 'power3.out' }, '-=0.35')
+    .from('#hero-h1 .roll', { opacity: 0, y: 40, duration: 0.75, ease: 'power3.out' }, '-=0.4')
+    .from('#hero-rule', { scaleX: 0, duration: 0.5, ease: 'power2.out', transformOrigin: 'left center' }, '-=0.3')
+    .from('#hero-tagline', { opacity: 0, y: 20, duration: 0.6, ease: 'power3.out' }, '-=0.25')
+    .from('#hero-pills .hero-pill', { opacity: 0, y: 16, stagger: 0.1, duration: 0.5, ease: 'power2.out' }, '-=0.3')
+    .from('#hero-cta', { opacity: 0, y: 20, duration: 0.5, ease: 'power2.out' }, '-=0.2')
+    .from('#scroll-indicator', { opacity: 0, duration: 0.5, ease: 'power2.out' }, '-=0.1');
+
+  /* Hero parallax */
+  gsap.to('.hero-badge-watermark', {
+    y: 120,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '.hero',
+      start: 'top top',
+      end: 'bottom top',
+      scrub: 1.5
+    }
+  });
+
+  /* === REVEAL ANIMATIONS === */
+  function initReveal(selector, xOffset, yOffset) {
+    xOffset = xOffset || 0;
+    yOffset = yOffset || 0;
+
+    gsap.utils.toArray(selector).forEach(function(el) {
+      gsap.fromTo(el,
+        { opacity: 0, x: xOffset, y: yOffset || 32 },
+        {
+          opacity: 1, x: 0, y: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 88%',
+            toggleActions: 'play none none none'
+          }
+        }
+      );
+    });
+  }
+
+  initReveal('.reveal', 0, 32);
+  initReveal('.reveal-left', -40, 0);
+  initReveal('.reveal-right', 40, 0);
+
+  gsap.utils.toArray('.reveal-scale').forEach(function(el) {
+    gsap.fromTo(el,
+      { opacity: 0, scale: 0.92 },
+      {
+        opacity: 1, scale: 1,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 88%',
+          toggleActions: 'play none none none'
+        }
+      }
+    );
+  });
+
+  /* === STAGGER MENU CARDS === */
+  var menuGrids = document.querySelectorAll('.menu-grid');
+  menuGrids.forEach(function(grid) {
+    var cards = grid.querySelectorAll('.menu-card');
+    // Remove individual reveal, apply stagger
+    cards.forEach(function(card) {
+      card.classList.remove('reveal');
+    });
+    gsap.fromTo(cards,
+      { opacity: 0, y: 36 },
+      {
+        opacity: 1, y: 0,
+        duration: 0.65,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: grid,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      }
+    );
+  });
+
+  /* === STAGGER REVIEW CARDS === */
+  var reviewCards = document.querySelectorAll('.review-card');
+  reviewCards.forEach(function(c) { c.classList.remove('reveal'); });
+  gsap.fromTo(reviewCards,
+    { opacity: 0, y: 40 },
+    {
+      opacity: 1, y: 0,
+      duration: 0.7,
+      stagger: 0.15,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.reviews-grid',
+        start: 'top 85%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === PHILLY FEATURES STAGGER === */
+  var phillyFeatures = document.querySelectorAll('.philly-feature');
+  gsap.fromTo(phillyFeatures,
+    { opacity: 0, y: 30 },
+    {
+      opacity: 1, y: 0,
+      duration: 0.65,
+      stagger: 0.12,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.philly-features',
+        start: 'top 82%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === HOURS ROWS STAGGER === */
+  var hoursRows = document.querySelectorAll('.hours-row');
+  gsap.fromTo(hoursRows,
+    { opacity: 0, x: 20 },
+    {
+      opacity: 1, x: 0,
+      duration: 0.5,
+      stagger: 0.08,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.hours-panel',
+        start: 'top 88%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === FACT COUNTER ANIMATION === */
+  // Animate the fact numbers when they scroll into view
+  gsap.fromTo('.story-facts',
+    { opacity: 0, y: 24 },
+    {
+      opacity: 1, y: 0,
+      duration: 0.7,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.story-facts',
+        start: 'top 90%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === STRIP ITEMS === */
+  gsap.fromTo('.strip-item',
+    { opacity: 0, y: 10 },
+    {
+      opacity: 1, y: 0,
+      duration: 0.5,
+      stagger: 0.1,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.intro-strip',
+        start: 'top 95%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === MAP DOT PULSE === */
+  gsap.to('.map-dot', {
+    boxShadow: '0 0 0 12px rgba(212,160,74,0.08), 0 0 0 24px rgba(212,160,74,0.03)',
+    repeat: -1,
+    duration: 1.8,
+    yoyo: true,
+    ease: 'sine.inOut'
+  });
+
+  /* === PHILLY CALLOUT === */
+  gsap.fromTo('.philly-callout-quote',
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1, y: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.philly-callout',
+        start: 'top 88%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === SPECIALS CARD === */
+  gsap.fromTo('.specials-card',
+    { opacity: 0, scale: 0.97 },
+    {
+      opacity: 1, scale: 1,
+      duration: 0.75,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.specials-card',
+        start: 'top 88%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === STORY BADGE === */
+  gsap.fromTo('.story-photo-badge',
+    { opacity: 0, scale: 0.7, rotation: -15 },
+    {
+      opacity: 1, scale: 1, rotation: 0,
+      duration: 0.8,
+      ease: 'back.out(1.5)',
+      scrollTrigger: {
+        trigger: '.story-visual',
+        start: 'top 75%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === FOOTER ENTRANCE === */
+  gsap.fromTo('footer',
+    { opacity: 0 },
+    {
+      opacity: 1,
+      duration: 0.8,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: 'footer',
+        start: 'top 95%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+
+  /* === REFRESH ScrollTrigger on resize === */
+  window.addEventListener('resize', function() {
+    ScrollTrigger.refresh();
+  });
+
+})();
+</script>
+</body>
+</html>

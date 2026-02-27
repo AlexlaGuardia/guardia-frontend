@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Bella & Co — Boutique &amp; Jewelry Bar | Northumberland, PA</title>
+<meta name="description" content="Affordable luxury, every day. Women's fashion boutique and jewelry bar in Northumberland, PA. Look expensive without the price tag. Est. 2013.">
+<meta property="og:title" content="Bella &amp; Co — Boutique &amp; Jewelry Bar | Northumberland, PA">
+<meta property="og:description" content="Affordable luxury, every day. Women's fashion boutique and jewelry bar in Northumberland, PA.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lenis@1.1.20/dist/lenis.css">
+<style>
+/* ===================================================
+   BELLA & CO — Guardia Intelligence
+   GSAP + Lenis scroll storytelling
+   Women's boutique & jewelry bar demo
+   =================================================== */
+
+:root {
+  /* Warm Cream & Parchment */
+  --cream: #FAF6F1;
+  --cream-warm: #F5EDE3;
+  --parchment: #E8DDD3;
+  --parchment-dark: #D4C9B8;
+
+  /* Blush & Gold */
+  --blush: #C4A882;
+  --blush-deep: #A8916B;
+  --blush-light: #D4BFA0;
+  --blush-pale: #EDE0D0;
+
+  /* Dusty Rose */
+  --rose-muted: #B8908A;
+  --rose-deep: #9A7A75;
+  --rose-light: #CDB0AB;
+
+  /* Neutrals */
+  --charcoal: #2A2A2A;
+  --charcoal-light: #4A4540;
+  --warmgray: #7A7068;
+  --warmgray-light: #9A938B;
+
+  /* Surfaces */
+  --surface-warm: #F0E8DF;
+  --surface-dark: #1E1A17;
+  --surface-deep: #2E2820;
+
+  /* Shadows */
+  --shadow-soft: 0 4px 20px rgba(42, 36, 28, 0.07);
+  --shadow-medium: 0 8px 40px rgba(42, 36, 28, 0.10);
+  --shadow-lift: 0 12px 48px rgba(42, 36, 28, 0.14);
+  --radius: 4px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'Source Sans 3', -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* === GRAIN OVERLAY === */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* === BOTANICAL DIVIDER === */
+.botanical-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--blush-light), var(--rose-light), var(--blush-light), transparent);
+  position: relative;
+  overflow: visible;
+}
+.botanical-divider::before {
+  content: '◇';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--cream);
+  padding: 0 1rem;
+  color: var(--blush);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+}
+
+/* === NAVIGATION === */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 0 2rem;
+  transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
+  background: transparent;
+}
+nav.scrolled {
+  background: rgba(250, 246, 241, 0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 24px rgba(42, 36, 28, 0.07);
+}
+nav.scrolled::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--blush-light), var(--rose-light), var(--blush-light), transparent);
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.4s ease;
+  letter-spacing: 0.02em;
+}
+.logo-text span {
+  font-family: 'Lora', serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: var(--blush-light);
+  display: block;
+  letter-spacing: 0.15em;
+  transition: color 0.4s ease;
+  margin-top: -2px;
+}
+nav.scrolled .logo-text { color: var(--charcoal); }
+nav.scrolled .logo-text span { color: var(--blush-deep); }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+nav.scrolled .nav-links a { color: var(--charcoal-light); }
+.nav-links a:hover { color: var(--blush); }
+.nav-cta {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 1.3rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+}
+nav.scrolled .nav-cta {
+  color: var(--blush-deep);
+  border-color: var(--blush);
+}
+.nav-cta:hover {
+  background: var(--blush);
+  color: #fff;
+  border-color: var(--blush);
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-cta { display: none; }
+  .nav-inner { height: 56px; }
+  nav { padding: 0 1.25rem; }
+  .logo-text { font-size: 1.1rem; }
+}
+
+/* === SECTION HELPERS === */
+.section-label {
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  color: var(--blush-deep);
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+.section-padding {
+  padding: 6rem 2rem;
+}
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 4rem 1.5rem;
+  }
+}
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* === HERO === */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  background: var(--surface-dark);
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(196, 168, 130, 0.15) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 20%, rgba(184, 144, 138, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(196, 168, 130, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Subtle woven texture background */
+.hero-texture {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(196,168,130,0.3) 3px, rgba(196,168,130,0.3) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(196,168,130,0.3) 3px, rgba(196,168,130,0.3) 4px);
+  pointer-events: none;
+}
+
+/* Monogram watermark */
+.hero-monogram {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 420px;
+  height: 420px;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Decorative side panels */
+.hero-panel {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 220px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+.hero-panel-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(196,168,130,0.6), transparent);
+}
+.hero-panel-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(184,144,138,0.6), transparent);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+  max-width: 820px;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--blush-light);
+  margin-bottom: 2.5rem;
+}
+.hero-eyebrow::before,
+.hero-eyebrow::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--blush-light);
+  opacity: 0.5;
+}
+@media (max-width: 768px) {
+  .hero-eyebrow {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    gap: 0.6rem;
+  }
+  .hero-eyebrow::before,
+  .hero-eyebrow::after { width: 25px; }
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: clamp(2.8rem, 6.5vw, 5rem);
+  color: var(--cream);
+  line-height: 1.08;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.hero h1 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--blush-light);
+}
+.hero h1 .ampersand {
+  color: var(--rose-light);
+  font-style: italic;
+  font-weight: 400;
+}
+.hero-tagline {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  color: rgba(255,255,255,0.6);
+  margin: 1.5rem 0 2.5rem;
+  letter-spacing: 0.02em;
+}
+.hero-tagline strong {
+  color: var(--blush-light);
+  font-style: normal;
+  font-weight: 500;
+}
+@media (max-width: 768px) {
+  .hero-tagline {
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+  }
+}
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  display: inline-block;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--surface-dark);
+  background: var(--blush);
+  padding: 0.9rem 2.4rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  background: var(--blush-light);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(196,168,130,0.3);
+}
+.btn-outline {
+  display: inline-block;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  background: transparent;
+  padding: 0.9rem 2.4rem;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.btn-outline:hover {
+  border-color: var(--blush-light);
+  color: var(--blush-light);
+}
+
+/* Hero collection strips */
+.hero-strips {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  height: 6px;
+  pointer-events: none;
+}
+.hero-strip {
+  flex: 1;
+  opacity: 0.5;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  z-index: 2;
+}
+.scroll-indicator span {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+}
+.scroll-line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, rgba(196,168,130,0.6), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.4; transform: scaleY(0.6); }
+}
+@media (max-width: 768px) {
+  .hero-panel { display: none; }
+  .hero-content { padding: 1.5rem; }
+  .hero h1 { font-size: clamp(2.2rem, 10vw, 3rem); }
+  .hero-monogram { width: 280px; height: 280px; }
+  .scroll-indicator { bottom: 1.5rem; }
+}
+
+/* === COLLECTIONS GRID === */
+.collections {
+  background: var(--cream);
+}
+.collections .section-label { color: var(--blush-deep); text-align: center; }
+.collections .section-title {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  color: var(--charcoal);
+  text-align: center;
+}
+.collections-subtitle {
+  text-align: center;
+  color: var(--warmgray);
+  font-size: 1rem;
+  font-weight: 300;
+  margin-bottom: 3.5rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1.25rem;
+}
+
+/* Featured cell */
+.col-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.col-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
+}
+.col-card.featured {
+  grid-row: 1 / 3;
+}
+.col-image {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 1.5rem;
+  position: relative;
+}
+.col-card.featured .col-image { min-height: 480px; }
+.col-card:not(.featured) .col-image { min-height: 220px; }
+.col-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(30,26,23,0.65) 0%, rgba(30,26,23,0.1) 50%, transparent 100%);
+  pointer-events: none;
+}
+.col-label {
+  position: relative;
+  z-index: 1;
+}
+.col-label-tag {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blush-light);
+  margin-bottom: 0.3rem;
+}
+.col-label-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+}
+.col-card.featured .col-label-name { font-size: 1.7rem; }
+
+/* Gradient backgrounds per card */
+.col-bg-arrivals {
+  background: linear-gradient(160deg, var(--blush-pale) 0%, var(--blush) 40%, var(--blush-deep) 100%);
+}
+.col-bg-accessories {
+  background: linear-gradient(135deg, var(--parchment) 0%, var(--blush-light) 60%, var(--warmgray-light) 100%);
+}
+.col-bg-apparel {
+  background: linear-gradient(145deg, var(--cream-warm) 0%, var(--rose-light) 50%, var(--rose-muted) 100%);
+}
+.col-bg-jewelry {
+  background: linear-gradient(140deg, var(--surface-deep) 0%, var(--charcoal-light) 50%, var(--blush-deep) 100%);
+}
+.col-bg-seasonal {
+  background: linear-gradient(130deg, var(--parchment-dark) 0%, var(--warmgray) 60%, var(--charcoal-light) 100%);
+}
+
+/* Decorative placeholder SVG motifs */
+.col-motif {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .collections-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; }
+  .col-card.featured { grid-row: auto; }
+  .col-card.featured .col-image { min-height: 300px; }
+}
+@media (max-width: 560px) {
+  .collections-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .col-card.featured .col-image { min-height: 260px; }
+  .col-card:not(.featured) .col-image { min-height: 200px; }
+  .col-label-name { font-size: 1.1rem; }
+  .col-card.featured .col-label-name { font-size: 1.3rem; }
+}
+
+/* === OUR STORY === */
+.story {
+  background: var(--cream-warm);
+  position: relative;
+  overflow: hidden;
+}
+.story::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--blush-pale) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+.story-visual {
+  position: relative;
+}
+.story-portrait {
+  aspect-ratio: 3/4;
+  background: linear-gradient(155deg, var(--blush-pale) 0%, var(--blush-light) 40%, var(--blush) 100%);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: var(--shadow-lift);
+}
+.story-portrait-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  opacity: 0.25;
+}
+.story-portrait-inner svg {
+  width: 64px;
+  height: 64px;
+}
+.story-portrait-inner span {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+}
+.story-badge {
+  position: absolute;
+  bottom: -1.5rem;
+  right: -1.5rem;
+  width: 90px;
+  height: 90px;
+  background: var(--surface-dark);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-medium);
+}
+.story-badge-year {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--blush-light);
+  line-height: 1;
+}
+.story-badge-est {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warmgray-light);
+  margin-top: 2px;
+}
+.story-accent {
+  position: absolute;
+  top: 1.5rem;
+  left: -1.5rem;
+  width: 60px;
+  height: 60px;
+  border: 1px solid var(--blush-light);
+  border-radius: 50%;
+  opacity: 0.4;
+}
+.story-text .section-label { color: var(--blush-deep); }
+.story-text .section-title {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  color: var(--charcoal);
+}
+.story-text p {
+  color: var(--warmgray);
+  font-size: 1rem;
+  margin-bottom: 1.1rem;
+  line-height: 1.85;
+}
+.story-text p strong {
+  color: var(--charcoal);
+  font-weight: 600;
+}
+.story-quote {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--blush-deep);
+  border-left: 2px solid var(--blush);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  line-height: 1.65;
+}
+.story-pillars {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+.pillar {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blush-deep);
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--blush-light);
+  border-radius: 50px;
+  background: rgba(196,168,130,0.06);
+}
+@media (max-width: 768px) {
+  .story-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .story-visual { order: 2; }
+  .story-text { order: 1; }
+  .story-portrait { aspect-ratio: 4/3; max-height: 320px; }
+  .story-badge { width: 70px; height: 70px; bottom: -1rem; right: -0.75rem; }
+  .story-badge-year { font-size: 0.95rem; }
+  .story-accent { display: none; }
+  .story-quote { font-size: 1.05rem; padding-left: 1rem; margin: 1.5rem 0; }
+}
+
+/* === JEWELRY BAR === */
+.jewelry {
+  background: var(--surface-dark);
+  position: relative;
+  overflow: hidden;
+}
+.jewelry::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 10% 50%, rgba(196,168,130,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 30%, rgba(184,144,138,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 90%, rgba(196,168,130,0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+.jewelry-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 2;
+}
+.jewelry .section-label { color: var(--blush-light); }
+.jewelry .section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  color: var(--cream);
+}
+.jewelry-header p {
+  color: rgba(255,255,255,0.6);
+  font-size: 1rem;
+  font-weight: 300;
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+.jewelry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.jewelry-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.jewelry-piece {
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+.jewelry-piece:hover { transform: translateY(-3px); }
+.jewelry-piece-inner {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  min-height: 180px;
+}
+.jewelry-piece:nth-child(1) .jewelry-piece-inner {
+  background: linear-gradient(145deg, #2E2420 0%, #3D3228 100%);
+}
+.jewelry-piece:nth-child(2) .jewelry-piece-inner {
+  background: linear-gradient(145deg, #342830 0%, #4A3840 100%);
+}
+.jewelry-piece:nth-child(3) .jewelry-piece-inner {
+  background: linear-gradient(145deg, #1E2228 0%, #2A3038 100%);
+}
+.jewelry-piece:nth-child(4) .jewelry-piece-inner {
+  background: linear-gradient(145deg, #28201E 0%, #3A2E2A 100%);
+}
+.jewelry-piece-icon {
+  font-size: 1.8rem;
+  opacity: 0.7;
+}
+.jewelry-piece-name {
+  font-family: 'Lora', serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--blush-light);
+}
+.jewelry-piece-desc {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.05em;
+}
+.jewelry-text .section-label { color: var(--blush-light); }
+.jewelry-text .section-title { color: var(--cream); font-size: clamp(1.5rem, 3vw, 2.2rem); }
+.jewelry-text p {
+  color: rgba(255,255,255,0.65);
+  font-size: 0.98rem;
+  line-height: 1.85;
+  margin-bottom: 1.1rem;
+}
+.jewelry-text p strong { color: var(--blush-light); font-weight: 500; }
+.jewelry-features {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.jewelry-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.jewelry-feature-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blush);
+  flex-shrink: 0;
+}
+.jewelry-feature span {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+}
+.jewelry-cta {
+  display: inline-block;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--surface-dark);
+  background: var(--blush);
+  padding: 0.85rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+.jewelry-cta:hover {
+  background: var(--blush-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(196,168,130,0.25);
+}
+@media (max-width: 900px) {
+  .jewelry-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .jewelry-showcase { grid-template-columns: repeat(4, 1fr); }
+  .jewelry-piece-inner { min-height: 140px; padding: 1.5rem 1rem; }
+}
+@media (max-width: 560px) {
+  .jewelry-showcase { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* === PINNED SCROLL — BOUTIQUE STORY === */
+.pinned-section {
+  background: var(--parchment);
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+.pinned-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 0% 50%, rgba(196,168,130,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 50%, rgba(184,144,138,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.pinned-inner {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pinned-phase {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+.pinned-phase .phase-content {
+  max-width: 680px;
+  text-align: center;
+  padding: 2rem;
+}
+@media (max-width: 768px) {
+  .pinned-phase .phase-content { padding: 1.5rem; }
+}
+.pinned-section .section-label { color: var(--blush-deep); }
+.pinned-section .section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  color: var(--charcoal);
+  margin-bottom: 1.5rem;
+}
+.pinned-phase p {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  color: var(--charcoal-light);
+  line-height: 1.85;
+  margin-bottom: 1rem;
+}
+.pinned-phase .lora-quote {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  color: var(--blush-deep);
+  border-left: 2px solid var(--blush);
+  padding-left: 1.5rem;
+  text-align: left;
+  margin: 2rem auto;
+  max-width: 520px;
+  line-height: 1.65;
+}
+@media (max-width: 768px) {
+  .pinned-phase .lora-quote {
+    font-size: 1.05rem;
+    padding-left: 1rem;
+    margin: 1.5rem auto;
+  }
+}
+.pinned-stamp {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blush-deep);
+  border: 1px solid var(--blush-light);
+  border-radius: 50px;
+  padding: 0.4rem 1.5rem;
+  opacity: 0.7;
+}
+
+/* === TESTIMONIALS === */
+.testimonials {
+  background: var(--cream);
+}
+.testimonials .section-label { color: var(--blush-deep); text-align: center; }
+.testimonials .section-title {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  color: var(--charcoal);
+  text-align: center;
+}
+.testimonials-intro {
+  text-align: center;
+  color: var(--warmgray);
+  font-size: 0.95rem;
+  font-weight: 300;
+  margin-bottom: 3.5rem;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+.testimonial-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--parchment);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+.testimonial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+.testimonial-mark {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--blush-light);
+  margin-bottom: 1rem;
+  display: block;
+  opacity: 0.6;
+}
+.testimonial-text {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--charcoal-light);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+.testimonial-stars {
+  color: var(--blush);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.testimonial-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+.av-1 { background: linear-gradient(135deg, var(--blush) 0%, var(--blush-deep) 100%); }
+.av-2 { background: linear-gradient(135deg, var(--rose-muted) 0%, var(--rose-deep) 100%); }
+.av-3 { background: linear-gradient(135deg, var(--warmgray) 0%, var(--charcoal-light) 100%); }
+.testimonial-name {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+.testimonial-since {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.72rem;
+  color: var(--warmgray-light);
+  font-weight: 300;
+}
+@media (max-width: 900px) {
+  .testimonials-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; gap: 1.25rem; }
+}
+@media (max-width: 560px) {
+  .testimonial-card { padding: 2rem 1.5rem; }
+  .testimonial-text { font-size: 0.9rem; }
+}
+
+/* === VISIT US === */
+.visit {
+  background: var(--surface-dark);
+  position: relative;
+  overflow: hidden;
+}
+.visit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 0% 100%, rgba(196,168,130,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 0%, rgba(184,144,138,0.05) 0%, transparent 45%);
+  pointer-events: none;
+}
+.visit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.visit-text .section-label { color: var(--blush-light); }
+.visit-text .section-title {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  color: var(--cream);
+}
+.visit-text p {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.98rem;
+  line-height: 1.85;
+  margin-bottom: 2rem;
+}
+.visit-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+.visit-detail {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.visit-detail-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(196,168,130,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+}
+.visit-detail-body {
+  flex: 1;
+}
+.visit-detail-label {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blush-light);
+  margin-bottom: 0.2rem;
+}
+.visit-detail-value {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.5;
+}
+.visit-map {
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(160deg, #1A2028 0%, #242830 50%, #1E2228 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.visit-map-inner {
+  text-align: center;
+  padding: 2rem;
+}
+.map-pin {
+  width: 48px;
+  height: 48px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--blush);
+  margin: 0 auto 1.5rem;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(196,168,130,0.3);
+}
+.map-pin::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface-dark);
+}
+.map-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 0.5rem;
+}
+.map-address {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+}
+/* Map decorative rings */
+.map-rings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.map-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(196,168,130,0.06);
+  border-radius: 50%;
+}
+.map-ring-1 { width: 120px; height: 120px; }
+.map-ring-2 { width: 240px; height: 240px; }
+.map-ring-3 { width: 380px; height: 380px; }
+
+.visit-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--blush-light);
+  text-decoration: none;
+  padding: 0.75rem 1.8rem;
+  border: 1px solid rgba(196,168,130,0.2);
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+.visit-phone:hover {
+  background: rgba(196,168,130,0.08);
+  border-color: var(--blush-light);
+}
+@media (max-width: 900px) {
+  .visit-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .visit-map { aspect-ratio: 4/3; max-height: 320px; }
+  .map-ring-3 { display: none; }
+}
+
+/* === FOOTER === */
+footer {
+  background: var(--surface-deep);
+  padding: 3rem 2rem 2rem;
+  position: relative;
+}
+footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(196,168,130,0.2), transparent);
+}
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.footer-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+.footer-brand .footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 0.3rem;
+}
+.footer-brand .footer-tagline {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--blush-light);
+  margin-bottom: 1rem;
+}
+.footer-brand p {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.35);
+  max-width: 260px;
+  line-height: 1.7;
+}
+.footer-nav h4 {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blush-light);
+  margin-bottom: 1rem;
+}
+.footer-nav ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.footer-nav a {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.footer-nav a:hover { color: var(--blush-light); }
+.footer-social h4 {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blush-light);
+  margin-bottom: 1rem;
+}
+.social-links {
+  display: flex;
+  gap: 0.75rem;
+}
+.social-link {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(196,168,130,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.social-link:hover {
+  border-color: var(--blush-light);
+  color: var(--blush-light);
+  background: rgba(196,168,130,0.08);
+}
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.footer-copy {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.25);
+}
+.footer-by {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.2);
+}
+.footer-by a {
+  color: var(--blush-light);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+.footer-by a:hover { opacity: 1; }
+@media (max-width: 768px) {
+  .footer-top { flex-direction: column; gap: 2rem; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
+
+/* === ANIMATION INIT STATES === */
+.anim-fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.anim-fade-in {
+  opacity: 0;
+}
+.anim-slide-left {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+.anim-slide-right {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.anim-scale {
+  opacity: 0;
+  transform: scale(0.94);
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="#" class="logo-text">
+      Bella <span>&amp; Co</span>
+      <span style="margin-top:1px;">boutique &amp; jewelry bar</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#collections">Collections</a></li>
+      <li><a href="#story">Our Story</a></li>
+      <li><a href="#jewelry">Jewelry Bar</a></li>
+      <li><a href="#visit">Visit Us</a></li>
+    </ul>
+    <a href="#visit" class="nav-cta">Find Us</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-texture"></div>
+  <div class="hero-panel hero-panel-left"></div>
+  <div class="hero-panel hero-panel-right"></div>
+
+  <!-- Monogram watermark SVG -->
+  <svg class="hero-monogram" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="150" cy="150" r="130" stroke="white" stroke-width="1"/>
+    <circle cx="150" cy="150" r="110" stroke="white" stroke-width="0.5"/>
+    <text x="150" y="110" text-anchor="middle" font-family="Georgia, serif" font-size="60" font-style="italic" fill="white" font-weight="400">B</text>
+    <text x="150" y="170" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="white" font-weight="300" letter-spacing="8">&amp;</text>
+    <text x="150" y="215" text-anchor="middle" font-family="Georgia, serif" font-size="38" font-style="italic" fill="white" font-weight="400">Co</text>
+    <text x="150" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white" letter-spacing="6" font-weight="300">EST 2013</text>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow anim-fade-in">Est. 2013 &nbsp;&middot;&nbsp; Northumberland, PA</div>
+    <h1 class="anim-fade-up">
+      <em>Bella</em> <span class="ampersand">&amp;</span> Co
+    </h1>
+    <p class="hero-tagline anim-fade-up">
+      <strong>Look expensive without the price tag.</strong><br>
+      Women's fashion boutique &amp; jewelry bar — where style meets small-town warmth.
+    </p>
+    <div class="hero-actions anim-fade-up">
+      <a href="#collections" class="btn-primary">Shop Collections</a>
+      <a href="#jewelry" class="btn-outline">The Jewelry Bar</a>
+    </div>
+  </div>
+
+  <!-- Colour strips at base -->
+  <div class="hero-strips">
+    <div class="hero-strip" style="background:var(--blush-pale)"></div>
+    <div class="hero-strip" style="background:var(--blush-light)"></div>
+    <div class="hero-strip" style="background:var(--blush)"></div>
+    <div class="hero-strip" style="background:var(--rose-light)"></div>
+    <div class="hero-strip" style="background:var(--rose-muted)"></div>
+    <div class="hero-strip" style="background:var(--warmgray)"></div>
+    <div class="hero-strip" style="background:var(--parchment-dark)"></div>
+    <div class="hero-strip" style="background:var(--charcoal-light)"></div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Explore</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Collections Grid -->
+<section class="collections section-padding" id="collections">
+  <div class="container">
+    <p class="section-label anim-fade-in">Shop the Edit</p>
+    <h2 class="section-title anim-fade-up">New &amp; Now</h2>
+    <p class="collections-subtitle anim-fade-up">Fresh arrivals, timeless pieces, and everything in between — curated for real women, real lives.</p>
+
+    <div class="collections-grid">
+      <!-- Featured: New Arrivals -->
+      <div class="col-card featured anim-scale" style="position:relative;">
+        <div class="col-image col-bg-arrivals">
+          <!-- Decorative motif -->
+          <svg class="col-motif" width="120" height="120" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="55" stroke="white" stroke-width="1" stroke-dasharray="4 4"/>
+            <circle cx="60" cy="60" r="35" stroke="white" stroke-width="0.5"/>
+            <path d="M60 20 L65 40 L85 40 L70 52 L75 72 L60 60 L45 72 L50 52 L35 40 L55 40 Z" stroke="white" stroke-width="1" fill="none"/>
+          </svg>
+          <div class="col-label">
+            <div class="col-label-tag">Just Landed</div>
+            <div class="col-label-name">New<br>Arrivals</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accessories -->
+      <div class="col-card anim-scale">
+        <div class="col-image col-bg-accessories">
+          <svg class="col-motif" width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <rect x="10" y="25" width="60" height="35" rx="4" stroke="white" stroke-width="1"/>
+            <path d="M25 25 C25 18 55 18 55 25" stroke="white" stroke-width="1" fill="none"/>
+          </svg>
+          <div class="col-label">
+            <div class="col-label-tag">Finish the Look</div>
+            <div class="col-label-name">Accessories</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Apparel -->
+      <div class="col-card anim-scale">
+        <div class="col-image col-bg-apparel">
+          <svg class="col-motif" width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <path d="M30 10 L15 25 L25 30 L20 70 L60 70 L55 30 L65 25 L50 10 C50 10 45 18 40 18 C35 18 30 10 30 10Z" stroke="white" stroke-width="1" fill="none"/>
+          </svg>
+          <div class="col-label">
+            <div class="col-label-tag">Figure-Flattering</div>
+            <div class="col-label-name">Apparel</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jewelry -->
+      <div class="col-card anim-scale">
+        <div class="col-image col-bg-jewelry">
+          <svg class="col-motif" width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <circle cx="40" cy="40" r="20" stroke="white" stroke-width="1"/>
+            <circle cx="40" cy="40" r="8" stroke="white" stroke-width="0.5"/>
+            <path d="M40 20 L40 14 M40 60 L40 66 M20 40 L14 40 M60 40 L66 40" stroke="white" stroke-width="1"/>
+          </svg>
+          <div class="col-label">
+            <div class="col-label-tag">Jewelry Bar</div>
+            <div class="col-label-name">Fine &amp; Fashion</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seasonal -->
+      <div class="col-card anim-scale">
+        <div class="col-image col-bg-seasonal">
+          <svg class="col-motif" width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <path d="M40 10 C25 10 10 25 10 40 C10 55 25 70 40 70 C55 70 70 55 70 40" stroke="white" stroke-width="1" fill="none"/>
+            <path d="M55 10 L70 10 L70 25" stroke="white" stroke-width="1"/>
+            <path d="M40 25 L40 55 M25 40 L55 40" stroke="white" stroke-width="0.5" stroke-dasharray="2 2"/>
+          </svg>
+          <div class="col-label">
+            <div class="col-label-tag">Limited Time</div>
+            <div class="col-label-name">Seasonal Finds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Our Story -->
+<section class="story section-padding" id="story">
+  <div class="container">
+    <div class="story-grid">
+      <div class="story-visual anim-slide-left">
+        <div class="story-portrait">
+          <div class="story-portrait-inner">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path d="M32 8 C20 8 12 18 12 30 C12 42 20 52 32 54 C44 52 52 42 52 30 C52 18 44 8 32 8Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <path d="M24 38 C24 38 26 44 32 44 C38 44 40 38 40 38" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <circle cx="25" cy="30" r="2.5" fill="currentColor" opacity="0.6"/>
+              <circle cx="39" cy="30" r="2.5" fill="currentColor" opacity="0.6"/>
+              <path d="M16 28 C16 28 20 22 32 22 C44 22 48 28 48 28" stroke="currentColor" stroke-width="1" fill="none" stroke-dasharray="2 2"/>
+            </svg>
+            <span>boutique portrait</span>
+          </div>
+          <div class="story-badge">
+            <div class="story-badge-year">2013</div>
+            <div class="story-badge-est">Est.</div>
+          </div>
+        </div>
+        <div class="story-accent"></div>
+      </div>
+
+      <div class="story-text anim-slide-right">
+        <p class="section-label">Our Story</p>
+        <h2 class="section-title">More Than a Boutique.<br>A Village Institution.</h2>
+        <p>Bella &amp; Co opened on Queen Street in 2013 with a simple belief: <strong>every woman deserves to feel beautiful</strong>, regardless of her budget. Nestled in the heart of Northumberland's historic village center, we've spent over a decade building something rare — a boutique where you walk in as a stranger and leave as a regular.</p>
+        <p>We travel the country sourcing <strong>figure-flattering styles, on-trend accessories, and thoughtfully curated jewelry</strong> that you won't find in chain stores. Our selections celebrate real bodies, real budgets, and real personal style.</p>
+        <blockquote class="story-quote">"We wanted a place where women could look expensive without spending a fortune — and feel genuinely seen while they shopped."</blockquote>
+        <p>From our brick-and-mortar roots to a growing online presence, we remain a <strong>brick-and-mortar mainstay</strong> of the Pennsylvania heartland — and we're just getting started.</p>
+        <div class="story-pillars">
+          <span class="pillar">Est. 2013</span>
+          <span class="pillar">Queen Street, PA</span>
+          <span class="pillar">Real Sizes</span>
+          <span class="pillar">Accessible Luxury</span>
+          <span class="pillar">Personal Styling</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The Jewelry Bar — Pinned Scroll Story -->
+<section class="pinned-section" id="pinned-story">
+  <div class="pinned-inner" id="pinned-inner">
+
+    <div class="pinned-phase" id="phase-1">
+      <div class="phase-content">
+        <p class="section-label">The Bella Story</p>
+        <h2 class="section-title">A boutique born from a simple idea.</h2>
+        <p>Queen Street, 2013. A storefront, a vision, and a deep belief that women in small Pennsylvania towns deserved better than big-box fashion — they deserved a <em>destination</em>.</p>
+        <p>So we built one.</p>
+        <div class="pinned-stamp">Est. Northumberland, PA · 2013</div>
+      </div>
+    </div>
+
+    <div class="pinned-phase" id="phase-2">
+      <div class="phase-content">
+        <p class="section-label">The Experience</p>
+        <h2 class="section-title">Personalized, from the moment you walk in.</h2>
+        <blockquote class="lora-quote">"You don't have to know what you want when you walk in. That's what we're here for."</blockquote>
+        <p>Our team knows inventory, knows bodies, and knows how to pull that one piece you didn't know you needed. We call it personal styling without the appointment.</p>
+      </div>
+    </div>
+
+    <div class="pinned-phase" id="phase-3">
+      <div class="phase-content">
+        <p class="section-label">The Philosophy</p>
+        <h2 class="section-title">Look expensive without the price tag.</h2>
+        <p>Trend-forward but timeless. Affordable but never cheap-looking. We curate every rack and every jewelry display with one question in mind: <strong>Would we wear this ourselves?</strong></p>
+        <p>If the answer is yes, it earns its place on the floor.</p>
+        <div class="pinned-stamp">Curated Weekly · New Arrivals Every Friday</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- The Jewelry Bar -->
+<section class="jewelry section-padding" id="jewelry">
+  <div class="container">
+    <div class="jewelry-header anim-fade-up">
+      <p class="section-label">The Jewelry Bar</p>
+      <h2 class="section-title">Where Every Piece Tells a Story</h2>
+      <p>Our in-store jewelry bar is a boutique within the boutique — a curated collection of fine fashion, sterling, and statement pieces, gift-wrapped and ready for any occasion.</p>
+    </div>
+
+    <div class="jewelry-grid">
+      <div class="jewelry-showcase anim-scale">
+        <div class="jewelry-piece">
+          <div class="jewelry-piece-inner">
+            <div class="jewelry-piece-icon">◇</div>
+            <div class="jewelry-piece-name">Sterling &amp; Gold</div>
+            <div class="jewelry-piece-desc">Demi-fine everyday wear</div>
+          </div>
+        </div>
+        <div class="jewelry-piece">
+          <div class="jewelry-piece-inner">
+            <div class="jewelry-piece-icon">✦</div>
+            <div class="jewelry-piece-name">Statement Pieces</div>
+            <div class="jewelry-piece-desc">Bold, occasion-ready</div>
+          </div>
+        </div>
+        <div class="jewelry-piece">
+          <div class="jewelry-piece-inner">
+            <div class="jewelry-piece-icon">◯</div>
+            <div class="jewelry-piece-name">Layering Sets</div>
+            <div class="jewelry-piece-desc">Mix &amp; match curated</div>
+          </div>
+        </div>
+        <div class="jewelry-piece">
+          <div class="jewelry-piece-inner">
+            <div class="jewelry-piece-icon">✿</div>
+            <div class="jewelry-piece-name">Gift Ready</div>
+            <div class="jewelry-piece-desc">Box &amp; bow included</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="jewelry-text anim-slide-right">
+        <p class="section-label">What Makes It Special</p>
+        <h2 class="section-title">Two boutiques in one.</h2>
+        <p>The Jewelry Bar is <strong>its own world</strong> within Bella &amp; Co — a dedicated space lined with rotating collections of sterling silver, gold-filled, and fashion-forward pieces at prices that won't make you flinch.</p>
+        <p>We stock everything from your everyday layering staples to that one statement necklace that makes the whole outfit. And yes — we gift-wrap on the spot.</p>
+        <div class="jewelry-features">
+          <div class="jewelry-feature">
+            <div class="jewelry-feature-dot"></div>
+            <span>Rotating collection refreshed weekly</span>
+          </div>
+          <div class="jewelry-feature">
+            <div class="jewelry-feature-dot"></div>
+            <span>Sterling silver, gold-filled, and fashion pieces</span>
+          </div>
+          <div class="jewelry-feature">
+            <div class="jewelry-feature-dot"></div>
+            <span>Complimentary gift wrapping in-store</span>
+          </div>
+          <div class="jewelry-feature">
+            <div class="jewelry-feature-dot"></div>
+            <span>Expert pairing advice from our team</span>
+          </div>
+          <div class="jewelry-feature">
+            <div class="jewelry-feature-dot"></div>
+            <span>Price points starting under $25</span>
+          </div>
+        </div>
+        <a href="#visit" class="jewelry-cta">Find Us &amp; Browse In-Store</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials section-padding" id="testimonials">
+  <div class="container">
+    <p class="section-label anim-fade-in">What They're Saying</p>
+    <h2 class="section-title anim-fade-up">Real Women, Real Words</h2>
+    <p class="testimonials-intro anim-fade-up">Over a decade in business, built one happy customer at a time.</p>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card anim-scale">
+        <span class="testimonial-mark">"</span>
+        <div class="testimonial-stars">★ ★ ★ ★ ★</div>
+        <p class="testimonial-text">I've been coming here since they opened. Every single time I walk in, I leave with something that makes me feel like a million dollars — and I never spend more than I planned. The jewelry bar alone is worth the trip.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar av-1">M</div>
+          <div>
+            <div class="testimonial-name">Melissa R.</div>
+            <div class="testimonial-since">Customer since 2014</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card anim-scale">
+        <span class="testimonial-mark">"</span>
+        <div class="testimonial-stars">★ ★ ★ ★ ★</div>
+        <p class="testimonial-text">The girls here actually know fashion. They pulled pieces for me I never would have grabbed myself — and every single one worked. It's like having a stylist who actually knows your budget and your body.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar av-2">J</div>
+          <div>
+            <div class="testimonial-name">Jamie L.</div>
+            <div class="testimonial-since">Customer since 2019</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card anim-scale">
+        <span class="testimonial-mark">"</span>
+        <div class="testimonial-stars">★ ★ ★ ★ ★</div>
+        <p class="testimonial-text">Bought my daughter's birthday gift from the jewelry bar — they wrapped it beautifully and helped me pick something I knew she'd love. This is the kind of local shopping experience you can't replace online.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar av-3">D</div>
+          <div>
+            <div class="testimonial-name">Donna W.</div>
+            <div class="testimonial-since">Customer since 2021</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Visit Us -->
+<section class="visit section-padding" id="visit">
+  <div class="container">
+    <div class="visit-grid">
+      <div class="visit-text anim-slide-left">
+        <p class="section-label">Come See Us</p>
+        <h2 class="section-title">We're Open<br>&amp; Ready for You.</h2>
+        <p>Drop in anytime — no appointment needed. Whether you're browsing new arrivals, shopping for a gift, or just curious about that necklace you saw on our Instagram, the door's always open.</p>
+
+        <div class="visit-details">
+          <div class="visit-detail">
+            <div class="visit-detail-icon">📍</div>
+            <div class="visit-detail-body">
+              <div class="visit-detail-label">Address</div>
+              <div class="visit-detail-value">94 Queen Street<br>Northumberland, PA 17857</div>
+            </div>
+          </div>
+          <div class="visit-detail">
+            <div class="visit-detail-icon">🕙</div>
+            <div class="visit-detail-body">
+              <div class="visit-detail-label">Hours</div>
+              <div class="visit-detail-value">Mon – Sat &nbsp;10:00 am – 6:00 pm<br>Sunday &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12:00 pm – 5:00 pm</div>
+            </div>
+          </div>
+          <div class="visit-detail">
+            <div class="visit-detail-icon">📞</div>
+            <div class="visit-detail-body">
+              <div class="visit-detail-label">Phone</div>
+              <div class="visit-detail-value">(570) 555-0194</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="tel:5705550194" class="visit-phone">
+          <span>📞</span> Call Bella &amp; Co
+        </a>
+      </div>
+
+      <div class="visit-map anim-scale">
+        <div class="map-rings">
+          <div class="map-ring map-ring-1"></div>
+          <div class="map-ring map-ring-2"></div>
+          <div class="map-ring map-ring-3"></div>
+        </div>
+        <div class="visit-map-inner">
+          <div class="map-pin"></div>
+          <div class="map-label">Bella &amp; Co</div>
+          <div class="map-address">94 Queen Street<br>Northumberland, PA 17857<br><br>In the historic village center</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">Bella &amp; Co</div>
+        <div class="footer-tagline">Boutique &amp; Jewelry Bar</div>
+        <p>94 Queen Street, Northumberland, PA<br>Est. 2013 — Real fashion, real women, real prices.</p>
+      </div>
+      <div class="footer-nav">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#collections">New Arrivals</a></li>
+          <li><a href="#collections">Accessories</a></li>
+          <li><a href="#collections">Apparel</a></li>
+          <li><a href="#jewelry">Jewelry Bar</a></li>
+          <li><a href="#story">Our Story</a></li>
+        </ul>
+      </div>
+      <div class="footer-social">
+        <h4>Follow Along</h4>
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Instagram">IG</a>
+          <a href="#" class="social-link" aria-label="Facebook">fb</a>
+          <a href="#" class="social-link" aria-label="Pinterest">Pi</a>
+          <a href="#" class="social-link" aria-label="TikTok">TT</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">&copy; 2025 Bella &amp; Co Boutique &amp; Jewelry Bar. All rights reserved.</span>
+      <span class="footer-by">Website by <a href="https://guardiacontent.com" target="_blank" rel="noopener">Guardia Intelligence</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* ===================================================
+   BELLA & CO — Scroll Animation Engine
+   GSAP + Lenis + ScrollTrigger
+   =================================================== */
+
+// Lenis smooth scroll
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smoothWheel: true,
+});
+
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
+
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(time => { lenis.raf(time * 1000); });
+gsap.ticker.lagSmoothing(0);
+
+// Nav scroll behavior
+const nav = document.getElementById('main-nav');
+ScrollTrigger.create({
+  start: 'top -60px',
+  onEnter: () => nav.classList.add('scrolled'),
+  onLeaveBack: () => nav.classList.remove('scrolled'),
+});
+
+// === HERO ENTRANCE ===
+const heroTl = gsap.timeline({ delay: 0.2 });
+heroTl
+  .to('.hero .hero-eyebrow', {
+    opacity: 1,
+    duration: 1,
+    ease: 'power2.out',
+  })
+  .to('.hero h1', {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    ease: 'power3.out',
+  }, '-=0.5')
+  .to('.hero .hero-tagline', {
+    opacity: 1,
+    y: 0,
+    duration: 0.8,
+    ease: 'power2.out',
+  }, '-=0.4')
+  .to('.hero .hero-actions', {
+    opacity: 1,
+    y: 0,
+    duration: 0.8,
+    ease: 'power2.out',
+  }, '-=0.3');
+
+// Hero parallax
+gsap.to('.hero-monogram', {
+  y: 80,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '.hero',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: 1.5,
+  }
+});
+gsap.to('.hero-panel-left', {
+  x: -30,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '.hero',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: 2,
+  }
+});
+gsap.to('.hero-panel-right', {
+  x: 30,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '.hero',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: 2,
+  }
+});
+
+// === COLLECTIONS ===
+ScrollTrigger.create({
+  trigger: '.collections',
+  start: 'top 80%',
+  onEnter: () => {
+    gsap.to('.collections .section-label', { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' });
+    gsap.to('.collections .section-title', { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.1 });
+    gsap.to('.collections-subtitle', { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.2 });
+
+    const cards = document.querySelectorAll('.col-card');
+    cards.forEach((card, i) => {
+      gsap.to(card, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.7,
+        ease: 'power2.out',
+        delay: 0.3 + i * 0.1,
+      });
+    });
+  },
+  once: true,
+});
+
+// === OUR STORY ===
+ScrollTrigger.create({
+  trigger: '.story',
+  start: 'top 70%',
+  onEnter: () => {
+    gsap.to('.story-text .section-label', { opacity: 1, duration: 0.6, ease: 'power2.out' });
+    gsap.to('.story-text .section-title', { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.1 });
+
+    gsap.to('.story-visual', {
+      opacity: 1,
+      x: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+      delay: 0.1,
+    });
+    gsap.to('.story-text', {
+      opacity: 1,
+      x: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+      delay: 0.25,
+    });
+  },
+  once: true,
+});
+
+// Story portrait subtle float
+gsap.to('.story-portrait', {
+  y: -12,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '.story',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: 2,
+  }
+});
+
+// === PINNED SCROLL SECTION ===
+const pinnedInner = document.getElementById('pinned-inner');
+const phases = gsap.utils.toArray('.pinned-phase');
+
+// Make pinned section tall enough to scroll through
+const pinnedSection = document.getElementById('pinned-story');
+pinnedSection.style.height = (phases.length * 100) + 'vh';
+
+ScrollTrigger.create({
+  trigger: pinnedSection,
+  start: 'top top',
+  end: 'bottom bottom',
+  pin: pinnedInner,
+  pinSpacing: false,
+  scrub: false,
+  onUpdate: self => {
+    const progress = self.progress;
+    const step = 1 / phases.length;
+
+    phases.forEach((phase, i) => {
+      const phaseStart = i * step;
+      const phaseEnd = (i + 1) * step;
+      const phaseMid = phaseStart + step * 0.5;
+
+      let opacity = 0;
+      let y = 20;
+
+      if (progress >= phaseStart && progress < phaseEnd) {
+        // Fade in then fade out within each step
+        const local = (progress - phaseStart) / step;
+        if (local < 0.3) {
+          opacity = local / 0.3;
+          y = 20 * (1 - local / 0.3);
+        } else if (local < 0.7) {
+          opacity = 1;
+          y = 0;
+        } else {
+          opacity = 1 - (local - 0.7) / 0.3;
+          y = -20 * ((local - 0.7) / 0.3);
+        }
+      }
+
+      gsap.set(phase, { opacity, y });
+    });
+  }
+});
+
+// Show first phase by default
+gsap.set(phases[0], { opacity: 1, y: 0 });
+
+// === JEWELRY BAR ===
+ScrollTrigger.create({
+  trigger: '.jewelry',
+  start: 'top 75%',
+  onEnter: () => {
+    gsap.to('.jewelry-header', {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: 'power2.out',
+    });
+    gsap.to('.jewelry-showcase', {
+      opacity: 1,
+      scale: 1,
+      duration: 0.9,
+      ease: 'power2.out',
+      delay: 0.2,
+    });
+
+    const pieces = document.querySelectorAll('.jewelry-piece');
+    pieces.forEach((p, i) => {
+      gsap.from(p, {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        ease: 'power2.out',
+        delay: 0.3 + i * 0.1,
+      });
+    });
+
+    gsap.to('.jewelry-text', {
+      opacity: 1,
+      x: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+      delay: 0.3,
+    });
+  },
+  once: true,
+});
+
+// === TESTIMONIALS ===
+ScrollTrigger.create({
+  trigger: '.testimonials',
+  start: 'top 75%',
+  onEnter: () => {
+    gsap.to('.testimonials .section-label', { opacity: 1, duration: 0.5, ease: 'power2.out' });
+    gsap.to('.testimonials .section-title', { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.1 });
+    gsap.to('.testimonials-intro', { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', delay: 0.2 });
+
+    const cards = document.querySelectorAll('.testimonial-card');
+    cards.forEach((card, i) => {
+      gsap.to(card, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.7,
+        ease: 'power2.out',
+        delay: 0.3 + i * 0.15,
+      });
+    });
+  },
+  once: true,
+});
+
+// === VISIT US ===
+ScrollTrigger.create({
+  trigger: '.visit',
+  start: 'top 75%',
+  onEnter: () => {
+    gsap.to('.visit-text', {
+      opacity: 1,
+      x: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+    });
+    gsap.to('.visit-map', {
+      opacity: 1,
+      scale: 1,
+      duration: 0.9,
+      ease: 'power2.out',
+      delay: 0.2,
+    });
+  },
+  once: true,
+});
+
+// Map rings pulse
+gsap.to('.map-ring-1', {
+  scale: 1.05,
+  repeat: -1,
+  yoyo: true,
+  duration: 2.5,
+  ease: 'sine.inOut',
+  transformOrigin: 'center center',
+});
+gsap.to('.map-ring-2', {
+  scale: 1.03,
+  repeat: -1,
+  yoyo: true,
+  duration: 3.2,
+  ease: 'sine.inOut',
+  transformOrigin: 'center center',
+  delay: 0.5,
+});
+
+// Smooth anchor scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', e => {
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      lenis.scrollTo(target, { offset: -70, duration: 1.4 });
+    }
+  });
+});
+
+// Refresh ScrollTrigger after page load
+window.addEventListener('load', () => {
+  ScrollTrigger.refresh();
+});
+</script>
+</body>
+</html>
