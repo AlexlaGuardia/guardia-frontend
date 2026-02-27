@@ -903,6 +903,136 @@ footer {
   .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
 }
 
+/* === VISION CARDS === */
+.vision-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  padding: 2.2rem 1.8rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  width: 100%;
+  height: 100%;
+}
+.vision-card .vc-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.vision-card .vc-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.vision-card .vc-pitch {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 240px;
+}
+/* Portrait vision card (teal/cream) */
+.vc-portrait {
+  background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal) 100%);
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.18) 1.5px, transparent 1.5px),
+    linear-gradient(135deg, var(--teal-light) 0%, var(--teal) 100%);
+  background-size: 20px 20px, auto;
+  min-height: 320px;
+}
+.vc-portrait .vc-icon {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+}
+.vc-portrait .vc-label { color: rgba(255,255,255,0.8); }
+.vc-portrait .vc-pitch { color: rgba(255,255,255,0.95); }
+/* BA cards (dark themed) */
+.vc-before {
+  background: var(--charcoal-light);
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(106,191,173,0.06) 8px, rgba(106,191,173,0.06) 9px);
+  min-height: 280px;
+}
+.vc-before .vc-icon { background: rgba(42,42,42,0.8); color: rgba(255,255,255,0.7); }
+.vc-before .vc-label { color: rgba(255,255,255,0.5); }
+.vc-before .vc-pitch { color: rgba(255,255,255,0.8); }
+.vc-after {
+  background: linear-gradient(135deg, var(--teal-deep) 0%, var(--teal) 100%);
+  background-image:
+    repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(255,255,255,0.06) 8px, rgba(255,255,255,0.06) 9px);
+  min-height: 280px;
+}
+.vc-after .vc-icon { background: rgba(255,255,255,0.2); color: #fff; }
+.vc-after .vc-label { color: rgba(255,255,255,0.75); }
+.vc-after .vc-pitch { color: rgba(255,255,255,0.95); }
+/* Gallery vision cards */
+.vc-gallery-1 {
+  background: var(--charcoal-light);
+  background-image:
+    radial-gradient(circle, rgba(106,191,173,0.15) 1px, transparent 1px);
+  background-size: 16px 16px;
+  min-height: 260px;
+}
+.vc-gallery-1 .vc-icon { background: rgba(106,191,173,0.2); color: var(--teal-light); }
+.vc-gallery-1 .vc-label { color: rgba(255,255,255,0.5); }
+.vc-gallery-1 .vc-pitch { color: rgba(255,255,255,0.8); }
+.vc-gallery-2 {
+  background: linear-gradient(135deg, #2a1f1f 0%, #3d2c2c 100%);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(232,116,106,0.07) 14px, rgba(232,116,106,0.07) 15px),
+    repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(232,116,106,0.07) 14px, rgba(232,116,106,0.07) 15px);
+  min-height: 260px;
+}
+.vc-gallery-2 .vc-icon { background: rgba(232,116,106,0.2); color: var(--coral); }
+.vc-gallery-2 .vc-label { color: rgba(255,255,255,0.5); }
+.vc-gallery-2 .vc-pitch { color: rgba(255,255,255,0.8); }
+.vc-gallery-3 {
+  background: linear-gradient(135deg, #1a2a28 0%, #243d3a 100%);
+  background-image:
+    repeating-linear-gradient(30deg, transparent, transparent 10px, rgba(106,191,173,0.08) 10px, rgba(106,191,173,0.08) 11px),
+    repeating-linear-gradient(150deg, transparent, transparent 10px, rgba(106,191,173,0.08) 10px, rgba(106,191,173,0.08) 11px);
+  min-height: 260px;
+}
+.vc-gallery-3 .vc-icon { background: rgba(106,191,173,0.15); color: var(--teal-light); }
+.vc-gallery-3 .vc-label { color: rgba(255,255,255,0.5); }
+.vc-gallery-3 .vc-pitch { color: rgba(255,255,255,0.8); }
+.vc-gallery-4 {
+  background: linear-gradient(135deg, #2a2417 0%, #3d3520 100%);
+  background-image:
+    radial-gradient(circle, rgba(212,168,75,0.12) 1px, transparent 1px),
+    radial-gradient(circle at 8px 8px, rgba(212,168,75,0.06) 1px, transparent 1px);
+  background-size: 16px 16px, 16px 16px;
+  background-position: 0 0, 8px 8px;
+  min-height: 260px;
+}
+.vc-gallery-4 .vc-icon { background: rgba(212,168,75,0.18); color: var(--gold); }
+.vc-gallery-4 .vc-label { color: rgba(255,255,255,0.5); }
+.vc-gallery-4 .vc-pitch { color: rgba(255,255,255,0.8); }
+/* Gallery card inner fill for vision cards */
+.gallery-card.vc-card {
+  background: transparent;
+  padding: 0;
+}
+.gallery-card.vc-card .vision-card { border-radius: 2px; }
+.gallery-card.vc-card .gallery-caption { color: rgba(255,255,255,0.7); }
+.gallery-card.vc-card .gallery-caption em { color: rgba(255,255,255,0.45); }
+/* BA card inner fill for vision cards */
+.ba-card.vc-card {
+  background: transparent;
+}
+.ba-card.vc-card .ba-image { aspect-ratio: unset; }
+
 /* === SKIP LINK === */
 .skip-link {
   position: absolute;
@@ -1030,7 +1160,13 @@ footer a:focus-visible {
 <section class="artist section-padding" id="artist">
   <div class="container">
     <div class="artist-grid">
-      <div class="artist-portrait"><img src="images/painted_pooch_fb_image04.jpg" alt="Creative color poodle by Paws & Whiskers"></div>
+      <div class="artist-portrait">
+        <div class="vision-card vc-portrait">
+          <div class="vc-icon">&#128247;</div>
+          <div class="vc-label">Your Brand, Captured</div>
+          <div class="vc-pitch">Professional photography of your best grooms — styled, edited, and ready to post across every platform.</div>
+        </div>
+      </div>
       <div class="artist-text">
         <div class="section-label">The Artist</div>
         <h2 class="section-title">30 Years of Craft.<br>One Passion.</h2>
@@ -1062,36 +1198,72 @@ footer a:focus-visible {
 
     <!-- Before / After Showcase -->
     <div class="before-after">
-      <div class="ba-card">
+      <div class="ba-card vc-card">
         <div class="ba-label ba-before">Before</div>
-        <div class="ba-image"><img src="images/painted_pooch_fb_image07-before.jpg" alt="Before grooming" loading="lazy"></div>
+        <div class="ba-image">
+          <div class="vision-card vc-before">
+            <div class="vc-icon">&#128444;</div>
+            <div class="vc-label">Before &amp; After Gallery</div>
+            <div class="vc-pitch">Transformation galleries that show your craft — the kind of content that turns browsers into bookings.</div>
+          </div>
+        </div>
       </div>
       <div class="ba-arrow">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </div>
-      <div class="ba-card">
+      <div class="ba-card vc-card">
         <div class="ba-label ba-after">After</div>
-        <div class="ba-image"><img src="images/painted_pooch_fb_image07-after.jpg" alt="After grooming" loading="lazy"></div>
+        <div class="ba-image">
+          <div class="vision-card vc-after">
+            <div class="vc-icon">&#10024;</div>
+            <div class="vc-label">Content That Converts</div>
+            <div class="vc-pitch">Posts that tell a story, build trust, and keep your chair booked weeks in advance.</div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Gallery Grid -->
     <div class="gallery-grid">
-      <div class="gallery-card">
-        <div class="gallery-image"><img src="images/painted_pooch_fb_image01.jpg" alt="Holiday sparkle Pomeranian" loading="lazy"></div>
-        <div class="gallery-caption">Holiday Sparkle<em>Pomeranian</em></div>
+      <div class="gallery-card vc-card">
+        <div class="gallery-image">
+          <div class="vision-card vc-gallery-1">
+            <div class="vc-icon">&#128247;</div>
+            <div class="vc-label">Social Media Posts</div>
+            <div class="vc-pitch">Weekly posts showcasing your best work — you groom, we share it with the world.</div>
+          </div>
+        </div>
+        <div class="gallery-caption">Weekly Content<em>Auto-posted to every platform</em></div>
       </div>
-      <div class="gallery-card">
-        <div class="gallery-image"><img src="images/painted_pooch_fb_image02.jpg" alt="Classic groom German Shepherd" loading="lazy"></div>
-        <div class="gallery-caption">Classic Groom<em>German Shepherd</em></div>
+      <div class="gallery-card vc-card">
+        <div class="gallery-image">
+          <div class="vision-card vc-gallery-2">
+            <div class="vc-icon">&#127968;</div>
+            <div class="vc-label">Google Business</div>
+            <div class="vc-pitch">A polished Google profile that puts Paws &amp; Whiskers at the top when local pet owners search.</div>
+          </div>
+        </div>
+        <div class="gallery-caption">Local Discovery<em>More searches, more bookings</em></div>
       </div>
-      <div class="gallery-card">
-        <div class="gallery-image"><img src="images/painted_pooch_fb_image05.jpg" alt="Cool pup in sunglasses" loading="lazy"></div>
-        <div class="gallery-caption">Cool Customer<em>Shih Tzu</em></div>
+      <div class="gallery-card vc-card">
+        <div class="gallery-image">
+          <div class="vision-card vc-gallery-3">
+            <div class="vc-icon">&#128197;</div>
+            <div class="vc-label">Automated Scheduling</div>
+            <div class="vc-pitch">Content scheduled and posted on autopilot — your calendar stays full without the admin work.</div>
+          </div>
+        </div>
+        <div class="gallery-caption">Set &amp; Forget<em>Consistent presence, zero effort</em></div>
       </div>
-      <div class="gallery-card">
-        <div class="gallery-image"><img src="images/painted_pooch_fb_image06.jpg" alt="Dachshund on the grooming table" loading="lazy"></div>
-        <div class="gallery-caption">Halloween Ready<em>Dachshund</em></div>
+      <div class="gallery-card vc-card">
+        <div class="gallery-image">
+          <div class="vision-card vc-gallery-4">
+            <div class="vc-icon">&#127760;</div>
+            <div class="vc-label">Website &amp; Booking</div>
+            <div class="vc-pitch">A site that works as hard as you do — built to convert visitors into loyal pet parents.</div>
+          </div>
+        </div>
+        <div class="gallery-caption">Online Presence<em>Book online, 24/7</em></div>
       </div>
     </div>
   </div>

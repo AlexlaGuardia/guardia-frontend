@@ -649,6 +649,170 @@ section { position: relative; z-index: 1; }
   color: rgba(248, 245, 240, 0.35);
 }
 
+/* === VISION CARDS — Gallery (dark ink background) === */
+.vision-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.vision-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(184, 146, 42, 0.15);
+}
+/* Diagonal line pattern — default */
+.vision-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(92, 64, 51, 0.07) 0px,
+    rgba(92, 64, 51, 0.07) 1px,
+    transparent 1px,
+    transparent 18px
+  );
+}
+/* Crosshatch variant */
+.vision-card.crosshatch::before {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(92, 64, 51, 0.07) 0px,
+      rgba(92, 64, 51, 0.07) 1px,
+      transparent 1px,
+      transparent 16px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(92, 64, 51, 0.07) 0px,
+      rgba(92, 64, 51, 0.07) 1px,
+      transparent 1px,
+      transparent 16px
+    );
+}
+/* Dot grid variant */
+.vision-card.dotgrid::before {
+  background-image: radial-gradient(circle, rgba(184, 146, 42, 0.14) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+}
+/* Press-line variant */
+.vision-card.presslines::before {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(92, 64, 51, 0.06) 0px,
+    rgba(92, 64, 51, 0.06) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+
+/* Dark-on-paper cards (for gallery on ink bg) */
+.vision-card.vc-dark {
+  background: rgba(240, 235, 227, 0.06);
+  border: 1px solid rgba(184, 146, 42, 0.18);
+}
+/* Paper-toned cards */
+.vision-card.vc-paper {
+  background: #F0EBE3;
+  border: 1px solid rgba(92, 64, 51, 0.25);
+}
+.vision-card.vc-paper::before {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(92, 64, 51, 0.05) 0px,
+    rgba(92, 64, 51, 0.05) 1px,
+    transparent 1px,
+    transparent 18px
+  );
+}
+
+.vc-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.vision-card.vc-dark .vc-icon {
+  background: rgba(184, 146, 42, 0.08);
+  border: 1px solid rgba(184, 146, 42, 0.22);
+}
+.vision-card.vc-paper .vc-icon {
+  background: rgba(26, 26, 46, 0.08);
+  border: 1px solid rgba(92, 64, 51, 0.25);
+}
+.vc-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+.vision-card.vc-dark .vc-icon svg { stroke: var(--brass-light); }
+.vision-card.vc-paper .vc-icon svg { stroke: var(--walnut); }
+
+.vc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+.vision-card.vc-dark .vc-label { color: var(--brass-muted); }
+.vision-card.vc-paper .vc-label { color: var(--walnut-muted); }
+
+.vc-pitch {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  line-height: 1.55;
+  position: relative;
+  z-index: 1;
+}
+.vision-card.vc-dark .vc-pitch { color: rgba(248, 245, 240, 0.75); font-size: 0.88rem; }
+.vision-card.vc-paper .vc-pitch { color: var(--ink-soft); font-size: 0.9rem; }
+
+/* Heritage-image vision card replacement */
+.heritage-vision-card {
+  background: var(--paper-aged);
+  border: 1px solid rgba(92, 64, 51, 0.22);
+  border-radius: var(--radius);
+  padding: 2.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  justify-content: center;
+}
+.heritage-vision-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(92, 64, 51, 0.1) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+.heritage-vision-card .vc-icon {
+  background: rgba(26, 26, 46, 0.08);
+  border: 1px solid rgba(92, 64, 51, 0.25);
+}
+.heritage-vision-card .vc-icon svg { stroke: var(--walnut); }
+.heritage-vision-card .vc-label { color: var(--walnut-muted); }
+.heritage-vision-card .vc-pitch { color: var(--ink-soft); font-size: 1rem; }
+
 /* === TESTIMONIALS === */
 .testimonials {
   background: var(--paper);
@@ -1180,8 +1344,12 @@ footer {
         <p>The job hasn't changed much. Someone walks in with an idea &mdash; a business card, a wedding invitation, a banner for the church fundraiser &mdash; and we make it real. <strong>Ink on paper. Done right, done fast, at a fair price.</strong></p>
         <p>We're not the biggest shop. We're not the flashiest. But when your business cards need to be perfect and you need them Tuesday &mdash; you know where to find us.</p>
       </div>
-      <div class="heritage-image" aria-hidden="true">
-        <span>Shop Photo &mdash; Interior / Press</span>
+      <div class="heritage-vision-card">
+        <div class="vc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="vc-label">What you'd see here</span>
+        <p class="vc-pitch">Your story, told your way. <strong style="font-style:normal;color:var(--ink);">Ninety years of craft</strong> — captured in content that turns first-timers into regulars.</p>
       </div>
     </div>
     <div class="stats-strip">
@@ -1205,17 +1373,59 @@ footer {
 <section id="gallery" class="gallery section-pad">
   <div class="container">
     <div class="gallery-header">
-      <p class="section-label">Our Work</p>
-      <h2 class="section-title">Fresh Off the Press</h2>
-      <p class="section-brief">A look at some of what's come through the shop.</p>
+      <p class="section-label">What Guardia Delivers</p>
+      <h2 class="section-title">Your Digital Pressroom</h2>
+      <p class="section-brief">Everything Heritage Press needs online — handled, automated, and running 24/7.</p>
     </div>
     <div class="gallery-grid">
-      <div class="gallery-item"><span>Business Cards</span></div>
-      <div class="gallery-item"><span>Banners</span></div>
-      <div class="gallery-item"><span>Wedding Suite</span></div>
-      <div class="gallery-item"><span>Brochures</span></div>
-      <div class="gallery-item"><span>Yard Signs</span></div>
-      <div class="gallery-item"><span>Custom Forms</span></div>
+      <!-- Vision card 1 -->
+      <div class="vision-card vc-dark">
+        <div class="vc-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <span class="vc-label">What you'd see here</span>
+        <p class="vc-pitch">Your craft, showcased in a professional portfolio online — built and maintained for you.</p>
+      </div>
+      <!-- Vision card 2 -->
+      <div class="vision-card vc-dark crosshatch">
+        <div class="vc-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2z"/><path d="M12 18h.01"/><path d="M8 6h8M8 10h8M8 14h4"/></svg>
+        </div>
+        <span class="vc-label">What you'd see here</span>
+        <p class="vc-pitch">Social posts that bring locals through the door — without you lifting a finger.</p>
+      </div>
+      <!-- Vision card 3 -->
+      <div class="vision-card vc-dark dotgrid">
+        <div class="vc-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+        </div>
+        <span class="vc-label">What you'd see here</span>
+        <p class="vc-pitch">Google reviews managed and responded to — building the trust that prints revenue.</p>
+      </div>
+      <!-- Vision card 4 -->
+      <div class="vision-card vc-dark presslines">
+        <div class="vc-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        </div>
+        <span class="vc-label">What you'd see here</span>
+        <p class="vc-pitch">Search results that put you first for "print shop near me" — local dominance, done right.</p>
+      </div>
+      <!-- Vision card 5 -->
+      <div class="vision-card vc-dark">
+        <div class="vc-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <span class="vc-label">What you'd see here</span>
+        <p class="vc-pitch">Content posted weekly — you run the press, we run the promotion.</p>
+      </div>
+      <!-- Vision card 6 -->
+      <div class="vision-card vc-dark crosshatch">
+        <div class="vc-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span class="vc-label">What you'd see here</span>
+        <p class="vc-pitch">A website that works as hard as the press — 24/7, while you're closed.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -1449,8 +1659,8 @@ if (!prefersReducedMotion) {
     opacity: 0, y: 20, stagger: 0.15, duration: 0.6, ease: 'power2.out'
   });
 
-  gsap.from('.heritage-image', {
-    scrollTrigger: { trigger: '.heritage-image', start: 'top 80%' },
+  gsap.from('.heritage-vision-card', {
+    scrollTrigger: { trigger: '.heritage-vision-card', start: 'top 80%' },
     opacity: 0, scale: 0.95, duration: 0.8, ease: 'power2.out'
   });
 
@@ -1486,7 +1696,7 @@ if (!prefersReducedMotion) {
     opacity: 0, y: 30, duration: 0.7, ease: 'power2.out'
   });
 
-  gsap.from('.gallery-item', {
+  gsap.from('.gallery-grid .vision-card', {
     scrollTrigger: { trigger: '.gallery-grid', start: 'top 80%' },
     opacity: 0, y: 20, stagger: 0.1, duration: 0.6, ease: 'power2.out'
   });

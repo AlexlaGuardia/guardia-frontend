@@ -480,6 +480,109 @@ nav.scrolled::after {
   .story-quote { font-size: 1.1rem; padding-left: 1rem; }
 }
 
+/* === VISION CARDS === */
+.vision-card {
+  background: linear-gradient(135deg, var(--slate) 0%, var(--slate-deep) 100%);
+  border: 1px solid rgba(201,167,78,0.2);
+  border-radius: 2px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.vision-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 16px,
+    rgba(201,167,78,0.04) 16px,
+    rgba(201,167,78,0.04) 17px
+  );
+  pointer-events: none;
+}
+.vision-card.crosshatch::before {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 18px,
+      rgba(201,167,78,0.035) 18px,
+      rgba(201,167,78,0.035) 19px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 18px,
+      rgba(201,167,78,0.035) 18px,
+      rgba(201,167,78,0.035) 19px
+    );
+}
+.vision-card.dotgrid::before {
+  background-image: radial-gradient(circle, rgba(201,167,78,0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.vision-card.wide-diag::before {
+  background: repeating-linear-gradient(
+    -30deg,
+    transparent 0px,
+    transparent 28px,
+    rgba(201,167,78,0.045) 28px,
+    rgba(201,167,78,0.045) 29px
+  );
+}
+.vc-icon {
+  width: 52px;
+  height: 52px;
+  background: rgba(201,167,78,0.12);
+  border: 1px solid rgba(201,167,78,0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+.vc-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vc-label {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 0.6rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--gold-muted);
+  margin-bottom: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+.vc-pitch {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: rgba(245,240,229,0.82);
+  line-height: 1.65;
+  position: relative;
+  z-index: 1;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.vc-pitch strong {
+  font-style: normal;
+  color: var(--cream);
+  font-weight: 600;
+}
+
 /* === THE ARTISTS === */
 .artists {
   background: var(--cream-soft);
@@ -717,25 +820,7 @@ nav.scrolled::after {
   line-height: 1.8;
   margin-bottom: 1.5rem;
 }
-.work-photo-placeholder {
-  width: 100%;
-  max-width: 500px;
-  aspect-ratio: 4/3;
-  border: 1px solid rgba(201,167,78,0.12);
-  background: linear-gradient(160deg, var(--slate-light), var(--slate-deep));
-  margin: 2rem auto 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-medium);
-}
-.work-photo-placeholder span {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
-  color: rgba(245,240,229,0.2);
-  text-transform: uppercase;
-}
+/* work-photo-placeholder styles removed — replaced by vision cards */
 /* Before/After side by side */
 .work-ba {
   display: flex;
@@ -1216,9 +1301,14 @@ footer::before {
           <cite>&mdash; Verified Client</cite>
         </blockquote>
       </div>
-      <div class="story-photo">
-        <span>Salon Interior</span>
-        <div class="story-photo-label">Our Artists</div>
+      <div class="story-photo" style="display:flex;align-items:center;justify-content:center;padding:2rem;">
+        <div class="vision-card dotgrid" style="width:100%;max-width:340px;">
+          <div class="vc-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="vc-label">Your Space, Captured</div>
+          <div class="vc-pitch">A website as <strong>polished as your work</strong> — professional photography and design that matches your salon's luxury</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1237,7 +1327,15 @@ footer::before {
     </div>
     <div class="artists-grid">
       <div class="artist-card">
-        <div class="artist-photo"><span>Portrait</span></div>
+        <div class="artist-photo" style="display:flex;align-items:center;justify-content:center;padding:2rem;">
+          <div class="vision-card crosshatch" style="width:100%;">
+            <div class="vc-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M17 3l2 2-6 6-2-2 6-6z" opacity=".5"/></svg>
+            </div>
+            <div class="vc-label">Color Portfolio</div>
+            <div class="vc-pitch">Your <strong>transformations showcased online</strong> — before &amp; afters that attract the right clientele</div>
+          </div>
+        </div>
         <div class="artist-info">
           <div class="artist-name">Artist One</div>
           <div class="artist-role">Color Specialist</div>
@@ -1246,7 +1344,15 @@ footer::before {
         </div>
       </div>
       <div class="artist-card">
-        <div class="artist-photo"><span>Portrait</span></div>
+        <div class="artist-photo" style="display:flex;align-items:center;justify-content:center;padding:2rem;">
+          <div class="vision-card wide-diag" style="width:100%;">
+            <div class="vc-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <div class="vc-label">Style Gallery</div>
+            <div class="vc-pitch">Curated cuts and styles <strong>across every platform</strong> — social media that books chairs</div>
+          </div>
+        </div>
         <div class="artist-info">
           <div class="artist-name">Artist Two</div>
           <div class="artist-role">Style Architect</div>
@@ -1327,7 +1433,13 @@ footer::before {
         <div class="section-label" style="color:var(--gold)">The Work</div>
         <h2 class="section-title">Shades That Move.</h2>
         <p>Dimensional color isn't flat &mdash; it catches light, shifts with movement, reveals new tones as the day changes. That's what we create.</p>
-        <div class="work-photo-placeholder"><span>Balayage Transformation</span></div>
+        <div class="vision-card dotgrid" style="max-width:500px;margin-top:1.5rem;">
+          <div class="vc-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M8 11l3 3 5-5" opacity=".8"/></svg>
+          </div>
+          <div class="vc-label">Before &amp; After Galleries</div>
+          <div class="vc-pitch"><strong>Transformation content</strong> that fills your chair — galleries your clients share for you</div>
+        </div>
       </div>
     </div>
 
@@ -1337,7 +1449,13 @@ footer::before {
       <div class="phase-content">
         <h2 class="section-title">Structure That Lasts.</h2>
         <p>A great cut isn't just about what happens in the chair. It's about how it falls six weeks later. How it moves in wind. How it frames you without trying.</p>
-        <div class="work-photo-placeholder"><span>Precision Cut</span></div>
+        <div class="vision-card crosshatch" style="max-width:500px;margin-top:1.5rem;">
+          <div class="vc-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="vc-label">Social Proof That Books Chairs</div>
+          <div class="vc-pitch">Reviews, posts, and testimonials <strong>working around the clock</strong> — your reputation doing the selling</div>
+        </div>
       </div>
     </div>
 
@@ -1347,15 +1465,21 @@ footer::before {
       <div class="phase-content">
         <h2 class="section-title">Before You Walked In.<br>After You Walk Out.</h2>
         <p>The best part of what we do isn't the technique. It's the look on your face when you see yourself for the first time.</p>
-        <div class="work-ba">
-          <div class="work-ba-card">
-            <div class="work-ba-label">Before</div>
-            <span>Photo</span>
+        <div class="work-ba" style="gap:1rem;align-items:stretch;">
+          <div class="vision-card" style="flex:1;padding:2rem 1.5rem;">
+            <div class="vc-icon">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="vc-label">Content That Converts</div>
+            <div class="vc-pitch">Your artistry, <strong>showcased across every platform</strong></div>
           </div>
           <div class="work-ba-divider"></div>
-          <div class="work-ba-card">
-            <div class="work-ba-label">After</div>
-            <span>Photo</span>
+          <div class="vision-card wide-diag" style="flex:1;padding:2rem 1.5rem;">
+            <div class="vc-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </div>
+            <div class="vc-label">Results You Can Share</div>
+            <div class="vc-pitch">Posts that turn <strong>scrollers into clients</strong></div>
           </div>
         </div>
       </div>

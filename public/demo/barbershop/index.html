@@ -400,37 +400,170 @@ nav.scrolled .nav-phone {
   }
 }
 
-/* Hero stamp image placeholder */
+/* Hero stamp vision card */
 .hero-stamp {
   position: absolute;
   bottom: 8%; right: 6%;
   width: 280px; height: 360px;
   z-index: 1;
 }
-.hero-stamp-inner {
+
+/* === VISION CARDS === */
+.vision-card {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-deep) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: center;
+}
+/* dots pattern */
+.vision-card.vc-dots {
+  background-color: var(--navy-deep);
+  background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+/* diagonal stripes pattern */
+.vision-card.vc-diag {
+  background-color: var(--navy-deep);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+/* crosshatch pattern */
+.vision-card.vc-cross {
+  background-color: var(--navy-deep);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 16px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 16px);
+}
+/* cream/parchment card variant */
+.vision-card.vc-cream {
+  background-color: var(--cream);
+  background-image: radial-gradient(rgba(27,58,92,0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+.vision-card.vc-cream-diag {
+  background-color: var(--cream);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(27,58,92,0.06) 0px,
+    rgba(27,58,92,0.06) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+.vision-card.vc-cream-cross {
+  background-color: var(--parchment);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(27,58,92,0.07) 0px, rgba(27,58,92,0.07) 1px, transparent 1px, transparent 16px),
+    repeating-linear-gradient(90deg, rgba(27,58,92,0.07) 0px, rgba(27,58,92,0.07) 1px, transparent 1px, transparent 16px);
+}
+.vc-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  flex-shrink: 0;
 }
-.hero-stamp-inner span {
+/* dark card icon */
+.vision-card.vc-dots .vc-icon,
+.vision-card.vc-diag .vc-icon,
+.vision-card.vc-cross .vc-icon {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+/* light card icon */
+.vision-card.vc-cream .vc-icon,
+.vision-card.vc-cream-diag .vc-icon,
+.vision-card.vc-cream-cross .vc-icon {
+  background: rgba(27,58,92,0.12);
+  border: 1px solid rgba(27,58,92,0.25);
+}
+.vc-icon svg {
+  width: 26px; height: 26px;
+  stroke-width: 1.5;
+  fill: none;
+}
+.vision-card.vc-dots .vc-icon svg,
+.vision-card.vc-diag .vc-icon svg,
+.vision-card.vc-cross .vc-icon svg {
+  stroke: rgba(255,255,255,0.85);
+}
+.vision-card.vc-cream .vc-icon svg,
+.vision-card.vc-cream-diag .vc-icon svg,
+.vision-card.vc-cream-cross .vc-icon svg {
+  stroke: #1B3A5C;
+}
+/* accent icon (red) */
+.vision-card .vc-icon.vc-red {
+  background: rgba(196,30,58,0.12);
+  border: 1px solid rgba(196,30,58,0.25);
+}
+.vision-card .vc-icon.vc-red svg {
+  stroke: var(--airmail-red);
+}
+.vc-label {
   font-family: 'Oswald', sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.4);
+  font-weight: 400;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
-.hero-stamp-denom {
-  position: absolute;
-  top: 8px; right: 10px;
-  font-family: 'Oswald', sans-serif;
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.25);
-  text-transform: uppercase;
+.vision-card.vc-dots .vc-label,
+.vision-card.vc-diag .vc-label,
+.vision-card.vc-cross .vc-label {
+  color: rgba(255,255,255,0.55);
+}
+.vision-card.vc-cream .vc-label,
+.vision-card.vc-cream-diag .vc-label,
+.vision-card.vc-cream-cross .vc-label {
+  color: var(--navy);
+}
+.vc-pitch {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  max-width: 220px;
+}
+.vision-card.vc-dots .vc-pitch,
+.vision-card.vc-diag .vc-pitch,
+.vision-card.vc-cross .vc-pitch {
+  color: rgba(255,255,255,0.8);
+}
+.vision-card.vc-cream .vc-pitch,
+.vision-card.vc-cream-diag .vc-pitch,
+.vision-card.vc-cream-cross .vc-pitch {
+  color: var(--charcoal);
+}
+
+/* Shop section: 4-card grid when using vision cards */
+.shop-grid.vc-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (max-width: 768px) {
+  .shop-grid.vc-grid { grid-template-columns: 1fr; }
+}
+.shop-grid.vc-grid .shop-card {
+  transform: none !important;
+}
+.shop-grid.vc-grid .shop-card:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+}
+.shop-grid.vc-grid .shop-image {
+  aspect-ratio: 16/9;
 }
 
 /* Scroll indicator */
@@ -497,29 +630,7 @@ nav.scrolled .nav-phone {
   width: 100%;
   height: 100%;
 }
-.barber-portrait .photo-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(160deg, var(--navy-light) 0%, var(--navy-deep) 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-medium);
-}
-.barber-portrait .photo-placeholder span {
-  font-family: 'Oswald', sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  color: rgba(255,255,255,0.35);
-  text-transform: uppercase;
-}
-.barber-portrait .photo-placeholder .placeholder-icon {
-  font-size: 3rem;
-  opacity: 0.2;
-}
+/* photo-placeholder styles removed — replaced by vision cards */
 .barber-est {
   text-align: center;
   margin-top: 1rem;
@@ -1290,11 +1401,18 @@ a:focus-visible, button:focus-visible {
     <a href="tel:+15551234567" class="hero-cta">Book Your Cut</a>
   </div>
 
-  <!-- Hero stamp photo placeholder -->
+  <!-- Hero stamp vision card -->
   <div class="hero-stamp stamp-frame">
-    <div class="hero-stamp-inner">
-      <span>Barber Chair</span>
-      <div class="hero-stamp-denom">USA 2019</div>
+    <div class="vision-card vc-dots">
+      <div class="vc-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="vc-label">Online Presence</div>
+      <div class="vc-pitch">Your brand, delivered — as sharp as your cuts</div>
     </div>
   </div>
 
@@ -1314,9 +1432,17 @@ a:focus-visible, button:focus-visible {
   <div class="container">
     <div class="barber-grid">
       <div class="barber-portrait">
-        <div class="photo-placeholder">
-          <div class="placeholder-icon">&#9986;</div>
-          <span>Photo Coming Soon</span>
+        <div class="stamp-frame" style="width:100%;height:100%;">
+          <div class="vision-card vc-diag">
+            <div class="vc-icon">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23 7l-7 5 7 5V7z"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              </svg>
+            </div>
+            <div class="vc-label">Content Creation</div>
+            <div class="vc-pitch">Professional shots of your craft — styled, captioned, and posted for you</div>
+          </div>
         </div>
         <div class="barber-est">Est. 2019</div>
       </div>
@@ -1396,32 +1522,71 @@ a:focus-visible, button:focus-visible {
 <section class="shop section-padding" id="shop">
   <div class="container">
     <div class="section-label">The Shop</div>
-    <h2 class="section-title">Vintage Character.<br>Modern Comfort.</h2>
-    <p class="shop-subtitle">Vintage memorabilia, comfortable seating, and the kind of atmosphere that makes you want to stay a while.</p>
-    <div class="shop-grid">
+    <h2 class="section-title">What Guardia<br>Delivers For You.</h2>
+    <p class="shop-subtitle">Everything a classic shop needs to own its corner of the internet — handled.</p>
+    <div class="shop-grid vc-grid">
+      <!-- Vision card 1 -->
       <div class="shop-card">
-        <div class="shop-image"><span>The Chair</span></div>
-        <div class="shop-caption">The Chair<em>Barber chair detail</em></div>
+        <div class="shop-image">
+          <div class="vision-card vc-cream" style="border-radius:1px;">
+            <div class="vc-icon">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <div class="vc-label">Web Presence</div>
+            <div class="vc-pitch">A website with the character of your shop</div>
+          </div>
+        </div>
+        <div class="shop-caption">Your Atmosphere, Online<em>Built to match your vintage vibe</em></div>
       </div>
+      <!-- Vision card 2 -->
       <div class="shop-card">
-        <div class="shop-image"><span>Memorabilia Wall</span></div>
-        <div class="shop-caption">Memorabilia Wall<em>Vintage pieces</em></div>
+        <div class="shop-image">
+          <div class="vision-card vc-cream-diag" style="border-radius:1px;">
+            <div class="vc-icon vc-red">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <div class="vc-label">Social Content</div>
+            <div class="vc-pitch">Weekly posts that keep regulars coming back</div>
+          </div>
+        </div>
+        <div class="shop-caption">Social Posts That Build Loyalty<em>Automated content from your chair</em></div>
       </div>
+      <!-- Vision card 3 -->
       <div class="shop-card">
-        <div class="shop-image"><span>Street View</span></div>
-        <div class="shop-caption">Street View<em>Looking out the window</em></div>
+        <div class="shop-image">
+          <div class="vision-card vc-cream-cross" style="border-radius:1px;">
+            <div class="vc-icon">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <div class="vc-label">Local SEO</div>
+            <div class="vc-pitch">Google Business optimization that drives walk-in traffic</div>
+          </div>
+        </div>
+        <div class="shop-caption">Walk-In Traffic, Digitized<em>Google maps, ranked and managed</em></div>
       </div>
+      <!-- Vision card 4 -->
       <div class="shop-card">
-        <div class="shop-image"><span>The Pole</span></div>
-        <div class="shop-caption">The Pole<em>Classic barber pole</em></div>
-      </div>
-      <div class="shop-card">
-        <div class="shop-image"><span>Details</span></div>
-        <div class="shop-caption">Details<em>Shop interior touches</em></div>
-      </div>
-      <div class="shop-card">
-        <div class="shop-image"><span>The Sign</span></div>
-        <div class="shop-caption">The Sign<em>Shop signage</em></div>
+        <div class="shop-image">
+          <div class="vision-card vc-cream" style="border-radius:1px;">
+            <div class="vc-icon vc-red">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div class="vc-label">Reputation</div>
+            <div class="vc-pitch">Review management that builds your reputation cut by cut</div>
+          </div>
+        </div>
+        <div class="shop-caption">Google Reviews That Work<em>Managed responses, more 5-stars</em></div>
       </div>
     </div>
   </div>
