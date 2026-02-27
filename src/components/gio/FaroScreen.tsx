@@ -8,6 +8,7 @@ import {
   Copy, Sparkles,
 } from "lucide-react";
 import type { GioClient } from "./types";
+import FaroDomainSection from "./FaroDomainSection";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -464,6 +465,9 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
               )}
             </div>
           </section>
+
+          {/* Custom Domain */}
+          <FaroDomainSection jwt={jwt} />
 
           {/* Profile */}
           <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5 space-y-4">
