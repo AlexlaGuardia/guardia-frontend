@@ -21,30 +21,30 @@
 
 :root {
   /* Sage Greens */
-  --sage: #7C9082;
-  --sage-deep: #5E7363;
-  --sage-light: #9FB0A4;
-  --sage-muted: #A8B8AC;
+  --sage: #6B8F72;
+  --sage-deep: #4A6B50;
+  --sage-light: #8EAD95;
+  --sage-muted: #95B89D;
 
   /* Dusty Rose */
-  --rose: #C4918A;
-  --rose-deep: #A87872;
-  --rose-light: #D4ACA6;
+  --rose: #C08578;
+  --rose-deep: #A66E63;
+  --rose-light: #D4A49A;
   --rose-muted: #DBBFBB;
 
   /* Neutrals */
-  --ivory: #FAFAF5;
-  --ivory-warm: #F5F2EC;
-  --linen: #EDE8E0;
+  --ivory: #F7F4EE;
+  --ivory-warm: #F0EBE2;
+  --linen: #E4DDD2;
   --charcoal: #1A1A1A;
   --charcoal-light: #333333;
   --warmgray: #8A8580;
   --warmgray-light: #B0ACA8;
 
   /* Shadows */
-  --shadow-soft: 0 4px 20px rgba(26,26,26,0.06);
-  --shadow-medium: 0 8px 32px rgba(26,26,26,0.10);
-  --shadow-lift: 0 12px 48px rgba(26,26,26,0.14);
+  --shadow-soft: 0 4px 20px rgba(26,26,26,0.10);
+  --shadow-medium: 0 8px 32px rgba(26,26,26,0.14);
+  --shadow-lift: 0 12px 48px rgba(26,26,26,0.18);
 
   --radius: 4px;
 }
@@ -94,10 +94,10 @@ nav {
   background: transparent;
 }
 nav.scrolled {
-  background: rgba(250, 250, 245, 0.96);
+  background: rgba(247, 244, 238, 0.98);
   backdrop-filter: blur(12px);
-  box-shadow: 0 2px 24px rgba(26,26,26,0.07);
-  border-bottom: 1px solid rgba(124,144,130,0.2);
+  box-shadow: 0 2px 24px rgba(26,26,26,0.12);
+  border-bottom: 1px solid rgba(107,143,114,0.25);
 }
 .nav-inner {
   max-width: 1200px;
@@ -208,8 +208,9 @@ nav.scrolled .nav-cta {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(to bottom, rgba(26,26,26,0.42), rgba(26,26,26,0.60)),
+    linear-gradient(to bottom, rgba(30,40,32,0.45), rgba(25,35,28,0.62)),
     url('https://images.unsplash.com/photo-1664475764570-c7e67c1dbb91?w=1920&q=80') center/cover no-repeat;
+  image-rendering: auto;
 }
 
 .hero-photo-overlay {
@@ -413,6 +414,7 @@ nav.scrolled .nav-cta {
   background-repeat: no-repeat;
   transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
   position: relative;
+  filter: saturate(1.08) contrast(1.04);
 }
 .col-card-tall .col-card-photo { min-height: 520px; }
 .col-card:hover .col-card-photo { transform: scale(1.05); }
@@ -420,7 +422,7 @@ nav.scrolled .nav-cta {
 .col-card-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(26,26,26,0.72) 0%, rgba(26,26,26,0.08) 55%, transparent 100%);
+  background: linear-gradient(to top, rgba(30,40,32,0.72) 0%, rgba(30,40,32,0.15) 55%, transparent 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -428,7 +430,7 @@ nav.scrolled .nav-cta {
   transition: background 0.4s ease;
 }
 .col-card:hover .col-card-overlay {
-  background: linear-gradient(to top, rgba(26,26,26,0.80) 0%, rgba(26,26,26,0.18) 60%, transparent 100%);
+  background: linear-gradient(to top, rgba(30,40,32,0.82) 0%, rgba(30,40,32,0.28) 60%, transparent 100%);
 }
 
 .col-card-label {
@@ -507,6 +509,7 @@ nav.scrolled .nav-cta {
   border-radius: var(--radius);
   display: block;
   box-shadow: var(--shadow-medium);
+  filter: saturate(1.08) contrast(1.04);
 }
 .story-photo-accent {
   position: absolute;
@@ -584,7 +587,7 @@ nav.scrolled .nav-cta {
 /* === JEWELRY BAR === */
 .jewelry-bar {
   background:
-    linear-gradient(to bottom, rgba(26,26,26,0.58), rgba(26,26,26,0.72)),
+    linear-gradient(to bottom, rgba(30,40,32,0.55), rgba(25,35,28,0.70)),
     url('https://images.unsplash.com/photo-1674748385760-d846825598ab?w=1200&q=80') center/cover no-repeat;
   padding: 7rem 2rem;
   position: relative;
@@ -742,12 +745,13 @@ nav.scrolled .nav-cta {
   background-repeat: no-repeat;
   position: relative;
   overflow: hidden;
+  filter: saturate(1.08) contrast(1.04);
 }
 .piece-card-photo::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 60%, rgba(26,26,26,0.3) 100%);
+  background: linear-gradient(to bottom, transparent 60%, rgba(30,40,32,0.30) 100%);
 }
 .piece-badge {
   position: absolute;
@@ -887,7 +891,7 @@ nav.scrolled .nav-cta {
 /* === VISIT US === */
 .visit {
   background:
-    linear-gradient(to bottom, rgba(26,26,26,0.48), rgba(26,26,26,0.65)),
+    linear-gradient(to bottom, rgba(30,40,32,0.46), rgba(25,35,28,0.63)),
     url('https://images.unsplash.com/photo-1756641964889-5a04b6e0f4f6?w=1200&q=80') center/cover no-repeat;
   padding: 7rem 2rem;
   position: relative;
@@ -1169,7 +1173,7 @@ footer {
   <div class="collections-grid container">
 
     <div class="col-card col-card-tall fade-in">
-      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(26,26,26,0.18), rgba(26,26,26,0.52)), url('https://images.unsplash.com/photo-1595991209266-711c557ac7c4?w=1200&q=80');">
+      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(30,40,32,0.15), rgba(30,40,32,0.50)), url('https://images.unsplash.com/photo-1595991209266-711c557ac7c4?w=1200&q=80');">
         <div class="col-card-overlay">
           <span class="col-card-label">Latest In</span>
           <div class="col-card-title">New<br>Arrivals</div>
@@ -1179,7 +1183,7 @@ footer {
     </div>
 
     <div class="col-card fade-in">
-      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(26,26,26,0.15), rgba(26,26,26,0.50)), url('https://images.unsplash.com/photo-1752533866148-920e80a74a2f?w=1200&q=80');">
+      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(30,40,32,0.12), rgba(30,40,32,0.48)), url('https://images.unsplash.com/photo-1752533866148-920e80a74a2f?w=1200&q=80');">
         <div class="col-card-overlay">
           <span class="col-card-label">Finish The Look</span>
           <div class="col-card-title">Accessories</div>
@@ -1189,7 +1193,7 @@ footer {
     </div>
 
     <div class="col-card fade-in">
-      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(26,26,26,0.15), rgba(26,26,26,0.50)), url('https://images.unsplash.com/photo-1753161029492-0644556055cf?w=1200&q=80');">
+      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(30,40,32,0.12), rgba(30,40,32,0.48)), url('https://images.unsplash.com/photo-1753161029492-0644556055cf?w=1200&q=80');">
         <div class="col-card-overlay">
           <span class="col-card-label">Everyday Wear</span>
           <div class="col-card-title">Apparel</div>
@@ -1199,7 +1203,7 @@ footer {
     </div>
 
     <div class="col-card fade-in">
-      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(26,26,26,0.15), rgba(26,26,26,0.55)), url('https://images.unsplash.com/photo-1674748385760-d846825598ab?w=1200&q=80');">
+      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(30,40,32,0.12), rgba(30,40,32,0.52)), url('https://images.unsplash.com/photo-1674748385760-d846825598ab?w=1200&q=80');">
         <div class="col-card-overlay">
           <span class="col-card-label">The Jewelry Bar</span>
           <div class="col-card-title">Fine Jewelry</div>
@@ -1209,7 +1213,7 @@ footer {
     </div>
 
     <div class="col-card fade-in">
-      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(26,26,26,0.15), rgba(26,26,26,0.50)), url('https://images.unsplash.com/photo-1756641964889-5a04b6e0f4f6?w=1200&q=80');">
+      <div class="col-card-photo" style="background-image: linear-gradient(to bottom, rgba(30,40,32,0.12), rgba(30,40,32,0.48)), url('https://images.unsplash.com/photo-1756641964889-5a04b6e0f4f6?w=1200&q=80');">
         <div class="col-card-overlay">
           <span class="col-card-label">Just In</span>
           <div class="col-card-title">Seasonal</div>
