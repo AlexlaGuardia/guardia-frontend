@@ -149,8 +149,8 @@ export default function VIPStartPage() {
                   { niche: 'Barbershop', emoji: '\u2702\uFE0F', href: '/demo/barbershop', gradient: 'from-slate-700/40 to-slate-900/40' },
                   { niche: 'Luxury Salon', emoji: '\uD83D\uDC87', href: '/demo/salon', gradient: 'from-violet-800/40 to-purple-900/40' },
                   { niche: 'Print Shop', emoji: '\uD83D\uDDA8\uFE0F', href: '/demo/printshop', gradient: 'from-teal-800/40 to-teal-950/40' },
-                  { niche: 'Boutique', emoji: '\uD83D\uDC5C', href: '/demo/boutique', gradient: 'from-rose-800/40 to-amber-900/40' },
-                  { niche: 'Deli & Subs', emoji: '\uD83E\uDD6A', href: '/demo/deli', gradient: 'from-amber-700/40 to-yellow-900/40' },
+                  { niche: 'Boutique', emoji: '\uD83D\uDC5C', href: '/demo/boutique', gradient: 'from-emerald-800/40 to-stone-900/40' },
+                  { niche: 'Deli & Subs', emoji: '\uD83E\uDD6A', href: '/demo/deli', gradient: 'from-rose-900/40 to-amber-900/40' },
                 ].map((demo) => (
                   <a
                     key={demo.niche}
