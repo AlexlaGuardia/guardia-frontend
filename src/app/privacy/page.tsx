@@ -8,7 +8,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] px-6 py-20">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
-        <p className="text-[var(--text-secondary)] mb-12">Last updated: February 21, 2026</p>
+        <p className="text-[var(--text-secondary)] mb-12">Last updated: February 28, 2026</p>
 
         <div className="space-y-8 text-[var(--text-secondary)] leading-relaxed">
 
@@ -93,6 +93,23 @@ export default function PrivacyPage() {
               We never post without your authorization and you can revoke access at any time.
               You can also remove Guardia from your Facebook settings, which triggers
               automatic deletion of your connected account data.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">Data from Instagram</h2>
+            <p>
+              When you connect your Facebook account and your Facebook Page has a linked
+              Instagram Business account, we request the following Instagram permissions:
+            </p>
+            <ul className="list-disc list-inside space-y-2 mt-4">
+              <li><strong className="text-[var(--text-primary)]">instagram_basic:</strong> To read your Instagram Business account profile information (username, profile picture) and display it in your Account settings</li>
+              <li><strong className="text-[var(--text-primary)]">instagram_content_publish:</strong> To publish photos to your Instagram Business account after you review and approve each post in the dashboard</li>
+            </ul>
+            <p className="mt-4">
+              Instagram access is provided through your Facebook Page connection.
+              We never post to Instagram without your explicit approval. You can
+              disconnect Instagram at any time from your Account settings.
             </p>
           </section>
 

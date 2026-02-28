@@ -183,7 +183,7 @@ export default function PublishPreviewModal({ assetId, jwt, onClose, onPublished
               {platforms.length === 0 && (
                 <div className="p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl">
                   <p className="text-sm text-[#ef4444]">No platforms connected</p>
-                  <p className="text-xs text-[var(--text-secondary)] mt-1">Go to Account to connect Facebook</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">Go to Account to connect Facebook or Instagram</p>
                 </div>
               )}
             </div>
