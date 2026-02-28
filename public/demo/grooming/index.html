@@ -38,6 +38,13 @@
   --shadow-medium: 0 8px 40px rgba(42, 42, 42, 0.12);
   --shadow-lift: 0 12px 48px rgba(42, 42, 42, 0.16);
   --radius: 6px;
+
+  /* Fluid Type Scale */
+  --fs-display:  clamp(2.5rem, 6vw + 0.5rem, 4.5rem);
+  --fs-title:    clamp(1.6rem, 3vw + 0.3rem, 2.8rem);
+  --fs-subtitle: clamp(1rem, 1.5vw + 0.5rem, 1.2rem);
+  --fs-body:     clamp(0.92rem, 0.4vw + 0.82rem, 1.05rem);
+  --fs-small:    clamp(0.75rem, 0.3vw + 0.65rem, 0.85rem);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -166,6 +173,27 @@ nav.scrolled .nav-phone {
   margin: 0 auto;
 }
 
+/* === LIGHT LEAKS === */
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 25% 40%, rgba(106, 191, 173, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 25%, rgba(232, 116, 106, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(106, 191, 173, 0.08) 0%, transparent 50%);
+  animation: glow-drift 22s ease-in-out infinite alternate;
+}
+@keyframes glow-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(3%, -2%) scale(1.05); }
+  100% { transform: translate(-2%, 3%) scale(0.98); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow { animation: none; }
+}
+
 /* === HERO === */
 .hero {
   min-height: 100vh;
@@ -208,7 +236,7 @@ nav.scrolled .nav-phone {
   font-family: 'Fraunces', serif;
   font-optical-sizing: auto;
   font-weight: 800;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: var(--fs-display);
   color: #fff;
   line-height: 1.1;
   margin-bottom: 1.5rem;
@@ -219,7 +247,7 @@ nav.scrolled .nav-phone {
 }
 .hero-subtitle {
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-size: var(--fs-subtitle);
   color: rgba(255,255,255,0.85);
   font-weight: 300;
   margin-bottom: 2.5rem;
@@ -321,7 +349,7 @@ nav.scrolled .nav-phone {
 }
 .artist-text .section-label { color: var(--teal-deep); }
 .artist-text .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--charcoal);
 }
 .artist-text p {
@@ -387,7 +415,7 @@ nav.scrolled .nav-phone {
 .gallery .section-label { color: var(--teal-light); }
 .gallery .section-title {
   color: #fff;
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
 }
 .gallery-subtitle {
   color: rgba(255,255,255,0.75);
@@ -520,7 +548,7 @@ nav.scrolled .nav-phone {
 }
 .services .section-label { color: var(--teal-deep); }
 .services .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--charcoal);
   text-align: center;
 }
@@ -601,7 +629,7 @@ nav.scrolled .nav-phone {
 }
 .barkbury .section-label { color: var(--bark-green-light); }
 .barkbury .section-title {
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-size: var(--fs-title);
   color: #fff;
   margin-bottom: 2rem;
 }
@@ -709,7 +737,7 @@ nav.scrolled .nav-phone {
   text-align: center;
 }
 .testimonials .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--charcoal);
   text-align: center;
 }
@@ -781,7 +809,7 @@ nav.scrolled .nav-phone {
 }
 .cta-section h2 {
   font-family: 'Fraunces', serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-size: var(--fs-title);
   color: #fff;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -1141,6 +1169,7 @@ footer a:focus-visible {
 <!-- HERO                                        -->
 <!-- ═══════════════════════════════════════════ -->
 <section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
   <div class="hero-content">
     <div class="hero-badge">Downtown Sunbury</div>
     <h1>Every Dog Is a<br>Work of <em>Art</em></h1>
@@ -1425,6 +1454,21 @@ lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((time) => lenis.raf(time * 1000));
 gsap.ticker.lagSmoothing(0);
 
+// ═══ TEXT SPLIT UTILITIES ═══
+function splitWords(el) {
+  // Replace <br> with spaces before extracting text
+  var html = el.innerHTML.replace(/<br\s*\/?>/gi, ' ');
+  var tmp = document.createElement('span');
+  tmp.innerHTML = html;
+  var text = tmp.textContent.trim();
+  el.innerHTML = text.split(/\s+/).map(function(word) {
+    return '<span style="display:inline-block;overflow:hidden">' +
+      '<span class="split-word" style="display:inline-block">' + word + '</span>' +
+    '</span>';
+  }).join(' ');
+  return el.querySelectorAll('.split-word');
+}
+
 // ═══ NAV SCROLL BEHAVIOR ═══
 const nav = document.querySelector('nav');
 ScrollTrigger.create({
@@ -1442,12 +1486,31 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-// ═══ HERO ENTRANCE ═══
+// ═══ HERO ENTRANCE (with line reveals) ═══
+const heroH1 = document.querySelector('.hero h1');
+const heroSub = document.querySelector('.hero-subtitle');
+
+var h1Lines = [];
+if (heroH1) {
+  var rawHTML = heroH1.innerHTML;
+  var lineParts = rawHTML.split(/<br\s*\/?>/i);
+  heroH1.innerHTML = lineParts.map(function(part) {
+    return '<span style="display:block;overflow:hidden">' +
+      '<span class="hero-line" style="display:block">' + part.trim() + '</span>' +
+    '</span>';
+  }).join('');
+  h1Lines = heroH1.querySelectorAll('.hero-line');
+}
+
+const subWords = heroSub ? splitWords(heroSub) : [];
+
+gsap.set([...h1Lines, ...subWords], { autoAlpha: 0, y: 50 });
+
 const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
 heroTL
   .from('.hero-badge', { opacity: 0, y: 20, duration: 0.7 })
-  .from('.hero h1', { opacity: 0, y: 40, duration: 0.9 }, '-=0.3')
-  .from('.hero-subtitle', { opacity: 0, y: 20, duration: 0.6 }, '-=0.4')
+  .to(h1Lines, { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.12 }, '-=0.3')
+  .to(subWords, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.04 }, '-=0.2')
   .from('.hero-cta', { opacity: 0, y: 20, duration: 0.6 }, '-=0.3')
   .from('.hero-image', { opacity: 0, scale: 1.1, duration: 1 }, '-=0.6')
   .from('.scroll-indicator', { opacity: 0, duration: 0.5 }, '-=0.3');
@@ -1467,7 +1530,7 @@ gsap.from('.artist-portrait', {
   scrollTrigger: { trigger: '.artist', start: 'top 70%' },
   opacity: 0, x: -50, duration: 0.9, ease: 'power2.out'
 });
-gsap.from('.artist-text .section-label, .artist-text .section-title', {
+gsap.from('.artist-text .section-label', {
   scrollTrigger: { trigger: '.artist', start: 'top 70%' },
   opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
 });
@@ -1489,7 +1552,7 @@ if (!prefersReducedMotion) {
 }
 
 // ═══ GALLERY ═══
-gsap.from('.gallery .section-label, .gallery .section-title, .gallery-subtitle', {
+gsap.from('.gallery .section-label, .gallery-subtitle', {
   scrollTrigger: { trigger: '.gallery', start: 'top 75%' },
   opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
 });
@@ -1509,7 +1572,7 @@ gsap.from('.gallery-card', {
 });
 
 // ═══ SERVICES ═══
-gsap.from('.services .section-label, .services .section-title', {
+gsap.from('.services .section-label', {
   scrollTrigger: { trigger: '.services', start: 'top 75%' },
   opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
 });
@@ -1568,8 +1631,25 @@ ScrollTrigger.matchMedia({
   }
 });
 
+// ═══ SCROLL-TRIGGERED SECTION TITLE REVEALS ═══
+document.querySelectorAll('.artist-text .section-title, .gallery .section-title, .services .section-title, .testimonials .section-title, .cta-section h2').forEach(function(title) {
+  var words = splitWords(title);
+  gsap.from(words, {
+    y: 40,
+    autoAlpha: 0,
+    duration: 0.65,
+    ease: 'power2.out',
+    stagger: 0.06,
+    scrollTrigger: {
+      trigger: title,
+      start: 'top 85%',
+      toggleActions: 'play none none none'
+    }
+  });
+});
+
 // ═══ TESTIMONIALS ═══
-gsap.from('.testimonials-header', {
+gsap.from('.testimonials .section-label', {
   scrollTrigger: { trigger: '.testimonials', start: 'top 75%' },
   opacity: 0, y: 30, duration: 0.7, ease: 'power2.out'
 });
@@ -1579,10 +1659,6 @@ gsap.from('.testimonial-card', {
 });
 
 // ═══ CTA SECTION ═══
-gsap.from('.cta-section h2', {
-  scrollTrigger: { trigger: '.cta-section', start: 'top 75%' },
-  opacity: 0, y: 40, duration: 0.8, ease: 'power2.out'
-});
 gsap.from('.cta-section .cta-sub', {
   scrollTrigger: { trigger: '.cta-section', start: 'top 70%' },
   opacity: 0, y: 20, duration: 0.6, delay: 0.15, ease: 'power2.out'
