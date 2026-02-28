@@ -45,6 +45,13 @@
   --shadow-soft: 0 4px 20px rgba(0,0,0,0.12);
   --shadow-medium: 0 8px 40px rgba(0,0,0,0.2);
   --radius: 2px;
+
+  /* Fluid type scale — no breakpoint jumps */
+  --fs-display:  clamp(2.8rem, 6vw + 0.5rem, 5rem);
+  --fs-title:    clamp(1.6rem, 3.5vw + 0.3rem, 3rem);
+  --fs-subtitle: clamp(1rem, 1.5vw + 0.5rem, 1.35rem);
+  --fs-body:     clamp(0.92rem, 0.4vw + 0.82rem, 1.1rem);
+  --fs-small:    clamp(0.75rem, 0.3vw + 0.65rem, 0.85rem);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -80,6 +87,13 @@ body::after {
 a:focus-visible, button:focus-visible {
   outline: 2px solid var(--gold-light);
   outline-offset: 2px;
+}
+
+/* === TEXT REVEAL PREP (hidden until GSAP fires) === */
+.hero-title-script,
+.hero-title-main,
+.hero-subtitle {
+  visibility: hidden;
 }
 
 /* === GHOST TYPOGRAPHY === */
@@ -247,6 +261,7 @@ nav.scrolled::after {
 .section-title {
   font-family: 'Playfair Display', serif;
   font-weight: 600;
+  font-size: var(--fs-title);
   line-height: 1.2;
   margin-bottom: 1.5rem;
 }
@@ -341,6 +356,27 @@ nav.scrolled::after {
   border-color: var(--gold);
   box-shadow: 0 0 30px rgba(201,167,78,0.2);
 }
+/* === LIGHT LEAKS (animated gradient orbs) === */
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(201, 167, 78, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 65%, rgba(90, 60, 140, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 15% 80%, rgba(201, 167, 78, 0.07) 0%, transparent 50%);
+  animation: glow-drift 22s ease-in-out infinite alternate;
+}
+@keyframes glow-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(3%, -2%) scale(1.06); }
+  100% { transform: translate(-2%, 3%) scale(0.97); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow { animation: none; }
+}
+
 /* Hero photo placeholder */
 .hero-photo {
   position: absolute;
@@ -394,6 +430,41 @@ nav.scrolled::after {
   .ghost-text { font-size: clamp(4rem, 20vw, 8rem); }
 }
 
+/* === MARQUEE BAND === */
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--slate);
+  border-top: 1px solid rgba(201,167,78,0.08);
+  border-bottom: 1px solid rgba(201,167,78,0.08);
+  padding: 1.1rem 0;
+}
+.marquee-inner {
+  display: inline-flex;
+  gap: 2.5rem;
+  animation: marquee-scroll 28s linear infinite;
+}
+.marquee-inner span {
+  font-family: 'Montserrat', sans-serif;
+  font-size: var(--fs-small);
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245,240,229,0.35);
+}
+.marquee-inner span::after {
+  content: '·';
+  margin-left: 2.5rem;
+  color: var(--gold-muted);
+  opacity: 0.4;
+}
+@keyframes marquee-scroll {
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-inner { animation: none; }
+}
+
 /* === OUR STORY === */
 .story {
   background: linear-gradient(180deg, var(--slate-deep), var(--slate));
@@ -414,7 +485,7 @@ nav.scrolled::after {
 }
 .story-text .section-label { color: var(--gold); }
 .story-text .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--cream);
 }
 .story-text p {
@@ -602,7 +673,7 @@ nav.scrolled::after {
 }
 .artists .section-label { color: var(--gold-muted); }
 .artists .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--text-dark);
 }
 .artists-grid {
@@ -699,7 +770,7 @@ nav.scrolled::after {
 }
 .services .section-label { color: rgba(201,167,78,0.7); }
 .services .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--cream);
 }
 .services-subtitle {
@@ -809,7 +880,7 @@ nav.scrolled::after {
   transform: translate(-50%, -50%);
 }
 .work .section-title {
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--cream);
   margin-bottom: 1.5rem;
 }
@@ -889,7 +960,7 @@ nav.scrolled::after {
 }
 .reviews .section-label { color: var(--gold-muted); }
 .reviews .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--text-dark);
 }
 .reviews-grid {
@@ -966,7 +1037,7 @@ nav.scrolled::after {
 }
 .invisible .section-label { color: var(--rose-muted); }
 .invisible .section-title {
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--cream);
 }
 .invisible-body {
@@ -1036,7 +1107,7 @@ nav.scrolled::after {
   z-index: 2;
 }
 .booking .section-title {
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--cream);
 }
 .booking-sub {
@@ -1263,6 +1334,7 @@ footer::before {
 <!-- HERO                                        -->
 <!-- ═══════════════════════════════════════════ -->
 <section class="hero">
+  <div class="hero-glow"></div>
   <div class="ghost-text">LUXE</div>
 
   <div class="hero-content">
@@ -1281,6 +1353,26 @@ footer::before {
     <div class="scroll-line"></div>
   </div>
 </section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MARQUEE BAND                                -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="marquee">
+  <div class="marquee-inner">
+    <span>Balayage</span>
+    <span>Precision Cuts</span>
+    <span>Color Correction</span>
+    <span>Extensions</span>
+    <span>Dimensional Color</span>
+    <span>Organic Treatments</span>
+    <span aria-hidden="true">Balayage</span>
+    <span aria-hidden="true">Precision Cuts</span>
+    <span aria-hidden="true">Color Correction</span>
+    <span aria-hidden="true">Extensions</span>
+    <span aria-hidden="true">Dimensional Color</span>
+    <span aria-hidden="true">Organic Treatments</span>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- OUR STORY                                   -->
@@ -1672,14 +1764,44 @@ gsap.utils.toArray('.gold-line, .gold-line-left').forEach(line => {
   });
 });
 
-// ═══ HERO ENTRANCE ═══
+// ═══ TEXT SPLIT UTILITY ═══
+function splitWords(el) {
+  const text = el.textContent.trim();
+  el.innerHTML = text.split(/\s+/).map(word =>
+    '<span style="display:inline-block;overflow:hidden">' +
+      '<span class="split-word" style="display:inline-block">' + word + '</span>' +
+    '</span>'
+  ).join(' ');
+  return el.querySelectorAll('.split-word');
+}
+function splitChars(el) {
+  const text = el.textContent.trim();
+  el.innerHTML = text.split('').map(ch =>
+    ch === ' ' ? ' ' :
+    '<span style="display:inline-block;overflow:hidden">' +
+      '<span class="split-char" style="display:inline-block">' + ch + '</span>' +
+    '</span>'
+  ).join('');
+  return el.querySelectorAll('.split-char');
+}
+
+// ═══ HERO ENTRANCE (with text reveals) ═══
+const heroScript = document.querySelector('.hero-title-script');
+const heroMain = document.querySelector('.hero-title-main');
+const heroSub = document.querySelector('.hero-subtitle');
+
+// Split hero text into animatable pieces
+const scriptChars = heroScript ? splitChars(heroScript) : [];
+const mainChars = heroMain ? splitChars(heroMain) : [];
+const subWords = heroSub ? splitWords(heroSub) : [];
+
 const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
 heroTL
   .from('.hero .gold-line', { scaleX: 0, duration: 0.6 })
   .from('.hero-label', { opacity: 0, y: 15, duration: 0.6 }, '-=0.2')
-  .from('.hero-title-script', { opacity: 0, y: 30, filter: 'blur(8px)', duration: 0.9 }, '-=0.3')
-  .from('.hero-title-main', { opacity: 0, y: 20, duration: 0.7 }, '-=0.4')
-  .from('.hero-subtitle', { opacity: 0, y: 15, duration: 0.6 }, '-=0.3')
+  .from(scriptChars, { y: 50, autoAlpha: 0, duration: 0.7, stagger: 0.04, ease: 'back.out(1.2)' }, '-=0.2')
+  .from(mainChars, { y: 35, autoAlpha: 0, duration: 0.6, stagger: 0.03 }, '-=0.3')
+  .from(subWords, { y: 20, autoAlpha: 0, duration: 0.5, stagger: 0.04 }, '-=0.2')
   .from('.hero-cta', { opacity: 0, y: 15, duration: 0.6 }, '-=0.2')
   .from('.hero-photo', { opacity: 0, scale: 1.05, duration: 1 }, '-=0.6')
   .from('.hero .ghost-text', { opacity: 0, duration: 1.2 }, '-=0.8')
@@ -1692,8 +1814,20 @@ gsap.to('.hero-photo', {
   scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
 });
 
+// ═══ SECTION TITLE REVEALS (split word animation) ═══
+document.querySelectorAll('.story-text .section-title, .artists .section-title, .services .section-title, .invisible .section-title, .booking .section-title').forEach(title => {
+  const words = splitWords(title);
+  gsap.from(words, {
+    y: 40, autoAlpha: 0,
+    duration: 0.65,
+    ease: 'power2.out',
+    stagger: 0.06,
+    scrollTrigger: { trigger: title, start: 'top 85%' }
+  });
+});
+
 // ═══ STORY SECTION ═══
-gsap.from('.story-text .section-label, .story-text .gold-line-left, .story-text .section-title', {
+gsap.from('.story-text .section-label, .story-text .gold-line-left', {
   scrollTrigger: { trigger: '.story', start: 'top 70%' },
   opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
 });
