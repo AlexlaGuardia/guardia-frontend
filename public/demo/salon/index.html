@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Luxe Studio — Luxury Salon | Selinsgrove, PA</title>
-<meta name="description" content="Where color finds its depth. Full-service luxury salon crafting dimensional beauty in the heart of Selinsgrove. Balayage, color, cuts, extensions & more.">
+<meta name="description" content="Where color finds its depth. Two artists, organic craft, and a quiet reputation that reaches far beyond Selinsgrove. Balayage, color, cuts, extensions & more.">
 <meta property="og:title" content="Luxe Studio — Selinsgrove, PA">
 <meta property="og:description" content="Where color finds its depth. Full-service luxury salon in Selinsgrove.">
 <meta property="og:type" content="website">
@@ -87,13 +87,6 @@ body::after {
 a:focus-visible, button:focus-visible {
   outline: 2px solid var(--gold-light);
   outline-offset: 2px;
-}
-
-/* === TEXT REVEAL PREP (hidden until GSAP fires) === */
-.hero-title-script,
-.hero-title-main,
-.hero-subtitle {
-  visibility: hidden;
 }
 
 /* === GHOST TYPOGRAPHY === */
@@ -1342,7 +1335,7 @@ footer::before {
     <div class="hero-label">Selinsgrove, PA</div>
     <div class="hero-title-script">Luxe</div>
     <div class="hero-title-main">Studio</div>
-    <p class="hero-subtitle">Where color finds its depth. A full-service luxury salon crafting dimensional beauty in the heart of Selinsgrove.</p>
+    <p class="hero-subtitle">Where color finds its depth. Two artists. Organic craft. A quiet reputation that reaches far beyond Selinsgrove.</p>
     <a href="#booking" class="hero-cta">Book Your Experience</a>
   </div>
 
@@ -1398,8 +1391,8 @@ footer::before {
           <div class="vc-icon">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
-          <div class="vc-label">Your Space, Captured</div>
-          <div class="vc-pitch">A website as <strong>polished as your work</strong> — professional photography and design that matches your salon's luxury</div>
+          <div class="vc-label">Your Space, Online</div>
+          <div class="vc-pitch">A website as <strong>refined as your work</strong> — every service, every transformation, every five-star moment presented beautifully</div>
         </div>
       </div>
     </div>
@@ -1442,7 +1435,7 @@ footer::before {
               <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
             </div>
             <div class="vc-label">Style Gallery</div>
-            <div class="vc-pitch">Curated cuts and styles <strong>across every platform</strong> — social media that books chairs</div>
+            <div class="vc-pitch">Every precision cut <strong>photographed and posted</strong> — your Instagram becomes a booking engine</div>
           </div>
         </div>
         <div class="artist-info">
@@ -1465,7 +1458,7 @@ footer::before {
     <div class="services-header">
       <div class="section-label">The Experience</div>
       <h2 class="section-title">Every Service, Elevated.</h2>
-      <p class="services-subtitle">Full-service luxury. Organic products. Personalized to you.</p>
+      <p class="services-subtitle">Organic products. Personalized consultations. Walk-ins welcome.</p>
     </div>
     <div class="services-grid">
       <div class="service-category glass-panel">
@@ -1562,16 +1555,16 @@ footer::before {
             <div class="vc-icon">
               <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
-            <div class="vc-label">Content That Converts</div>
-            <div class="vc-pitch">Your artistry, <strong>showcased across every platform</strong></div>
+            <div class="vc-label">Weekly Content</div>
+            <div class="vc-pitch">Fresh posts every week — <strong>your chair stays booked</strong> without you touching a phone</div>
           </div>
           <div class="work-ba-divider"></div>
           <div class="vision-card wide-diag" style="flex:1;padding:2rem 1.5rem;">
             <div class="vc-icon">
               <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
             </div>
-            <div class="vc-label">Results You Can Share</div>
-            <div class="vc-pitch">Posts that turn <strong>scrollers into clients</strong></div>
+            <div class="vc-label">Before &amp; After Posts</div>
+            <div class="vc-pitch">Transformations your clients <strong>share for you</strong> — the kind of content that books the next chair</div>
           </div>
         </div>
       </div>
@@ -1766,7 +1759,11 @@ gsap.utils.toArray('.gold-line, .gold-line-left').forEach(line => {
 
 // ═══ TEXT SPLIT UTILITY ═══
 function splitWords(el) {
-  const text = el.textContent.trim();
+  // Replace <br> with spaces before extracting text, so words don't concatenate
+  var html = el.innerHTML.replace(/<br\s*\/?>/gi, ' ');
+  var tmp = document.createElement('span');
+  tmp.innerHTML = html;
+  var text = tmp.textContent.trim();
   el.innerHTML = text.split(/\s+/).map(word =>
     '<span style="display:inline-block;overflow:hidden">' +
       '<span class="split-word" style="display:inline-block">' + word + '</span>' +
@@ -1790,18 +1787,21 @@ const heroScript = document.querySelector('.hero-title-script');
 const heroMain = document.querySelector('.hero-title-main');
 const heroSub = document.querySelector('.hero-subtitle');
 
-// Split hero text into animatable pieces
+// Hide immediately, then split into animatable pieces
+gsap.set([heroScript, heroMain, heroSub].filter(Boolean), { autoAlpha: 1 });
 const scriptChars = heroScript ? splitChars(heroScript) : [];
 const mainChars = heroMain ? splitChars(heroMain) : [];
 const subWords = heroSub ? splitWords(heroSub) : [];
+// Set all split pieces to hidden before animation
+gsap.set([...scriptChars, ...mainChars, ...subWords], { autoAlpha: 0, y: 40 });
 
 const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
 heroTL
   .from('.hero .gold-line', { scaleX: 0, duration: 0.6 })
   .from('.hero-label', { opacity: 0, y: 15, duration: 0.6 }, '-=0.2')
-  .from(scriptChars, { y: 50, autoAlpha: 0, duration: 0.7, stagger: 0.04, ease: 'back.out(1.2)' }, '-=0.2')
-  .from(mainChars, { y: 35, autoAlpha: 0, duration: 0.6, stagger: 0.03 }, '-=0.3')
-  .from(subWords, { y: 20, autoAlpha: 0, duration: 0.5, stagger: 0.04 }, '-=0.2')
+  .to(scriptChars, { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.04, ease: 'back.out(1.2)' }, '-=0.2')
+  .to(mainChars, { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.03 }, '-=0.3')
+  .to(subWords, { y: 0, autoAlpha: 1, duration: 0.5, stagger: 0.04 }, '-=0.2')
   .from('.hero-cta', { opacity: 0, y: 15, duration: 0.6 }, '-=0.2')
   .from('.hero-photo', { opacity: 0, scale: 1.05, duration: 1 }, '-=0.6')
   .from('.hero .ghost-text', { opacity: 0, duration: 1.2 }, '-=0.8')
