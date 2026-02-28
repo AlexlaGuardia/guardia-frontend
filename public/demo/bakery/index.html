@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Sugar &amp; Bloom &mdash; Artisan Bakery | Demo by Guardia</title>
+<meta name="description" content="Demo bakery website built by Guardia Intelligence. See what we can build for your business.">
+<meta property="og:title" content="Sugar &amp; Bloom &mdash; Artisan Bakery">
+<meta property="og:description" content="Baked fresh every morning. Artisan breads, pastries, and cakes &mdash; made from scratch since day one.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lenis@1.1.20/dist/lenis.css">
+<style>
+/* ===================================================
+   SUGAR & BLOOM &mdash; Guardia Intelligence
+   GSAP + Lenis scroll storytelling
+   Blush + Cocoa + Vanilla bakery demo
+   =================================================== */
+
+:root {
+  /* Blush Pink */
+  --blush: #E8A0A0;
+  --blush-deep: #D4878A;
+  --blush-light: #F0BFBF;
+  --blush-muted: #D9A5A8;
+
+  /* Cocoa (Dark) */
+  --cocoa: #3D2B1F;
+  --cocoa-light: #5A4438;
+  --cocoa-muted: #7A6658;
+
+  /* Cream Base */
+  --cream: #FFF5EE;
+  --cream-warm: #FDF0E6;
+  --cream-dark: #F0E4D8;
+  --linen: #E8DDD0;
+
+  /* Vanilla Gold Accent */
+  --vanilla: #C4A265;
+  --vanilla-light: #D4B87A;
+  --vanilla-muted: #B89555;
+
+  /* Text */
+  --text-dark: #3D2B1F;
+  --text-body: #5A4438;
+  --text-muted: #8A7A6E;
+  --text-light: #FFF5EE;
+
+  /* Shadows */
+  --shadow-soft: 0 4px 20px rgba(61,43,31,0.08);
+  --shadow-medium: 0 8px 32px rgba(61,43,31,0.12);
+  --shadow-lift: 0 12px 48px rgba(61,43,31,0.16);
+
+  --radius: 8px;
+
+  /* Fluid type scale */
+  --fs-display:  clamp(2.4rem, 5vw, 4.2rem);
+  --fs-title:    clamp(1.6rem, 3vw, 2.4rem);
+  --fs-subtitle: clamp(1.1rem, 2vw, 1.5rem);
+  --fs-body:     clamp(0.95rem, 1.2vw, 1.1rem);
+  --fs-small:    clamp(0.8rem, 1vw, 0.9rem);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Lenis overrides */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--text-body);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* === GRAIN OVERLAY === */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ===================================================
+   NAV
+   =================================================== */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;
+}
+
+nav.scrolled {
+  background: var(--cream);
+  box-shadow: 0 2px 20px rgba(61,43,31,0.08);
+  padding: 0.875rem 2rem;
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: color 0.4s ease;
+}
+
+nav.scrolled .nav-logo {
+  color: var(--text-dark);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(255,245,238,0.85);
+  transition: color 0.3s ease;
+}
+
+nav.scrolled .nav-links a {
+  color: var(--text-body);
+}
+
+.nav-links a:hover {
+  color: var(--vanilla-light);
+}
+
+nav.scrolled .nav-links a:hover {
+  color: var(--vanilla);
+}
+
+/* Hamburger */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text-light);
+  border-radius: 2px;
+  transition: background 0.4s ease, transform 0.3s ease, opacity 0.3s ease;
+}
+
+nav.scrolled .nav-toggle span {
+  background: var(--text-dark);
+}
+
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile nav drawer */
+.nav-drawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background: var(--cream);
+  z-index: 999;
+  padding: 5rem 2rem 2rem;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -8px 0 32px rgba(61,43,31,0.12);
+}
+
+.nav-drawer.open {
+  transform: translateX(0);
+}
+
+.nav-drawer ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.nav-drawer ul a {
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-body);
+  transition: color 0.2s;
+}
+
+.nav-drawer ul a:hover { color: var(--vanilla); }
+
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(61,43,31,0.4);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+
+.nav-overlay.open { opacity: 1; }
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  .nav-drawer { display: block; }
+  .nav-overlay { display: block; }
+}
+
+/* ===================================================
+   HERO
+   =================================================== */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(160deg, var(--cocoa) 0%, var(--blush-deep) 45%, rgba(90,68,56,0.95) 80%, var(--cocoa) 100%);
+  will-change: transform;
+}
+/* Subtle texture layer */
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      -52deg,
+      transparent 0px,
+      transparent 22px,
+      rgba(196,162,101,0.03) 22px,
+      rgba(196,162,101,0.03) 23px
+    ),
+    repeating-linear-gradient(
+      38deg,
+      transparent 0px,
+      transparent 44px,
+      rgba(255,255,255,0.015) 44px,
+      rgba(255,255,255,0.015) 45px
+    );
+  pointer-events: none;
+}
+
+/* Light leaks */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 40%, rgba(232,160,160,0.15), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 60%, rgba(196,162,101,0.10), transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+  animation: glow-drift 8s ease-in-out infinite alternate;
+}
+
+@keyframes glow-drift {
+  0%   { opacity: 1; transform: scale(1) translate(0, 0); }
+  50%  { opacity: 0.85; transform: scale(1.04) translate(1%, -1%); }
+  100% { opacity: 0.95; transform: scale(0.98) translate(-1%, 1%); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  max-width: 800px;
+  padding: 0 1.5rem;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blush-light);
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: var(--fs-display);
+  font-weight: 700;
+  color: var(--text-light);
+  line-height: 1.12;
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--blush-light);
+}
+
+.hero-sub {
+  font-size: var(--fs-subtitle);
+  font-weight: 300;
+  color: rgba(255,245,238,0.78);
+  max-width: 540px;
+  margin: 0 auto 2.25rem;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 0.875rem 2.25rem;
+  background: var(--vanilla);
+  color: var(--cocoa);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.btn-primary:hover {
+  background: var(--vanilla-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(196,162,101,0.35);
+}
+
+.btn-outline {
+  display: inline-block;
+  padding: 0.875rem 2.25rem;
+  background: transparent;
+  color: var(--text-dark);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius);
+  border: 2px solid var(--vanilla);
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: var(--vanilla);
+  color: var(--cocoa);
+  transform: translateY(-2px);
+}
+
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-scroll-hint span {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,245,238,0.5);
+}
+
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255,245,238,0.5), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+
+@keyframes scroll-pulse {
+  0%, 100% { opacity: 0.5; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.15); }
+}
+
+/* ===================================================
+   MARQUEE
+   =================================================== */
+.marquee-band {
+  background: var(--cream-warm);
+  border-top: 1px solid var(--linen);
+  border-bottom: 1px solid var(--linen);
+  overflow: hidden;
+  padding: 0.9rem 0;
+  position: relative;
+  z-index: 10;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 0;
+  white-space: nowrap;
+  animation: marquee-scroll 20s linear infinite;
+  width: max-content;
+}
+
+.marquee-track:hover { animation-play-state: paused; }
+
+.marquee-item {
+  display: inline-block;
+  padding: 0 2.5rem;
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blush-muted);
+}
+
+.marquee-dot {
+  color: var(--vanilla-muted);
+  padding: 0 0.25rem;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ===================================================
+   SECTION SHARED
+   =================================================== */
+section {
+  position: relative;
+}
+
+.container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.section-eyebrow {
+  display: inline-block;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vanilla);
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: var(--fs-title);
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.section-body {
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  line-height: 1.75;
+  max-width: 580px;
+}
+
+/* ===================================================
+   MENU / SPECIALTIES
+   =================================================== */
+.menu-section {
+  padding: 7rem 0;
+  background: var(--cream);
+}
+
+.menu-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.menu-header .section-body {
+  margin: 0 auto;
+}
+
+/* CSS dot pattern background */
+.dot-pattern {
+  background-image: radial-gradient(circle, var(--linen) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* CSS crosshatch pattern */
+.cross-pattern {
+  background-image:
+    linear-gradient(var(--linen) 1px, transparent 1px),
+    linear-gradient(90deg, var(--linen) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* CSS diagonal pattern */
+.diag-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    var(--linen) 6px,
+    var(--linen) 7px
+  );
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 540px) {
+  .menu-grid { grid-template-columns: 1fr; }
+}
+
+.menu-card {
+  background: var(--cream-warm);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--blush);
+  padding: 2rem 1.75rem;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+}
+
+.menu-card.dot-bg::before {
+  background-image: radial-gradient(circle, var(--cream-dark) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.menu-card.cross-bg::before {
+  background-image:
+    linear-gradient(var(--cream-dark) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cream-dark) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.menu-card.diag-bg::before {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    var(--cream-dark) 5px,
+    var(--cream-dark) 6px
+  );
+}
+
+.menu-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-3px);
+  border-color: var(--vanilla);
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--blush-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* CSS-only icons using pseudo-elements */
+.icon-bread {
+  position: relative;
+}
+.icon-bread::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 14px;
+  background: var(--vanilla);
+  border-radius: 50% 50% 4px 4px;
+}
+.icon-bread::after {
+  content: '';
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 3px;
+  background: rgba(196,162,101,0.5);
+  border-radius: 2px;
+}
+
+.icon-pastry::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--vanilla);
+  border-radius: 50%;
+  border-top-color: transparent;
+  transform: rotate(45deg);
+}
+
+.icon-cake::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 16px;
+  background: var(--vanilla);
+  border-radius: 3px 3px 5px 5px;
+}
+.icon-cake::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 8px;
+  background: var(--blush-deep);
+  border-radius: 2px;
+}
+
+.icon-cookie::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: var(--vanilla);
+  border-radius: 50%;
+}
+.icon-cookie::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: var(--blush-light);
+  border-radius: 50%;
+}
+
+.icon-seasonal::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 18px solid var(--vanilla);
+}
+
+.icon-catering::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 4px;
+  background: var(--vanilla);
+  border-radius: 2px;
+  box-shadow: 0 -7px 0 var(--vanilla), 0 7px 0 var(--vanilla);
+}
+
+.card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vanilla);
+  margin-bottom: 0.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.6rem;
+  position: relative;
+  z-index: 1;
+}
+
+.card-desc {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  line-height: 1.65;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===================================================
+   OUR STORY
+   =================================================== */
+.story-section {
+  padding: 7rem 0;
+  background: var(--cream-warm);
+  border-top: 1px solid var(--linen);
+  border-bottom: 1px solid var(--linen);
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .story-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.story-text .section-body {
+  max-width: 480px;
+  margin-bottom: 1.5rem;
+}
+
+.story-text p + p {
+  margin-top: 1.25rem;
+}
+
+.story-visual {
+  position: relative;
+  height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.story-visual-inner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--blush-light) 0%, var(--cream-dark) 40%, var(--vanilla-muted) 100%);
+  position: relative;
+}
+
+/* Crosshatch decorative overlay */
+.story-visual-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,245,238,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,245,238,0.4) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Decorative floating shapes */
+.story-visual-inner::after {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(255,245,238,0.25);
+  box-shadow:
+    0 0 0 20px rgba(255,245,238,0.1),
+    0 0 0 40px rgba(255,245,238,0.06);
+}
+
+.story-accent-text {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  right: 2rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--cocoa);
+  line-height: 1.5;
+  z-index: 2;
+}
+
+/* ===================================================
+   DAILY SPECIALS
+   =================================================== */
+.specials-section {
+  padding: 7rem 0;
+  background: var(--cream);
+}
+
+.specials-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.specials-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+@media (max-width: 768px) {
+  .specials-row { grid-template-columns: 1fr; }
+}
+
+.special-card {
+  background: var(--cream-warm);
+  border-radius: var(--radius);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-soft);
+  border-top: 2px solid var(--blush);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.special-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-3px);
+}
+
+.special-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.special-desc {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.special-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--linen);
+}
+
+.special-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--linen);
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+}
+
+.special-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--cocoa);
+}
+
+/* ===================================================
+   TESTIMONIALS
+   =================================================== */
+.testimonials-section {
+  padding: 7rem 0;
+  background: var(--cocoa);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle diagonal pattern overlay */
+.testimonials-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 12px,
+    rgba(255,245,238,0.025) 12px,
+    rgba(255,245,238,0.025) 13px
+  );
+  pointer-events: none;
+}
+
+.testimonials-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.testimonials-header .section-eyebrow {
+  color: var(--blush-light);
+}
+
+.testimonials-header .section-title {
+  color: var(--text-light);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+@media (max-width: 900px) {
+  .testimonials-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; }
+}
+
+.testimonial-card {
+  background: rgba(255,245,238,0.05);
+  border: 1px solid rgba(255,245,238,0.08);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  backdrop-filter: blur(4px);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.testimonial-card:hover {
+  background: rgba(255,245,238,0.08);
+  border-color: rgba(255,245,238,0.14);
+}
+
+.stars {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 1rem;
+}
+
+.star {
+  width: 14px;
+  height: 14px;
+  background: var(--vanilla);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+.testimonial-text {
+  font-size: var(--fs-body);
+  color: rgba(255,245,238,0.75);
+  line-height: 1.7;
+  font-style: italic;
+  margin-bottom: 1.25rem;
+}
+
+.testimonial-author {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blush-light);
+}
+
+/* ===================================================
+   VISIT US
+   =================================================== */
+.visit-section {
+  padding: 7rem 0;
+  background: var(--cream-warm);
+}
+
+.visit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .visit-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.hours-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+}
+
+.hours-table tr {
+  border-bottom: 1px solid var(--linen);
+}
+
+.hours-table td {
+  padding: 0.75rem 0;
+  font-size: var(--fs-body);
+  color: var(--text-body);
+}
+
+.hours-table td:first-child {
+  font-weight: 500;
+  color: var(--text-dark);
+  width: 40%;
+}
+
+.hours-table td:last-child {
+  color: var(--text-muted);
+}
+
+.visit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.info-block h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.info-block p {
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.visit-cta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+/* ===================================================
+   FOOTER
+   =================================================== */
+footer {
+  background: var(--cocoa);
+  padding: 4rem 0 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232,160,160,0.05), transparent 60%);
+  pointer-events: none;
+}
+
+.footer-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-light);
+  letter-spacing: -0.01em;
+}
+
+.footer-tagline {
+  font-size: var(--fs-small);
+  color: rgba(255,245,238,0.45);
+  letter-spacing: 0.06em;
+  margin-bottom: 1.5rem;
+}
+
+.footer-divider {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--vanilla), transparent);
+  margin: 0.5rem 0;
+}
+
+.footer-credit {
+  font-size: var(--fs-small);
+  color: rgba(255,245,238,0.35);
+  letter-spacing: 0.04em;
+}
+
+.footer-credit a {
+  color: var(--vanilla-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-credit a:hover { color: var(--vanilla-light); }
+
+.footer-demo-badge {
+  margin-top: 1.5rem;
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,245,238,0.25);
+  border: 1px solid rgba(255,245,238,0.12);
+  padding: 0.3rem 0.9rem;
+  border-radius: 20px;
+}
+
+/* ===================================================
+   SCROLL ANIMATION INITIAL STATES (set by JS)
+   =================================================== */
+.reveal {
+  /* populated by gsap.set() calls */
+}
+
+</style>
+</head>
+<body>
+
+<!-- NAV OVERLAY -->
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- NAV DRAWER (mobile) -->
+<nav class="nav-drawer" id="navDrawer">
+  <ul>
+    <li><a href="#menu" class="drawer-link">Menu</a></li>
+    <li><a href="#story" class="drawer-link">Our Story</a></li>
+    <li><a href="#visit" class="drawer-link">Visit</a></li>
+  </ul>
+</nav>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="#" class="nav-logo">Sugar &amp; Bloom</a>
+  <ul class="nav-links">
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#story">Our Story</a></li>
+    <li><a href="#visit">Visit</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Open menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">Artisan Bakery</span>
+    <h1>Baked Fresh<br><em>Every Morning</em></h1>
+    <p class="hero-sub">Artisan breads, pastries, and cakes &mdash; made from scratch since day one</p>
+    <a href="#menu" class="btn-primary">See the Menu</a>
+  </div>
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-band" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item">Sourdough <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Croissants <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Birthday Cakes <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Cinnamon Rolls <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Fruit Tarts <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Fresh Bread <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Sourdough <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Croissants <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Birthday Cakes <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Cinnamon Rolls <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Fruit Tarts <span class="marquee-dot">&middot;</span></span>
+    <span class="marquee-item">Fresh Bread <span class="marquee-dot">&middot;</span></span>
+  </div>
+</div>
+
+<!-- MENU / SPECIALTIES -->
+<section class="menu-section" id="menu">
+  <div class="container">
+    <div class="menu-header">
+      <span class="section-eyebrow reveal-item">What We Offer</span>
+      <h2 class="section-title reveal-title">What's in the Case</h2>
+      <p class="section-body reveal-item">Everything displayed with the care it deserves. We build menus that make your baked goods impossible to scroll past.</p>
+    </div>
+    <div class="menu-grid">
+
+      <div class="menu-card dot-bg reveal-card">
+        <div class="card-icon">
+          <div class="icon-bread"></div>
+        </div>
+        <div class="card-label">Classic</div>
+        <h3 class="card-title">Artisan Breads</h3>
+        <p class="card-desc">Your loaves deserve a page that breathes. We showcase sourdoughs, baguettes, and focaccias with the weight they carry.</p>
+      </div>
+
+      <div class="menu-card cross-bg reveal-card">
+        <div class="card-icon">
+          <div class="icon-pastry"></div>
+        </div>
+        <div class="card-label">Morning</div>
+        <h3 class="card-title">Pastries &amp; Danishes</h3>
+        <p class="card-desc">Butter croissants, fruit danishes, pain au chocolat &mdash; displayed beautifully so customers know exactly what to order before they arrive.</p>
+      </div>
+
+      <div class="menu-card diag-bg reveal-card">
+        <div class="card-icon">
+          <div class="icon-cake"></div>
+        </div>
+        <div class="card-label">Celebrations</div>
+        <h3 class="card-title">Custom Cakes</h3>
+        <p class="card-desc">Birthdays, weddings, milestones. A gallery and order form that converts browsers into clients &mdash; before a single phone call.</p>
+      </div>
+
+      <div class="menu-card dot-bg reveal-card">
+        <div class="card-icon">
+          <div class="icon-cookie"></div>
+        </div>
+        <div class="card-label">Everyday</div>
+        <h3 class="card-title">Cookies &amp; Bars</h3>
+        <p class="card-desc">Chocolate chip, brownies, lemon bars &mdash; the impulse buys that keep people coming back. We make them irresistible to scroll.</p>
+      </div>
+
+      <div class="menu-card diag-bg reveal-card">
+        <div class="card-icon">
+          <div class="icon-seasonal"></div>
+        </div>
+        <div class="card-label">Rotating</div>
+        <h3 class="card-title">Seasonal Specials</h3>
+        <p class="card-desc">Monthly rotations, holiday drops, limited runs. Your website keeps up with your oven &mdash; fresh content, zero manual effort.</p>
+      </div>
+
+      <div class="menu-card cross-bg reveal-card">
+        <div class="card-icon">
+          <div class="icon-catering"></div>
+        </div>
+        <div class="card-label">Events</div>
+        <h3 class="card-title">Catering &amp; Orders</h3>
+        <p class="card-desc">Event platters, corporate orders, pre-orders &mdash; with a booking flow that handles the back-and-forth so you don't have to.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- OUR STORY -->
+<section class="story-section" id="story">
+  <div class="container">
+    <div class="story-grid">
+      <div class="story-text">
+        <span class="section-eyebrow reveal-item">The Craft</span>
+        <h2 class="section-title reveal-title">Your Story,<br>Told Beautifully</h2>
+        <p class="section-body reveal-item">We craft websites that capture the warmth and craft of your bakery &mdash; from the flour-dusted counters to the smell of fresh bread. Every word, every layout, every detail chosen to make a stranger feel like a regular before they ever walk in.</p>
+        <p class="section-body reveal-item" style="margin-top:1.25rem;">This isn't a template. It's a site built around your process, your seasons, and your customers. One that earns your name on the front.</p>
+      </div>
+      <div class="story-visual reveal-item">
+        <div class="story-visual-inner">
+          <p class="story-accent-text">"Your bakery, exactly as good as it tastes &mdash; now online."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DAILY SPECIALS -->
+<section class="specials-section" id="specials">
+  <div class="container">
+    <div class="specials-header">
+      <span class="section-eyebrow reveal-item">Today's Menu</span>
+      <h2 class="section-title reveal-title">Daily Specials</h2>
+      <p class="section-body reveal-item" style="margin: 0 auto;">Dynamic menu sections that update with the day &mdash; so your website always reflects what's actually in the case.</p>
+    </div>
+    <div class="specials-row">
+
+      <div class="special-card reveal-card">
+        <h3 class="special-name">Morning Sourdough</h3>
+        <p class="special-desc">Open crumb, dark crust, 24-hour ferment. Ready at 7am &mdash; gone by 10. Shown here so your regulars plan accordingly.</p>
+        <div class="special-footer">
+          <span class="special-tag">Fresh Daily</span>
+          <span class="special-price">$8</span>
+        </div>
+      </div>
+
+      <div class="special-card reveal-card">
+        <h3 class="special-name">Butter Croissant Box</h3>
+        <p class="special-desc">Six layers of laminated dough, baked golden. The kind of section that sells out before noon &mdash; online ordering handles the rush.</p>
+        <div class="special-footer">
+          <span class="special-tag">Box of 6</span>
+          <span class="special-price">$16</span>
+        </div>
+      </div>
+
+      <div class="special-card reveal-card">
+        <h3 class="special-name">Custom Layer Cake</h3>
+        <p class="special-desc">Birthdays, anniversaries, any occasion worth celebrating. Order form built right in &mdash; two weeks lead time, zero phone tag.</p>
+        <div class="special-footer">
+          <span class="special-tag">Made to Order</span>
+          <span class="special-price">from $45</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section" id="testimonials">
+  <div class="container">
+    <div class="testimonials-header">
+      <span class="section-eyebrow reveal-item">Word Gets Around</span>
+      <h2 class="section-title reveal-title">What Customers Say</h2>
+    </div>
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card reveal-card">
+        <div class="stars">
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+        </div>
+        <p class="testimonial-text">"Best bakery in town, full stop. I found them online, ordered ahead, and walked in to exactly what I wanted. That convenience is what keeps me coming back."</p>
+        <span class="testimonial-author">Sarah M.</span>
+      </div>
+
+      <div class="testimonial-card reveal-card">
+        <div class="stars">
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+        </div>
+        <p class="testimonial-text">"Their sourdough changed my life. I saw it on the website, pre-ordered the night before, and it was waiting for me warm in the morning. That's a business that has it figured out."</p>
+        <span class="testimonial-author">Daniel R.</span>
+      </div>
+
+      <div class="testimonial-card reveal-card">
+        <div class="stars">
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+        </div>
+        <p class="testimonial-text">"The wedding cake was absolutely stunning &mdash; and I designed it through the website. Every detail confirmed by email. The whole experience felt as polished as the cake itself."</p>
+        <span class="testimonial-author">Priya K.</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- VISIT US -->
+<section class="visit-section" id="visit">
+  <div class="container">
+    <div class="visit-grid">
+      <div>
+        <span class="section-eyebrow reveal-item">Find Us</span>
+        <h2 class="section-title reveal-title">Visit Us</h2>
+        <p class="section-body reveal-item">We put your hours, address, and contact front and center &mdash; because your customers shouldn't have to search for how to find you.</p>
+        <table class="hours-table reveal-item">
+          <tbody>
+            <tr>
+              <td>Monday &ndash; Friday</td>
+              <td>6:00 am &ndash; 6:00 pm</td>
+            </tr>
+            <tr>
+              <td>Saturday</td>
+              <td>6:00 am &ndash; 6:00 pm</td>
+            </tr>
+            <tr>
+              <td>Sunday</td>
+              <td>7:00 am &ndash; 2:00 pm</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="visit-cta">
+          <a href="#" class="btn-primary">Order Ahead</a>
+        </div>
+      </div>
+      <div class="visit-info reveal-item">
+        <div class="info-block">
+          <h4>Address</h4>
+          <p>Your street address<br>Your town, your state</p>
+        </div>
+        <div class="info-block">
+          <h4>Phone</h4>
+          <p>Your number here</p>
+        </div>
+        <div class="info-block">
+          <h4>What We Build</h4>
+          <p>Every bakery deserves a site that works as hard as they do. Order forms, menus that update, review sections, catering flows &mdash; all of it, handled.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">Sugar &amp; Bloom</div>
+      <div class="footer-tagline">Baked fresh every morning</div>
+      <div class="footer-divider"></div>
+      <p class="footer-credit">Website by <a href="https://guardiacontent.com" target="_blank" rel="noopener">Guardia Intelligence</a></p>
+      <span class="footer-demo-badge">Demo Site &mdash; Not a Real Business</span>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  /* ===========================================
+     REDUCED MOTION CHECK
+     =========================================== */
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ===========================================
+     LENIS SMOOTH SCROLL
+     =========================================== */
+  var lenis = new Lenis({
+    lerp: 0.08,
+    smoothWheel: true,
+    syncTouch: false,
+  });
+
+  lenis.on('scroll', ScrollTrigger.update);
+
+  gsap.ticker.add(function(time) {
+    lenis.raf(time * 1000);
+  });
+
+  gsap.ticker.lagSmoothing(0);
+
+  /* ===========================================
+     NAV SCROLL BEHAVIOR
+     =========================================== */
+  var nav = document.getElementById('mainNav');
+  var scrollThreshold = 60;
+
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > scrollThreshold) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }, { passive: true });
+
+  /* ===========================================
+     MOBILE NAV
+     =========================================== */
+  var navToggle = document.getElementById('navToggle');
+  var navDrawer = document.getElementById('navDrawer');
+  var navOverlay = document.getElementById('navOverlay');
+
+  function openDrawer() {
+    navToggle.classList.add('open');
+    navDrawer.classList.add('open');
+    navOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    navToggle.classList.remove('open');
+    navDrawer.classList.remove('open');
+    navOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  navToggle.addEventListener('click', function() {
+    if (navDrawer.classList.contains('open')) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
+  });
+
+  navOverlay.addEventListener('click', closeDrawer);
+
+  var drawerLinks = document.querySelectorAll('.drawer-link');
+  drawerLinks.forEach(function(link) {
+    link.addEventListener('click', closeDrawer);
+  });
+
+  /* ===========================================
+     SPLIT WORDS HELPER
+     =========================================== */
+  function splitWords(el) {
+    var html = el.innerHTML.replace(/<br\s*\/?>/gi, ' ');
+    var tmp = document.createElement('span');
+    tmp.innerHTML = html;
+    var text = tmp.textContent.trim();
+    el.innerHTML = text.split(/\s+/).map(function(word) {
+      return '<span style="display:inline-block;overflow:hidden">' +
+        '<span class="split-word" style="display:inline-block">' + word + '</span>' +
+      '</span>';
+    }).join(' ');
+    return el.querySelectorAll('.split-word');
+  }
+
+  /* ===========================================
+     ANIMATIONS
+     =========================================== */
+  if (!prefersReducedMotion) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* --- Hero entrance --- */
+    var eyebrow = document.querySelector('.hero-eyebrow');
+    var heroH1 = document.querySelector('.hero h1');
+    var heroSub = document.querySelector('.hero-sub');
+    var heroBtn = document.querySelector('.hero .btn-primary');
+
+    gsap.set([eyebrow, heroH1, heroSub, heroBtn], { opacity: 0, y: 24 });
+
+    var heroTl = gsap.timeline({ delay: 0.2 });
+    heroTl
+      .to(eyebrow,  { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' })
+      .to(heroH1,   { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.45')
+      .to(heroSub,  { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.5')
+      .to(heroBtn,  { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
+
+    /* --- Hero parallax --- */
+    var heroBg = document.getElementById('heroBg');
+    gsap.to(heroBg, {
+      yPercent: 25,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+      }
+    });
+
+    /* --- Section titles (word reveal) --- */
+    var revealTitles = document.querySelectorAll('.reveal-title');
+    revealTitles.forEach(function(title) {
+      var words = splitWords(title);
+      gsap.set(words, { y: '110%' });
+      gsap.to(words, {
+        y: '0%',
+        duration: 0.7,
+        stagger: 0.08,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: title,
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        }
+      });
+    });
+
+    /* --- Eyebrows + body text --- */
+    var revealItems = document.querySelectorAll('.reveal-item');
+    revealItems.forEach(function(item) {
+      gsap.set(item, { opacity: 0, y: 22 });
+      gsap.to(item, {
+        opacity: 1,
+        y: 0,
+        duration: 0.65,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: item,
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        }
+      });
+    });
+
+    /* --- Cards (staggered) --- */
+    var cardGroups = [
+      document.querySelectorAll('.menu-section .reveal-card'),
+      document.querySelectorAll('.specials-section .reveal-card'),
+      document.querySelectorAll('.testimonials-section .reveal-card'),
+    ];
+
+    cardGroups.forEach(function(group) {
+      if (!group.length) return;
+      gsap.set(group, { opacity: 0, y: 30 });
+      gsap.to(group, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: group[0].closest('section'),
+          start: 'top 75%',
+          toggleActions: 'play none none none',
+        }
+      });
+    });
+
+    /* --- Story visual --- */
+    var storyVisual = document.querySelector('.story-visual');
+    if (storyVisual) {
+      gsap.set(storyVisual, { opacity: 0, x: 30 });
+      gsap.to(storyVisual, {
+        opacity: 1,
+        x: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: storyVisual,
+          start: 'top 80%',
+          toggleActions: 'play none none none',
+        }
+      });
+    }
+
+  } else {
+    /* No motion &mdash; reveal everything immediately */
+    document.querySelectorAll('.hero-eyebrow, .hero h1, .hero-sub, .hero .btn-primary').forEach(function(el) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+  }
+
+  /* ===========================================
+     SMOOTH ANCHOR SCROLLING
+     =========================================== */
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        lenis.scrollTo(target, { offset: -80, duration: 1.1 });
+      }
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -45,7 +45,7 @@ export default function VIPStartPage() {
           </div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-3">You&apos;re In!</h1>
           <p className="text-[var(--text-secondary)] text-lg mb-6">
-            We&apos;ve received your info. Someone from our team will reach out within 24 hours to discuss your vision.
+            We&apos;ve got your info. Gio will reach out within 24 hours to learn about your business and talk next steps.
           </p>
           <p className="text-[#C9A227] font-medium">
             Talk soon, {formData.name.split(' ')[0]}!
@@ -96,7 +96,7 @@ export default function VIPStartPage() {
               <div>
                 <p className="text-[var(--text-primary)] font-medium mb-1">Hey, I&apos;m Gio!</p>
                 <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
-                  I help local businesses look great online. Fill out the form and we&apos;ll reach out to understand your vision and put together a plan.
+                  I build websites, run social media, and manage Google profiles for local businesses. Fill out the form and I&apos;ll reach out to learn about your business and put together a plan.
                 </p>
               </div>
             </div>
@@ -112,7 +112,7 @@ export default function VIPStartPage() {
                   </div>
                   <div>
                     <p className="text-[var(--text-primary)] font-medium text-sm sm:text-base">Professional Website</p>
-                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">Custom design, your own domain, mobile-friendly, ongoing updates</p>
+                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">A site that looks like you, works on every device, and we keep it updated for you</p>
                   </div>
                 </div>
 
@@ -122,7 +122,7 @@ export default function VIPStartPage() {
                   </div>
                   <div>
                     <p className="text-[var(--text-primary)] font-medium text-sm sm:text-base">Social Media Management</p>
-                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">AI-styled posts, caption writing, Facebook posting, professional scheduling</p>
+                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">We style your photos, write the captions, and post for you — consistently, every week</p>
                   </div>
                 </div>
 
@@ -132,7 +132,7 @@ export default function VIPStartPage() {
                   </div>
                   <div>
                     <p className="text-[var(--text-primary)] font-medium text-sm sm:text-base">Google Business Profile</p>
-                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">Setup, optimization, photos, posts, review management</p>
+                    <p className="text-[var(--text-muted)] text-xs sm:text-sm">Show up first when locals search for what you do — we handle the whole thing</p>
                   </div>
                 </div>
               </div>
@@ -140,27 +140,29 @@ export default function VIPStartPage() {
 
             {/* Demo showcase */}
             <div className="space-y-4">
-              <h3 className="text-[var(--text-primary)] font-semibold text-lg">Sites We&apos;ve Built</h3>
-              <p className="text-[var(--text-muted)] text-xs sm:text-sm">Tap to preview &mdash; these are real sites we created for local businesses.</p>
+              <h3 className="text-[var(--text-primary)] font-semibold text-lg">Preview by Industry</h3>
+              <p className="text-[var(--text-muted)] text-xs sm:text-sm">Tap to see what your site could look like &mdash; demos built for businesses like yours.</p>
 
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { niche: 'Pet Grooming', emoji: '\uD83D\uDC3E', href: '/demo/grooming', gradient: 'from-amber-800/40 to-orange-900/40' },
-                  { niche: 'Luxury Salon', emoji: '\uD83D\uDC87', href: '/demo/salon', gradient: 'from-violet-800/40 to-purple-900/40' },
-                  { niche: 'Print Shop', emoji: '\uD83D\uDDA8\uFE0F', href: '/demo/printshop', gradient: 'from-teal-800/40 to-teal-950/40' },
-                  { niche: 'Boutique', emoji: '\uD83D\uDC5C', href: '/demo/boutique', gradient: 'from-emerald-800/40 to-stone-900/40' },
-                  { niche: 'Deli & Subs', emoji: '\uD83E\uDD6A', href: '/demo/deli', gradient: 'from-rose-900/40 to-amber-900/40' },
+                  { niche: 'Pet Grooming', sub: 'Warm & Friendly', href: '/demo/grooming', bg: 'linear-gradient(135deg, #6ABFAD, #4A9E8E)', text: '#FFF9F5' },
+                  { niche: 'Luxury Salon', sub: 'Dark & Refined', href: '/demo/salon', bg: 'linear-gradient(135deg, #2A2D35, #1E2533)', text: '#C9A74E' },
+                  { niche: 'Print Shop', sub: 'Bold & Classic', href: '/demo/printshop', bg: 'linear-gradient(135deg, #1A1A2E, #2D2D44)', text: '#B8922A' },
+                  { niche: 'Boutique', sub: 'Soft & Elegant', href: '/demo/boutique', bg: 'linear-gradient(135deg, #6B8F72, #4A6B50)', text: '#F7F4EE' },
+                  { niche: 'Deli & Subs', sub: 'Warm & Appetizing', href: '/demo/deli', bg: 'linear-gradient(135deg, #7B2D3B, #5E1F2C)', text: '#D4A84B' },
+                  { niche: 'Bakery', sub: 'Soft & Artisan', href: '/demo/bakery', bg: 'linear-gradient(135deg, #E8A0A0, #D4878A)', text: '#3D2B1F' },
                 ].map((demo) => (
                   <a
                     key={demo.niche}
                     href={demo.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br ${demo.gradient} border border-[var(--border)] hover:border-[#C9A227]/30 transition-all hover:scale-[1.02]`}
+                    className="group relative flex flex-col items-center justify-center rounded-xl border border-[var(--border)] hover:border-[#C9A227]/30 transition-all hover:scale-[1.02] overflow-hidden"
+                    style={{ background: demo.bg, minHeight: '120px' }}
                   >
-                    <span className="text-2xl">{demo.emoji}</span>
-                    <p className="text-[var(--text-primary)] text-xs sm:text-sm font-medium mt-2">{demo.niche}</p>
-                    <ExternalLink className="w-3 h-3 text-[var(--text-muted)] group-hover:text-[#C9A227] absolute top-3 right-3 transition-colors" />
+                    <p className="font-semibold text-sm sm:text-base tracking-wide" style={{ color: demo.text }}>{demo.niche}</p>
+                    <p className="text-[10px] sm:text-xs mt-1 opacity-60" style={{ color: demo.text }}>{demo.sub}</p>
+                    <ExternalLink className="w-3 h-3 absolute top-3 right-3 opacity-40 group-hover:opacity-80 transition-opacity" style={{ color: demo.text }} />
                   </a>
                 ))}
               </div>
