@@ -52,6 +52,13 @@
   --shadow-medium: 0 8px 40px rgba(42, 42, 42, 0.12);
   --shadow-lift: 0 12px 48px rgba(42, 42, 42, 0.16);
   --radius: 6px;
+
+  /* Fluid Type Scale */
+  --fs-display:  clamp(2.5rem, 6vw + 0.5rem, 4.5rem);
+  --fs-title:    clamp(1.6rem, 3vw + 0.3rem, 2.8rem);
+  --fs-subtitle: clamp(1rem, 1.5vw + 0.5rem, 1.15rem);
+  --fs-body:     clamp(0.92rem, 0.4vw + 0.82rem, 1.05rem);
+  --fs-small:    clamp(0.75rem, 0.3vw + 0.65rem, 0.85rem);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -269,6 +276,42 @@ nav.scrolled .nav-phone {
   margin: 0 auto;
 }
 
+/* === MARQUEE BAND === */
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  border-top: 3px solid var(--navy);
+  border-bottom: 3px solid var(--navy);
+  padding: 0.8rem 0;
+  background: var(--cream-warm);
+}
+.marquee-inner {
+  display: inline-flex;
+  gap: 2.5rem;
+  animation: marquee-scroll 18s linear infinite;
+}
+.marquee-inner span {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--navy);
+  opacity: 0.7;
+}
+.marquee-inner span::after {
+  content: '·';
+  margin-left: 2.5rem;
+  color: var(--airmail-red);
+  opacity: 0.5;
+}
+@keyframes marquee-scroll {
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-inner { animation: none; }
+}
+
 /* === HERO === */
 .hero {
   min-height: 100vh;
@@ -346,7 +389,7 @@ nav.scrolled .nav-phone {
 .hero h1 {
   font-family: 'Playfair Display', serif;
   font-weight: 800;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: var(--fs-display);
   color: var(--cream-warm);
   line-height: 1.1;
   margin-bottom: 1.5rem;
@@ -357,7 +400,7 @@ nav.scrolled .nav-phone {
 }
 .hero-subtitle {
   font-family: 'Source Sans 3', sans-serif;
-  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-size: var(--fs-subtitle);
   color: rgba(255,255,255,0.85);
   font-weight: 300;
   margin-bottom: 2.5rem;
@@ -643,7 +686,7 @@ nav.scrolled .nav-phone {
 }
 .barber-text .section-label { color: var(--airmail-red); }
 .barber-text .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--charcoal);
 }
 .barber-text p {
@@ -728,7 +771,7 @@ nav.scrolled .nav-phone {
   text-align: center;
 }
 .services .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--cream);
   text-align: center;
 }
@@ -821,7 +864,7 @@ nav.scrolled .nav-phone {
 }
 .shop .section-label { color: var(--airmail-red); }
 .shop .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--charcoal);
 }
 .shop-subtitle {
@@ -953,7 +996,7 @@ nav.scrolled .nav-phone {
 .delivered .section-label { color: var(--airmail-red); }
 .delivered .section-title {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--charcoal);
   margin-bottom: 2rem;
 }
@@ -1004,7 +1047,7 @@ nav.scrolled .nav-phone {
   text-align: center;
 }
 .postcards .section-title {
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: var(--fs-title);
   color: var(--charcoal);
   text-align: center;
 }
@@ -1422,8 +1465,23 @@ a:focus-visible, button:focus-visible {
   </div>
 </section>
 
-<!-- Airmail stripe divider -->
-<div class="airmail-divider"></div>
+<!-- Marquee band (replaces first airmail divider) -->
+<div class="marquee">
+  <div class="marquee-inner">
+    <span>Classic Cuts</span>
+    <span>Hot Towel</span>
+    <span>Beard Work</span>
+    <span>Walk-Ins Welcome</span>
+    <span>Straight Razor</span>
+    <span>The Full Service</span>
+    <span aria-hidden="true">Classic Cuts</span>
+    <span aria-hidden="true">Hot Towel</span>
+    <span aria-hidden="true">Beard Work</span>
+    <span aria-hidden="true">Walk-Ins Welcome</span>
+    <span aria-hidden="true">Straight Razor</span>
+    <span aria-hidden="true">The Full Service</span>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════ -->
 <!-- THE BARBER                                  -->
@@ -1744,6 +1802,21 @@ lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((time) => lenis.raf(time * 1000));
 gsap.ticker.lagSmoothing(0);
 
+// ═══ TEXT SPLIT UTILITIES ═══
+function splitWords(el) {
+  // Replace <br> with spaces before extracting text, so words don't concatenate
+  var html = el.innerHTML.replace(/<br\s*\/?>/gi, ' ');
+  var tmp = document.createElement('span');
+  tmp.innerHTML = html;
+  var text = tmp.textContent.trim();
+  el.innerHTML = text.split(/\s+/).map(function(word) {
+    return '<span style="display:inline-block;overflow:hidden">' +
+      '<span class="split-word" style="display:inline-block">' + word + '</span>' +
+    '</span>';
+  }).join(' ');
+  return el.querySelectorAll('.split-word');
+}
+
 // ═══ NAV SCROLL BEHAVIOR ═══
 const nav = document.querySelector('nav');
 ScrollTrigger.create({
@@ -1760,12 +1833,34 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-// ═══ HERO ENTRANCE ═══
+// ═══ HERO ENTRANCE (with line reveals) ═══
+// Hero h1 has <br> and <em> tags — split by <br> into line spans, preserving HTML
+const heroH1 = document.querySelector('.hero h1');
+const heroSub = document.querySelector('.hero-subtitle');
+
+var h1Lines = [];
+if (heroH1) {
+  var rawHTML = heroH1.innerHTML;
+  var lineParts = rawHTML.split(/<br\s*\/?>/i);
+  heroH1.innerHTML = lineParts.map(function(part) {
+    return '<span style="display:block;overflow:hidden">' +
+      '<span class="hero-line" style="display:block">' + part.trim() + '</span>' +
+    '</span>';
+  }).join('');
+  h1Lines = heroH1.querySelectorAll('.hero-line');
+}
+
+// Split subtitle into words
+const subWords = heroSub ? splitWords(heroSub) : [];
+
+// Set initial hidden state
+gsap.set([...h1Lines, ...subWords], { autoAlpha: 0, y: 50 });
+
 const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
 heroTL
   .from('.hero-badge', { opacity: 0, y: 20, duration: 0.7 })
-  .from('.hero h1', { opacity: 0, y: 40, duration: 0.9 }, '-=0.3')
-  .from('.hero-subtitle', { opacity: 0, y: 20, duration: 0.6 }, '-=0.4')
+  .to(h1Lines, { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.12 }, '-=0.3')
+  .to(subWords, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.04 }, '-=0.2')
   .from('.hero-cta', { opacity: 0, y: 20, duration: 0.6 }, '-=0.3')
   .from('.hero-stamp', { opacity: 0, scale: 1.1, duration: 1 }, '-=0.6')
   .from('.scroll-indicator', { opacity: 0, duration: 0.5 }, '-=0.3');
@@ -1789,7 +1884,7 @@ gsap.from('.barber-portrait', {
   scrollTrigger: { trigger: '.barber', start: 'top 70%' },
   opacity: 0, x: -50, duration: 0.9, ease: 'power2.out'
 });
-gsap.from('.barber-text .section-label, .barber-text .section-title', {
+gsap.from('.barber-text .section-label', {
   scrollTrigger: { trigger: '.barber', start: 'top 70%' },
   opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
 });
@@ -1809,7 +1904,7 @@ gsap.to('.barber-portrait', {
 });
 
 // ═══ SERVICES ═══
-gsap.from('.services .section-label, .services .section-title, .services-subtitle', {
+gsap.from('.services .section-label, .services-subtitle', {
   scrollTrigger: { trigger: '.services', start: 'top 75%' },
   opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
 });
@@ -1819,7 +1914,7 @@ gsap.from('.service-card', {
 });
 
 // ═══ THE SHOP ═══
-gsap.from('.shop .section-label, .shop .section-title, .shop-subtitle', {
+gsap.from('.shop .section-label, .shop-subtitle', {
   scrollTrigger: { trigger: '.shop', start: 'top 75%' },
   opacity: 0, y: 30, stagger: 0.1, duration: 0.7, ease: 'power2.out'
 });
@@ -1884,8 +1979,25 @@ ScrollTrigger.matchMedia({
   }
 });
 
+// ═══ SCROLL-TRIGGERED SECTION TITLE REVEALS ═══
+document.querySelectorAll('.barber-text .section-title, .services .section-title, .shop .section-title, .postcards .section-title, .cta-section h2').forEach(function(title) {
+  var words = splitWords(title);
+  gsap.from(words, {
+    y: 40,
+    autoAlpha: 0,
+    duration: 0.65,
+    ease: 'power2.out',
+    stagger: 0.06,
+    scrollTrigger: {
+      trigger: title,
+      start: 'top 85%',
+      toggleActions: 'play none none none'
+    }
+  });
+});
+
 // ═══ POSTCARDS ═══
-gsap.from('.postcards-header', {
+gsap.from('.postcards .section-label', {
   scrollTrigger: { trigger: '.postcards', start: 'top 75%' },
   opacity: 0, y: 30, duration: 0.7, ease: 'power2.out'
 });
@@ -1895,10 +2007,6 @@ gsap.from('.postcard-card', {
 });
 
 // ═══ CTA SECTION ═══
-gsap.from('.cta-section h2', {
-  scrollTrigger: { trigger: '.cta-section', start: 'top 75%' },
-  opacity: 0, y: 40, duration: 0.8, ease: 'power2.out'
-});
 gsap.from('.cta-section .cta-sub', {
   scrollTrigger: { trigger: '.cta-section', start: 'top 70%' },
   opacity: 0, y: 20, duration: 0.6, delay: 0.15, ease: 'power2.out'
