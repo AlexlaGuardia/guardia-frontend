@@ -49,6 +49,13 @@
   --shadow-lift: 0 12px 48px rgba(26,26,26,0.18);
 
   --radius: 4px;
+
+  /* Fluid type scale */
+  --fs-display:  clamp(3rem, 7vw + 0.5rem, 5.5rem);
+  --fs-title:    clamp(1.9rem, 3.5vw + 0.3rem, 2.8rem);
+  --fs-subtitle: clamp(0.95rem, 1.5vw + 0.5rem, 1.1rem);
+  --fs-body:     clamp(0.92rem, 0.4vw + 0.82rem, 1.05rem);
+  --fs-small:    clamp(0.75rem, 0.3vw + 0.65rem, 0.85rem);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -236,6 +243,15 @@ nav.scrolled .nav-cta {
     radial-gradient(ellipse at 50% 50%, rgba(74,107,80,0.10) 0%, transparent 70%);
   pointer-events: none;
   z-index: 2;
+  animation: glow-drift 22s ease-in-out infinite alternate;
+}
+@keyframes glow-drift {
+  0%   { opacity: 1; transform: scale(1) translate(0, 0); }
+  50%  { opacity: 0.85; transform: scale(1.04) translate(1%, -1%); }
+  100% { opacity: 0.95; transform: scale(0.98) translate(-1%, 1%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo-overlay { animation: none; }
 }
 
 /* Diagonal accent lines — top-left corner */
@@ -1816,7 +1832,7 @@ footer {
 <section class="collections" id="collections">
   <div class="collections-header">
     <p class="section-eyebrow fade-up">Curated For You</p>
-    <h2 class="section-title fade-up">The Collections</h2>
+    <h2 class="section-title">The Collections</h2>
     <p class="fade-up">Seasonal finds, everyday essentials, and pieces that define your look.</p>
   </div>
 
@@ -2037,7 +2053,7 @@ footer {
 <section class="featured">
   <div class="featured-header">
     <p class="section-eyebrow fade-up">Staff Picks</p>
-    <h2 class="section-title fade-up">Featured This Season</h2>
+    <h2 class="section-title">Featured This Season</h2>
     <p class="fade-up">Handpicked by our team &mdash; pieces we're loving right now.</p>
   </div>
 
@@ -2109,7 +2125,7 @@ footer {
 <section class="testimonials" id="testimonials">
   <div class="testimonials-header">
     <p class="section-eyebrow fade-up">What Our Customers Say</p>
-    <h2 class="section-title fade-up">Words From The Community</h2>
+    <h2 class="section-title">Words From The Community</h2>
   </div>
 
   <div class="testimonials-grid">
@@ -2282,6 +2298,20 @@ window.addEventListener('scroll', () => {
 /* === GSAP REGISTER === */
 gsap.registerPlugin(ScrollTrigger);
 
+/* === Word Split Utility === */
+function splitWords(el) {
+  var html = el.innerHTML.replace(/<br\s*\/?>/gi, ' ');
+  var tmp = document.createElement('span');
+  tmp.innerHTML = html;
+  var text = tmp.textContent.trim();
+  el.innerHTML = text.split(/\s+/).map(function(word) {
+    return '<span style="display:inline-block;overflow:hidden">' +
+      '<span class="split-word" style="display:inline-block">' + word + '</span>' +
+    '</span>';
+  }).join(' ');
+  return el.querySelectorAll('.split-word');
+}
+
 /* === HERO ANIMATIONS === */
 const heroTl = gsap.timeline({ delay: 0.25 });
 heroTl
@@ -2333,6 +2363,15 @@ function animateFadeUp(selector, options = {}) {
 }
 
 /* === COLLECTIONS === */
+var collectionsTitle = document.querySelector('.collections-header .section-title');
+if (collectionsTitle) {
+  var cWords = splitWords(collectionsTitle);
+  gsap.set(cWords, { y: 40, autoAlpha: 0 });
+  gsap.to(cWords, {
+    y: 0, autoAlpha: 1, duration: 0.7, ease: 'power2.out', stagger: 0.06,
+    scrollTrigger: { trigger: '.collections', start: 'top 85%', toggleActions: 'play none none none' }
+  });
+}
 animateFadeUp('.collections-header .fade-up', { stagger: 0.12 });
 
 gsap.utils.toArray('.col-card.fade-in').forEach((el, i) => {
@@ -2419,10 +2458,28 @@ gsap.utils.toArray('.jewelry-stat.scale-in, .jewelry-vision-card.scale-in').forE
 });
 
 /* === FEATURED === */
+var featuredTitle = document.querySelector('.featured-header .section-title');
+if (featuredTitle) {
+  var fWords = splitWords(featuredTitle);
+  gsap.set(fWords, { y: 40, autoAlpha: 0 });
+  gsap.to(fWords, {
+    y: 0, autoAlpha: 1, duration: 0.7, ease: 'power2.out', stagger: 0.06,
+    scrollTrigger: { trigger: '.featured', start: 'top 85%', toggleActions: 'play none none none' }
+  });
+}
 animateFadeUp('.featured-header .fade-up', { stagger: 0.12 });
 animateFadeUp('.piece-card.fade-up', { stagger: 0.14 });
 
 /* === TESTIMONIALS === */
+var testiTitle = document.querySelector('.testimonials-header .section-title');
+if (testiTitle) {
+  var tWords = splitWords(testiTitle);
+  gsap.set(tWords, { y: 40, autoAlpha: 0 });
+  gsap.to(tWords, {
+    y: 0, autoAlpha: 1, duration: 0.7, ease: 'power2.out', stagger: 0.06,
+    scrollTrigger: { trigger: '.testimonials', start: 'top 85%', toggleActions: 'play none none none' }
+  });
+}
 animateFadeUp('.testimonials-header .fade-up', { stagger: 0.12 });
 animateFadeUp('.testimonial-card.fade-up', { stagger: 0.15 });
 
