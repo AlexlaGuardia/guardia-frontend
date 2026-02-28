@@ -146,7 +146,6 @@ export default function VIPStartPage() {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { niche: 'Pet Grooming', emoji: '\uD83D\uDC3E', href: '/demo/grooming', gradient: 'from-amber-800/40 to-orange-900/40' },
-                  { niche: 'Barbershop', emoji: '\u2702\uFE0F', href: '/demo/barbershop', gradient: 'from-slate-700/40 to-slate-900/40' },
                   { niche: 'Luxury Salon', emoji: '\uD83D\uDC87', href: '/demo/salon', gradient: 'from-violet-800/40 to-purple-900/40' },
                   { niche: 'Print Shop', emoji: '\uD83D\uDDA8\uFE0F', href: '/demo/printshop', gradient: 'from-teal-800/40 to-teal-950/40' },
                   { niche: 'Boutique', emoji: '\uD83D\uDC5C', href: '/demo/boutique', gradient: 'from-emerald-800/40 to-stone-900/40' },
