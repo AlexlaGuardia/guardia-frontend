@@ -384,12 +384,14 @@ export default function SpiritTalesEditor() {
 
   async function ghostWrite() {
     if (!activeChapter) return;
-    const isOutlineMode = editorMode === "outline";
-    // Validate: need content in write mode, or outline in outline mode
+    const isOutlineMode = editorMode === "outline" && !pageMode;
+    // Validate: need content or outline to work from
     if (isOutlineMode && !outline.trim()) return;
     if (!isOutlineMode && !content.trim()) return;
     // Save current state first
-    if (isOutlineMode) {
+    if (pageMode) {
+      if (activePage !== null) await savePage(activeChapter, activePage, pageContent, pageIllustration);
+    } else if (isOutlineMode) {
       await saveOutline(activeChapter, outline);
     } else {
       await saveChapter(activeChapter, content);
@@ -402,30 +404,75 @@ export default function SpiritTalesEditor() {
       );
       if (res.ok) {
         const data = await res.json();
-        const ghostText = data.ghost_content || "";
-        setGhostContent(ghostText);
-        if (isOutlineMode) {
-          // Drafting from outline — set content directly and switch to write mode
-          setContent(ghostText);
-          setEditorMode("write");
-          setShowGhost(false);
-          // Update local chapter status
+        const pagesCreated = data.pages_created || 0;
+        const startPage = data.start_page || 1;
+
+        if (pagesCreated > 0) {
+          // Ghost-write now produces pages directly — switch to page mode
+          const pgs = await loadPages(activeChapter);
+          setPageMode(true);
+          // Load the first new page
+          if (pgs.length > 0) {
+            loadPage(activeChapter, startPage);
+          }
+          // Update local chapter state
           if (book) {
             const updated = { ...book };
             const ch = updated.chapters.find((c) => c.chapter_number === activeChapter);
             if (ch) {
-              ch.status = "draft";
-              ch.content = ghostText;
-              ch.word_count = ghostText.split(/\s+/).filter(Boolean).length;
+              ch.has_pages = true;
+              ch.page_count = pgs.length;
+              if (isOutlineMode) {
+                ch.status = "draft";
+              }
             }
             setBook(updated);
           }
-        } else {
-          setShowGhost(true);
+          setShowGhost(false);
         }
       }
     } finally {
       setGhosting(false);
+    }
+  }
+
+  async function deletePage(chNum: number, pageNum: number) {
+    const res = await fetch(
+      `${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages/${pageNum}`,
+      { method: "DELETE" }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const totalPages = data.total_pages || 0;
+      if (totalPages === 0) {
+        // No pages left — exit page mode
+        setPageMode(false);
+        setPages([]);
+        setActivePage(null);
+        if (book) {
+          const updated = { ...book };
+          const ch = updated.chapters.find((c) => c.chapter_number === chNum);
+          if (ch) { ch.has_pages = false; ch.page_count = 0; }
+          setBook(updated);
+        }
+      } else {
+        // Reload page list (pages got renumbered)
+        const pgs = await loadPages(chNum);
+        // If the deleted page was active, load the nearest page
+        if (activePage === pageNum) {
+          const nextPage = Math.min(pageNum, totalPages);
+          loadPage(chNum, nextPage);
+        } else if (activePage !== null && activePage > pageNum) {
+          // Active page shifted down by 1
+          setActivePage(activePage - 1);
+        }
+        if (book) {
+          const updated = { ...book };
+          const ch = updated.chapters.find((c) => c.chapter_number === chNum);
+          if (ch) { ch.page_count = totalPages; }
+          setBook(updated);
+        }
+      }
     }
   }
 
@@ -823,24 +870,34 @@ export default function SpiritTalesEditor() {
                 {ch.has_pages && activeChapter === ch.chapter_number && pages.length > 0 && (
                   <div className="bg-[#0d0d0e] border-b border-[#0f0f10]">
                     {pages.map((pg) => (
-                      <button
+                      <div
                         key={pg.page_number}
-                        onClick={() => {
-                          setPageMode(true);
-                          loadPage(ch.chapter_number, pg.page_number);
-                        }}
-                        className={`w-full text-left pl-8 pr-3 py-1.5 text-[11px] transition-colors flex items-center justify-between ${
+                        className={`group w-full flex items-center justify-between pl-8 pr-3 py-1.5 text-[11px] transition-colors cursor-pointer ${
                           activePage === pg.page_number
                             ? "text-cyan-400 bg-[#111]"
                             : "text-[#555] hover:text-[#888] hover:bg-[#0f0f10]"
                         }`}
+                        onClick={() => {
+                          setPageMode(true);
+                          loadPage(ch.chapter_number, pg.page_number);
+                        }}
                       >
                         <span className="font-mono">Pg {pg.page_number}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-[9px] font-mono text-[#333]">{pg.word_count}w</span>
                           <span className={`w-1.5 h-1.5 rounded-full ${pg.status === "approved" ? "bg-green-400" : "bg-[#333]"}`} />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deletePage(ch.chapter_number, pg.page_number);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 text-red-400/40 hover:text-red-400 transition-all"
+                            title={`Delete page ${pg.page_number}`}
+                          >
+                            <X size={10} />
+                          </button>
                         </div>
-                      </button>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -910,20 +967,18 @@ export default function SpiritTalesEditor() {
                       )}
                     </>
                   )}
-                  {!pageMode && (
-                    <button
-                      onClick={ghostWrite}
-                      disabled={ghosting || (editorMode === "write" ? !content.trim() : !outline.trim())}
-                      className="flex items-center gap-1.5 bg-purple-500/15 text-purple-400 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:bg-purple-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    >
-                      {ghosting ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        <Wand2 size={12} />
-                      )}
-                      {editorMode === "outline" ? "Draft from Outline" : "Ghost Writer"}
-                    </button>
-                  )}
+                  <button
+                    onClick={ghostWrite}
+                    disabled={ghosting || (pageMode ? !content.trim() : (editorMode === "write" ? !content.trim() : !outline.trim()))}
+                    className="flex items-center gap-1.5 bg-purple-500/15 text-purple-400 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:bg-purple-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {ghosting ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <Wand2 size={12} />
+                    )}
+                    {editorMode === "outline" && !pageMode ? "Draft from Outline" : "Ghost Writer"}
+                  </button>
                   <button
                     onClick={() => setCharPanelOpen(!charPanelOpen)}
                     className={`transition-colors ${charPanelOpen ? "text-amber-400" : "text-[#555] hover:text-[#888]"}`}
