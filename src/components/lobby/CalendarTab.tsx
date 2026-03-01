@@ -888,10 +888,10 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                 key={i}
                 onClick={() => day && handleDayClick(day)}
                 disabled={!day}
-                className="relative p-1 aspect-square transition-all duration-150"
-                style={{ 
-                  background: isSelected 
-                    ? 'var(--bg-elevated)' 
+                className={`relative p-1 aspect-square transition-all duration-150 ${day ? 'hover:bg-white/5 cursor-pointer' : ''}`}
+                style={{
+                  background: isSelected
+                    ? 'var(--bg-elevated)'
                     : isTodayCell
                       ? 'rgba(232, 160, 96, 0.05)'
                       : 'transparent',
@@ -1100,7 +1100,13 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                   </div>
                   <p className="text-sm text-[var(--text-muted)]">No content scheduled</p>
                   {onCreatePost && isFuture(selectedDay) ? (
-                    <p className="text-xs text-[var(--accent)] mt-2">Tap to create a post</p>
+                    <span
+                      className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl text-sm font-medium text-white transition-all hover:brightness-110"
+                      style={{ background: 'linear-gradient(135deg, #C9A227, #D4AF37)' }}
+                    >
+                      <PlusIcon size={14} />
+                      Post Now
+                    </span>
                   ) : isFuture(selectedDay) && !autoSchedule ? (
                     <p className="text-xs text-[var(--text-muted)] mt-2">Tap + to add a slot</p>
                   ) : autoSchedule ? (
@@ -1136,7 +1142,17 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                             <ClockIcon size={36} className="text-[var(--accent)]" />
                           </div>
                           <p className="text-sm text-[var(--text-secondary)]">Empty Slot</p>
-                          <p className="text-xs text-[var(--text-muted)] mt-1">{onCreatePost ? "Tap to create post" : "Fill from Gallery"}</p>
+                          {onCreatePost ? (
+                            <span
+                              className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 rounded-xl text-sm font-medium text-white"
+                              style={{ background: 'linear-gradient(135deg, #C9A227, #D4AF37)' }}
+                            >
+                              <PlusIcon size={14} />
+                              Post Now
+                            </span>
+                          ) : (
+                            <p className="text-xs text-[var(--text-muted)] mt-1">Fill from Gallery</p>
+                          )}
                         </button>
                       ) : (selectedPosts[selectedPostIndex]?.preview_url || selectedPosts[selectedPostIndex]?.thumbnail_url) ? (
                         <img
