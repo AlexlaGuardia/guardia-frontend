@@ -546,7 +546,7 @@ export default function AppShell() {
         return (
           <CalendarScreen
             {...screenProps}
-            onDateSelect={(date) => { setComposerDate(date); setShowComposer(true); }}
+            onCreatePost={(date) => { setComposerDate(date); setShowComposer(true); }}
             onNewPost={() => { setComposerDate(null); setShowComposer(true); }}
           />
         );

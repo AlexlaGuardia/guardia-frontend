@@ -32,6 +32,7 @@ interface CalendarTabProps {
   jwt: string | null;
   onMessage: (msg: string) => void;
   onDateSelect?: (date: string) => void;
+  onCreatePost?: (date: string) => void;
 }
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -481,7 +482,7 @@ function SlotCreationModal({ day, month, year, jwt, onClose, onCreated, onMessag
 // Main Component
 // ─────────────────────────────────────────────────────────────
 
-export default function CalendarTab({ client: _client, jwt, onMessage, onDateSelect }: CalendarTabProps) {
+export default function CalendarTab({ client: _client, jwt, onMessage, onDateSelect, onCreatePost }: CalendarTabProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -660,13 +661,23 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
 
   // Background poll so new scheduled posts appear without refresh
   useEffect(() => {
-    const pollTimer = setInterval(() => {
-      if (!document.hidden) {
-        loadCalendar();
+    const pollTimer = setInterval(async () => {
+      if (!document.hidden && jwt) {
+        try {
+          const res = await fetch(`${API_BASE}/client/calendar`, {
+            headers: { Authorization: `Bearer ${jwt}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setPosts(data);
+          }
+        } catch (err) {
+          console.error("Failed to poll calendar:", err);
+        }
       }
-    }, 30000);
+    }, 120000);
     return () => clearInterval(pollTimer);
-  }, [loadCalendar]);
+  }, [jwt]);
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -759,11 +770,10 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
     setSelectedDay(day);
     setSelectedPosts(dayPosts);
     setSelectedPostIndex(0);
-    if (onDateSelect) {
-      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      onDateSelect(dateStr);
-    }
   };
+
+  const getDateStr = (day: number) =>
+    `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
   const openSlotModal = (day: number) => {
     setSlotDay(day);
@@ -1070,8 +1080,16 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
               
               {selectedPosts.length === 0 ? (
                 /* Empty Day */
-                <div className="px-5 py-12 text-center">
-                  <div 
+                <div
+                  className={`px-5 py-12 text-center ${onCreatePost && isFuture(selectedDay) ? 'cursor-pointer hover:bg-white/5 transition-all' : ''}`}
+                  onClick={() => {
+                    if (onCreatePost && selectedDay && isFuture(selectedDay)) {
+                      setSelectedDay(null);
+                      onCreatePost(getDateStr(selectedDay));
+                    }
+                  }}
+                >
+                  <div
                     className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
                     style={{
                       border: '2px dashed var(--border)',
@@ -1081,12 +1099,13 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                     <ClockIcon size={28} className="text-[var(--text-muted)]" />
                   </div>
                   <p className="text-sm text-[var(--text-muted)]">No content scheduled</p>
-                  {isFuture(selectedDay) && !autoSchedule && (
+                  {onCreatePost && isFuture(selectedDay) ? (
+                    <p className="text-xs text-[var(--accent)] mt-2">Tap to create a post</p>
+                  ) : isFuture(selectedDay) && !autoSchedule ? (
                     <p className="text-xs text-[var(--text-muted)] mt-2">Tap + to add a slot</p>
-                  )}
-                  {autoSchedule && (
+                  ) : autoSchedule ? (
                     <p className="text-xs text-[var(--text-muted)] mt-2">Auto-schedule is on</p>
-                  )}
+                  ) : null}
                 </div>
               ) : (
                 <>
@@ -1098,8 +1117,16 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                     >
                       {/* Check if current post is unfilled slot */}
                       {isUnfilledSlot(selectedPosts[selectedPostIndex]) ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center">
-                          <div 
+                        <button
+                          onClick={() => {
+                            if (onCreatePost && selectedDay) {
+                              setSelectedDay(null);
+                              onCreatePost(getDateStr(selectedDay));
+                            }
+                          }}
+                          className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-all"
+                        >
+                          <div
                             className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4"
                             style={{
                               border: '2px dashed var(--accent)',
@@ -1109,8 +1136,8 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                             <ClockIcon size={36} className="text-[var(--accent)]" />
                           </div>
                           <p className="text-sm text-[var(--text-secondary)]">Empty Slot</p>
-                          <p className="text-xs text-[var(--text-muted)] mt-1">Fill from Gallery</p>
-                        </div>
+                          <p className="text-xs text-[var(--text-muted)] mt-1">{onCreatePost ? "Tap to create post" : "Fill from Gallery"}</p>
+                        </button>
                       ) : (selectedPosts[selectedPostIndex]?.preview_url || selectedPosts[selectedPostIndex]?.thumbnail_url) ? (
                         <img
                           src={selectedPosts[selectedPostIndex].preview_url || selectedPosts[selectedPostIndex].thumbnail_url}

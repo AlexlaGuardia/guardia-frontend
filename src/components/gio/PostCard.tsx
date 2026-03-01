@@ -7,7 +7,9 @@ export interface PostedItem {
   id: number;
   caption: string;
   platform: string;
+  status?: string;
   posted_at: string;
+  scheduled_for?: string;
   post_url?: string;
   image_url: string;
   image_full?: string;
@@ -58,6 +60,16 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, onClick }: PostCardProps) {
+  const isPosted = !post.status || post.status === "posted";
+  const displayDate = post.posted_at || post.scheduled_for || "";
+
+  const statusConfig: Record<string, { label: string; bg: string; color: string }> = {
+    scheduled: { label: "Scheduled", bg: "rgba(34,197,94,0.15)", color: "#22c55e" },
+    pending_approval: { label: "Pending", bg: "rgba(245,158,11,0.15)", color: "#f59e0b" },
+    pending_review: { label: "In Review", bg: "rgba(245,158,11,0.15)", color: "#f59e0b" },
+  };
+  const badge = post.status ? statusConfig[post.status] : null;
+
   return (
     <button
       onClick={onClick}
@@ -73,12 +85,28 @@ export default function PostCard({ post, onClick }: PostCardProps) {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 560px"
           />
+          {badge && (
+            <span
+              className="absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full backdrop-blur-sm"
+              style={{ background: badge.bg, color: badge.color }}
+            >
+              {badge.label}
+            </span>
+          )}
         </div>
       ) : (
-        <div className="w-full px-5 py-8 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-elevated)]">
+        <div className="relative w-full px-5 py-8 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-elevated)]">
           <p className="text-base text-[var(--text-primary)] leading-relaxed line-clamp-6">
             {post.caption || "Text post"}
           </p>
+          {badge && (
+            <span
+              className="absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full"
+              style={{ background: badge.bg, color: badge.color }}
+            >
+              {badge.label}
+            </span>
+          )}
         </div>
       )}
 
@@ -88,25 +116,27 @@ export default function PostCard({ post, onClick }: PostCardProps) {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
             {platformIcon(post.platform)}
-            <span>{formatDate(post.posted_at)}</span>
+            <span>{displayDate ? formatDate(displayDate) : ""}</span>
           </div>
-          <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-            {post.likes > 0 && (
-              <span className="flex items-center gap-1">
-                <Heart size={12} /> {post.likes}
-              </span>
-            )}
-            {post.comments > 0 && (
-              <span className="flex items-center gap-1">
-                <MessageCircle size={12} /> {post.comments}
-              </span>
-            )}
-            {post.shares > 0 && (
-              <span className="flex items-center gap-1">
-                <Share2 size={12} /> {post.shares}
-              </span>
-            )}
-          </div>
+          {isPosted && (
+            <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+              {post.likes > 0 && (
+                <span className="flex items-center gap-1">
+                  <Heart size={12} /> {post.likes}
+                </span>
+              )}
+              {post.comments > 0 && (
+                <span className="flex items-center gap-1">
+                  <MessageCircle size={12} /> {post.comments}
+                </span>
+              )}
+              {post.shares > 0 && (
+                <span className="flex items-center gap-1">
+                  <Share2 size={12} /> {post.shares}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Caption */}

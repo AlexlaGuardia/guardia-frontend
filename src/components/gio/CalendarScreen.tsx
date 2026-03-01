@@ -14,11 +14,11 @@ interface MonthStats {
 }
 
 interface CalendarScreenProps extends ScreenProps {
-  onDateSelect?: (date: string) => void;
+  onCreatePost?: (date: string) => void;
   onNewPost?: () => void;
 }
 
-export default function CalendarScreen({ client, jwt, onMessage, onDateSelect, onNewPost }: CalendarScreenProps) {
+export default function CalendarScreen({ client, jwt, onMessage, onCreatePost, onNewPost }: CalendarScreenProps) {
   const [stats, setStats] = useState<MonthStats | null>(null);
 
   const loadStats = useCallback(async () => {
@@ -57,7 +57,7 @@ export default function CalendarScreen({ client, jwt, onMessage, onDateSelect, o
         client={client as any}
         jwt={jwt}
         onMessage={onMessage || (() => {})}
-        onDateSelect={onDateSelect}
+        onCreatePost={onCreatePost}
       />
 
       {/* Month Stats */}

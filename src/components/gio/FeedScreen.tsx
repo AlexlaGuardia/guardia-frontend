@@ -41,7 +41,7 @@ export default function FeedScreen({ jwt, onPostSelect, onNavigate }: FeedScreen
     if (append) setLoadingMore(true); else setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/lobby/posted?limit=${PAGE_SIZE}&offset=${offset}`, {
+      const res = await fetch(`${API_BASE}/lobby/activity?limit=${PAGE_SIZE}&offset=${offset}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       if (res.ok) {
@@ -109,7 +109,15 @@ export default function FeedScreen({ jwt, onPostSelect, onNavigate }: FeedScreen
   return (
     <div className="max-w-xl mx-auto px-4 py-4 space-y-4 pb-24 xl:pb-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onClick={() => onPostSelect(post)} />
+        <PostCard
+          key={post.id}
+          post={post}
+          onClick={() => {
+            if (!post.status || post.status === "posted") {
+              onPostSelect(post);
+            }
+          }}
+        />
       ))}
 
       {hasMore && (
