@@ -164,7 +164,7 @@ function CardFormInner({ addon, clientSecret, jwt, onSuccess, onCancel }: CardFo
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/60 cursor-pointer" onClick={onCancel} />
 
       {/* Card form */}
       <div className="relative w-full max-w-md mx-4 mb-4 sm:mb-0 rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl">
@@ -252,7 +252,7 @@ interface UnsubscribeDialogProps {
 function UnsubscribeDialog({ addon, onConfirm, onCancel, processing }: UnsubscribeDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/60 cursor-pointer" onClick={onCancel} />
       <div className="relative w-full max-w-sm mx-4 mb-4 sm:mb-0 rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl p-5 text-center">
         <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-red-500/10 flex items-center justify-center">
           <AlertTriangle className="w-6 h-6 text-red-400" />

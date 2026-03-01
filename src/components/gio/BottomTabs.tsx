@@ -30,7 +30,7 @@ export default function BottomTabs({ activeScreen, onScreenChange }: BottomTabsP
             <button
               key={tab.screen}
               onClick={() => onScreenChange(tab.screen)}
-              className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all active:scale-95"
+              className={`flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all active:scale-95 ${!isActive ? 'hover:bg-white/5' : ''}`}
             >
               <div className={`flex items-center justify-center w-14 h-8 rounded-full transition-all duration-200 ${
                 isActive ? "bg-violet-400/10" : ""

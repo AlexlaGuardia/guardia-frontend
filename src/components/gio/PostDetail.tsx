@@ -34,7 +34,7 @@ export default function PostDetail({ post, onBack }: PostDetailProps) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <p className="text-[var(--text-muted)]">Post not found</p>
-        <button onClick={onBack} className="mt-4 text-[var(--accent)] text-sm font-medium">
+        <button onClick={onBack} className="mt-4 text-[var(--accent)] text-sm font-medium hover:underline transition-all">
           Back to Feed
         </button>
       </div>

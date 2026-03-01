@@ -226,7 +226,7 @@ export default function FactoryScreen({ jwt, clientTier }: FactoryScreenProps) {
           {reviewPosts.length > 1 && (
             <button
               onClick={handleBulkApprove}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all active:scale-95"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all active:scale-95 hover:brightness-110"
               style={{ background: "#4338CA", boxShadow: "0 2px 6px rgba(67,56,202,0.25)" }}
             >
               Approve All
@@ -396,7 +396,7 @@ export default function FactoryScreen({ jwt, clientTier }: FactoryScreenProps) {
       {/* Upload button */}
       <div className="flex-shrink-0 p-4 bg-[var(--bg-base)] border-t border-[var(--border-subtle)]">
         <label
-          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm cursor-pointer transition-all active:scale-[0.98] text-white"
+          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm cursor-pointer transition-all active:scale-[0.98] hover:brightness-110 text-white"
           style={{
             background: "linear-gradient(135deg, #C9A227, #D4AF37)",
             boxShadow: "0 4px 16px rgba(201,162,39,0.35)",

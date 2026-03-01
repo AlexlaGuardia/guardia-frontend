@@ -414,10 +414,10 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
             {showPreview ? "Edit" : "Preview"}
           </button>
           <button onClick={togglePublish} disabled={saving}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-all hover:brightness-110 ${
               page.is_published
-                ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"
+                ? "bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20"
+                : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)] hover:bg-white/5"
             }`}>
             {page.is_published ? <Eye size={14} /> : <EyeOff size={14} />}
             {page.is_published ? "Live" : "Draft"}
@@ -641,7 +641,7 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
               <div className="space-y-2">
                 {blocks.map((block, idx) => (
                   <div key={block.id}
-                    className="flex items-center gap-2 p-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl group">
+                    className="flex items-center gap-2 p-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl group hover:bg-white/5 transition-all">
                     {/* Icon */}
                     <div className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center flex-shrink-0">
                       {block.type === "link" && <Link2 size={14} className="text-[var(--accent)]" />}

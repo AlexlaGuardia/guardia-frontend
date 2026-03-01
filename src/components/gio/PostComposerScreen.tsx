@@ -181,7 +181,7 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
           <div className="flex flex-col gap-3">
             <button
               onClick={handleReset}
-              className="px-6 py-3 rounded-2xl font-semibold text-sm text-white transition-all active:scale-[0.98]"
+              className="px-6 py-3 rounded-2xl font-semibold text-sm text-white transition-all active:scale-[0.98] hover:brightness-110"
               style={{ background: "linear-gradient(135deg, #C9A227, #D4AF37)", boxShadow: "0 4px 16px rgba(201,162,39,0.35)" }}
             >
               Post Another
@@ -189,7 +189,7 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
             {onComplete && (
               <button
                 onClick={onComplete}
-                className="px-6 py-3 rounded-2xl font-semibold text-sm text-[var(--text-secondary)] bg-[var(--bg-elevated)] border border-[var(--border)] transition-all active:scale-[0.98] hover:border-[var(--text-muted)]"
+                className="px-6 py-3 rounded-2xl font-semibold text-sm text-[var(--text-secondary)] bg-[var(--bg-elevated)] border border-[var(--border)] transition-all active:scale-[0.98] hover:border-[var(--text-muted)] hover:bg-white/5"
               >
                 Back to Calendar
               </button>
@@ -333,7 +333,7 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all ${
                       isSelected
                         ? "border-transparent text-white shadow-sm"
-                        : "border-[var(--border)] text-[var(--text-secondary)] bg-[var(--bg-elevated)] hover:border-[var(--text-muted)]"
+                        : "border-[var(--border)] text-[var(--text-secondary)] bg-[var(--bg-elevated)] hover:border-[var(--text-muted)] hover:bg-white/5"
                     }`}
                     style={isSelected ? { background: meta?.color || "var(--accent)" } : {}}
                   >
@@ -364,7 +364,7 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
         <button
           onClick={handlePost}
           disabled={!canPost}
-          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm text-white transition-all active:scale-[0.98] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:brightness-100"
           style={{
             background: canPost
               ? `linear-gradient(135deg, ${PLATFORM_META[platform]?.color || "#C9A227"}, ${PLATFORM_META[platform]?.color || "#D4AF37"}cc)`

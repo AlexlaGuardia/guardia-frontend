@@ -73,7 +73,11 @@ export default function PostCard({ post, onClick }: PostCardProps) {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-[var(--shadow-soft)] transition-all active:scale-[0.99]"
+      className={`w-full text-left bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden transition-all ${
+        isPosted
+          ? 'hover:shadow-[var(--shadow-soft)] hover:border-[var(--border)] active:scale-[0.99] cursor-pointer'
+          : 'cursor-default opacity-90'
+      }`}
     >
       {/* Image or text-only fallback */}
       {post.image_url ? (
