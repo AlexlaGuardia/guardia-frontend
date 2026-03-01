@@ -27,6 +27,7 @@ import {
   Scissors,
   FileText,
   Merge,
+  Paintbrush,
 } from "lucide-react";
 
 const API = "https://api.guardiacontent.com";
@@ -882,7 +883,12 @@ export default function SpiritTalesEditor() {
                           loadPage(ch.chapter_number, pg.page_number);
                         }}
                       >
-                        <span className="font-mono">Pg {pg.page_number}</span>
+                        <span className="font-mono flex items-center gap-1.5">
+                          Pg {pg.page_number}
+                          {pg.illustration_note && (
+                            <Paintbrush size={9} className="text-amber-400/60" />
+                          )}
+                        </span>
                         <div className="flex items-center gap-2">
                           <span className="text-[9px] font-mono text-[#333]">{pg.word_count}w</span>
                           <span className={`w-1.5 h-1.5 rounded-full ${pg.status === "approved" ? "bg-green-400" : "bg-[#333]"}`} />
