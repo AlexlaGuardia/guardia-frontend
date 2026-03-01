@@ -43,6 +43,14 @@ export default function FaroDomainSection({ jwt }: FaroDomainSectionProps) {
 
   useEffect(() => { loadDomain(); }, [loadDomain]);
 
+  // Auto-poll when pending — check every 15s until active
+  useEffect(() => {
+    if (domainData?.connected && domainData.status === "pending") {
+      const interval = setInterval(loadDomain, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [domainData?.connected, domainData?.status, loadDomain]);
+
   const connectDomain = async () => {
     if (!jwt || !inputDomain.trim()) return;
     setSaving(true);
@@ -198,9 +206,22 @@ export default function FaroDomainSection({ jwt }: FaroDomainSectionProps) {
         </p>
       )}
 
-      <p className="text-xs text-[var(--text-muted)]">
-        After connecting, you&apos;ll need to add a CNAME record pointing to <code className="text-[var(--text-secondary)]">faro.guardiacontent.com</code>
-      </p>
+      <div className="flex items-start gap-2 text-xs text-[var(--text-muted)]">
+        <div className="flex flex-col gap-1.5 mt-0.5">
+          <div className="flex items-center gap-2">
+            <span className="w-4 h-4 rounded-full bg-[var(--accent-muted)] text-[var(--accent)] flex items-center justify-center text-[9px] font-bold flex-shrink-0">1</span>
+            <span>Enter your domain above and click Connect</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-4 h-4 rounded-full bg-[var(--bg-surface)] text-[var(--text-muted)] flex items-center justify-center text-[9px] font-bold flex-shrink-0">2</span>
+            <span>Add a CNAME record at your DNS provider pointing to <code className="text-[var(--text-secondary)]">faro.guardiacontent.com</code></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-4 h-4 rounded-full bg-[var(--bg-surface)] text-[var(--text-muted)] flex items-center justify-center text-[9px] font-bold flex-shrink-0">3</span>
+            <span>SSL activates automatically — usually under 5 minutes</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
