@@ -11,6 +11,8 @@ import {
   Wand2,
   BookOpen,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Loader2,
   Check,
   X,
@@ -22,6 +24,9 @@ import {
   Maximize2,
   Minimize2,
   Users,
+  Scissors,
+  FileText,
+  Merge,
 } from "lucide-react";
 
 const API = "https://api.guardiacontent.com";
@@ -108,6 +113,14 @@ const SPIRIT_TALES_CHARACTERS = [
   },
 ];
 
+interface PageMeta {
+  page_number: number;
+  word_count: number;
+  status: "draft" | "approved";
+  illustration_note: string;
+  approved_at: string | null;
+}
+
 interface Chapter {
   id: number;
   book_id: number;
@@ -119,6 +132,8 @@ interface Chapter {
   illustration_notes: string;
   word_count: number;
   status: string;
+  has_pages?: boolean;
+  page_count?: number;
 }
 
 interface Book {
@@ -170,7 +185,16 @@ export default function SpiritTalesEditor() {
   const [editTitle, setEditTitle] = useState("");
   const [editTheme, setEditTheme] = useState("");
   const [editSynopsis, setEditSynopsis] = useState("");
+  // Page mode state
+  const [pageMode, setPageMode] = useState(false);
+  const [pages, setPages] = useState<PageMeta[]>([]);
+  const [activePage, setActivePage] = useState<number | null>(null);
+  const [pageContent, setPageContent] = useState("");
+  const [pageIllustration, setPageIllustration] = useState("");
+  const [pageSplitting, setPageSplitting] = useState(false);
+
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const pageSaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
   const sessionStartWords = useRef<number | null>(null);
@@ -226,8 +250,13 @@ export default function SpiritTalesEditor() {
   function selectChapter(ch: Chapter, _bk?: Book) {
     // Save current first if dirty
     if (dirty && activeChapter !== null) {
-      if (editorMode === "outline") saveOutline(activeChapter, outline);
-      else saveChapter(activeChapter, content);
+      if (pageMode && activePage !== null) {
+        savePage(activeChapter, activePage, pageContent, pageIllustration);
+      } else if (editorMode === "outline") {
+        saveOutline(activeChapter, outline);
+      } else {
+        saveChapter(activeChapter, content);
+      }
     }
     setActiveChapter(ch.chapter_number);
     setContent(ch.content || "");
@@ -236,8 +265,19 @@ export default function SpiritTalesEditor() {
     setShowGhost(false);
     setDirty(false);
     setSaved(false);
-    // Default to write mode if chapter has content, otherwise outline
-    setEditorMode(ch.content?.trim() ? "write" : "outline");
+    // Handle page mode
+    if (ch.has_pages && ch.page_count && ch.page_count > 0) {
+      setPageMode(true);
+      setEditorMode("write");
+      loadPages(ch.chapter_number).then((pgs) => {
+        if (pgs.length > 0) loadPage(ch.chapter_number, 1);
+      });
+    } else {
+      setPageMode(false);
+      setPages([]);
+      setActivePage(null);
+      setEditorMode(ch.content?.trim() ? "write" : "outline");
+    }
   }
 
   // Auto-save with debounce
@@ -440,6 +480,146 @@ export default function SpiritTalesEditor() {
     await loadBook();
   }
 
+  // ---- Page functions ----
+
+  async function loadPages(chNum: number): Promise<PageMeta[]> {
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages`);
+    if (res.ok) {
+      const data = await res.json();
+      const pgs = data.pages || data;
+      setPages(pgs);
+      return pgs as PageMeta[];
+    }
+    return [];
+  }
+
+  async function loadPage(chNum: number, pageNum: number) {
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages/${pageNum}`);
+    if (res.ok) {
+      const data = await res.json();
+      setPageContent(data.content || "");
+      setPageIllustration(data.illustration_note || "");
+      setActivePage(pageNum);
+    }
+  }
+
+  async function savePage(chNum: number, pageNum: number, c: string, ill: string) {
+    setSaving(true);
+    await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages/${pageNum}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: c, illustration_note: ill }),
+    });
+    setSaving(false);
+    setDirty(false);
+    setSaved(true);
+    loadPages(chNum);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  async function splitIntoPages(chNum: number) {
+    setPageSplitting(true);
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/split-into-pages`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      await loadBook();
+      const pgs = await loadPages(chNum);
+      if (pgs.length > 0) {
+        setPageMode(true);
+        await loadPage(chNum, 1);
+      }
+    }
+    setPageSplitting(false);
+  }
+
+  async function splitPageAtCursor(chNum: number, pageNum: number) {
+    const textarea = textareaRef.current;
+    const offset = textarea ? textarea.selectionStart : 0;
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages/${pageNum}/split`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ offset }),
+    });
+    if (res.ok) {
+      await loadPages(chNum);
+      await loadPage(chNum, pageNum);
+      await loadBook();
+    }
+  }
+
+  async function mergePageWithNext(chNum: number, pageNum: number) {
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages/${pageNum}/merge`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const pgs = await loadPages(chNum);
+      const newPageNum = pageNum > pgs.length ? pgs.length : pageNum;
+      await loadPage(chNum, newPageNum);
+      await loadBook();
+    }
+  }
+
+  async function togglePageApproval(chNum: number, pageNum: number) {
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages/${pageNum}/approve`, {
+      method: "PATCH",
+    });
+    if (res.ok) {
+      await loadPages(chNum);
+    }
+  }
+
+  async function compilePages(chNum: number) {
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/compile-pages`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setContent(data.content || "");
+      setPageMode(false);
+      setPages([]);
+      setActivePage(null);
+      await loadBook();
+    }
+  }
+
+  async function dissolvePages(chNum: number) {
+    const res = await fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/pages`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      setPageMode(false);
+      setPages([]);
+      setActivePage(null);
+      await loadBook();
+    }
+  }
+
+  function handlePageContentChange(val: string) {
+    setPageContent(val);
+    setDirty(true);
+    setSaved(false);
+    if (pageSaveTimer.current) clearTimeout(pageSaveTimer.current);
+    pageSaveTimer.current = setTimeout(() => {
+      if (activeChapter !== null && activePage !== null) {
+        savePage(activeChapter, activePage, val, pageIllustration);
+      }
+    }, 2000);
+    if (zenMode) requestAnimationFrame(typewriterScroll);
+  }
+
+  function handlePageIllustrationChange(val: string) {
+    setPageIllustration(val);
+    setDirty(true);
+    setSaved(false);
+    if (pageSaveTimer.current) clearTimeout(pageSaveTimer.current);
+    pageSaveTimer.current = setTimeout(() => {
+      if (activeChapter !== null && activePage !== null) {
+        savePage(activeChapter, activePage, pageContent, val);
+      }
+    }, 2000);
+  }
+
   if (!book) {
     return (
       <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center">
@@ -572,68 +752,99 @@ export default function SpiritTalesEditor() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {book.chapters.map((ch) => (
-              <button
-                key={ch.chapter_number}
-                onClick={() => selectChapter(ch)}
-                draggable
-                onDragStart={() => setDraggedChapter(ch.chapter_number)}
-                onDragEnd={() => { setDraggedChapter(null); setDropTarget(null); }}
-                onDragOver={(e) => { e.preventDefault(); setDropTarget(ch.chapter_number); }}
-                onDragLeave={() => setDropTarget(null)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (draggedChapter !== null && draggedChapter !== ch.chapter_number) {
-                    reorderChapters(draggedChapter, ch.chapter_number);
-                  }
-                  setDraggedChapter(null);
-                  setDropTarget(null);
-                }}
-                className={`w-full text-left px-3 py-2.5 border-b border-[#0f0f10] transition-colors group ${
-                  activeChapter === ch.chapter_number
-                    ? "bg-[#1a1a1f]"
-                    : "hover:bg-[#111]"
-                } ${draggedChapter === ch.chapter_number ? "opacity-50" : ""} ${
-                  dropTarget === ch.chapter_number && draggedChapter !== ch.chapter_number
-                    ? "border-t-2 border-t-amber-400/60"
-                    : ""
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="truncate">
-                    <span className={`text-[10px] font-mono ${activeChapter === ch.chapter_number ? "text-amber-400/50" : "text-[#444]"}`}>
-                      Ch {ch.chapter_number}
+              <div key={ch.chapter_number}>
+                <button
+                  onClick={() => selectChapter(ch)}
+                  draggable
+                  onDragStart={() => setDraggedChapter(ch.chapter_number)}
+                  onDragEnd={() => { setDraggedChapter(null); setDropTarget(null); }}
+                  onDragOver={(e) => { e.preventDefault(); setDropTarget(ch.chapter_number); }}
+                  onDragLeave={() => setDropTarget(null)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (draggedChapter !== null && draggedChapter !== ch.chapter_number) {
+                      reorderChapters(draggedChapter, ch.chapter_number);
+                    }
+                    setDraggedChapter(null);
+                    setDropTarget(null);
+                  }}
+                  className={`w-full text-left px-3 py-2.5 border-b border-[#0f0f10] transition-colors group ${
+                    activeChapter === ch.chapter_number
+                      ? "bg-[#1a1a1f]"
+                      : "hover:bg-[#111]"
+                  } ${draggedChapter === ch.chapter_number ? "opacity-50" : ""} ${
+                    dropTarget === ch.chapter_number && draggedChapter !== ch.chapter_number
+                      ? "border-t-2 border-t-amber-400/60"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="truncate">
+                      <span className={`text-[10px] font-mono ${activeChapter === ch.chapter_number ? "text-amber-400/50" : "text-[#444]"}`}>
+                        Ch {ch.chapter_number}
+                      </span>
+                      <span
+                        className={`text-[12px] font-medium ml-1.5 ${
+                          activeChapter === ch.chapter_number
+                            ? "text-amber-400"
+                            : ch.title ? "text-[#999]" : "text-[#555] italic"
+                        }`}
+                      >
+                        {ch.title || "Untitled"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {ch.has_pages && (
+                        <span className="text-[9px] text-cyan-400/50 font-mono">{ch.page_count}pg</span>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm("Delete this chapter?")) deleteChapter(ch.chapter_number);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-[#333] hover:text-red-400/60 transition-all"
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-[#333] font-mono">
+                      {ch.word_count} words
                     </span>
                     <span
-                      className={`text-[12px] font-medium ml-1.5 ${
-                        activeChapter === ch.chapter_number
-                          ? "text-amber-400"
-                          : ch.title ? "text-[#999]" : "text-[#555] italic"
-                      }`}
-                    >
-                      {ch.title || "Untitled"}
-                    </span>
+                      className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ backgroundColor: STATUS_COLORS[ch.status] || "#555" }}
+                      title={ch.status}
+                    />
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm("Delete this chapter?")) deleteChapter(ch.chapter_number);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 text-[#333] hover:text-red-400/60 transition-all"
-                  >
-                    <Trash2 size={11} />
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-[#333] font-mono">
-                    {ch.word_count} words
-                  </span>
-                  <span
-                    className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: STATUS_COLORS[ch.status] || "#555" }}
-                    title={ch.status}
-                  />
-                </div>
-              </button>
+                </button>
+                {/* Page sub-list */}
+                {ch.has_pages && activeChapter === ch.chapter_number && pages.length > 0 && (
+                  <div className="bg-[#0d0d0e] border-b border-[#0f0f10]">
+                    {pages.map((pg) => (
+                      <button
+                        key={pg.page_number}
+                        onClick={() => {
+                          setPageMode(true);
+                          loadPage(ch.chapter_number, pg.page_number);
+                        }}
+                        className={`w-full text-left pl-8 pr-3 py-1.5 text-[11px] transition-colors flex items-center justify-between ${
+                          activePage === pg.page_number
+                            ? "text-cyan-400 bg-[#111]"
+                            : "text-[#555] hover:text-[#888] hover:bg-[#0f0f10]"
+                        }`}
+                      >
+                        <span className="font-mono">Pg {pg.page_number}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono text-[#333]">{pg.word_count}w</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${pg.status === "approved" ? "bg-green-400" : "bg-[#333]"}`} />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
             {book.chapters.length === 0 && (
               <div className="px-3 py-6 text-center">
@@ -699,18 +910,20 @@ export default function SpiritTalesEditor() {
                       )}
                     </>
                   )}
-                  <button
-                    onClick={ghostWrite}
-                    disabled={ghosting || (editorMode === "write" ? !content.trim() : !outline.trim())}
-                    className="flex items-center gap-1.5 bg-purple-500/15 text-purple-400 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:bg-purple-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {ghosting ? (
-                      <Loader2 size={12} className="animate-spin" />
-                    ) : (
-                      <Wand2 size={12} />
-                    )}
-                    {editorMode === "outline" ? "Draft from Outline" : "Ghost Writer"}
-                  </button>
+                  {!pageMode && (
+                    <button
+                      onClick={ghostWrite}
+                      disabled={ghosting || (editorMode === "write" ? !content.trim() : !outline.trim())}
+                      className="flex items-center gap-1.5 bg-purple-500/15 text-purple-400 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:bg-purple-500/25 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {ghosting ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <Wand2 size={12} />
+                      )}
+                      {editorMode === "outline" ? "Draft from Outline" : "Ghost Writer"}
+                    </button>
+                  )}
                   <button
                     onClick={() => setCharPanelOpen(!charPanelOpen)}
                     className={`transition-colors ${charPanelOpen ? "text-amber-400" : "text-[#555] hover:text-[#888]"}`}
@@ -761,54 +974,145 @@ export default function SpiritTalesEditor() {
                 </div>
               )}
 
-              {/* Outline / Write tabs */}
+              {/* Outline / Write / Page tabs */}
               <div className={`flex items-center gap-0 border-b border-[#1a1a1f] shrink-0 px-5 ${zenMode ? "hidden" : ""}`}>
-                <button
-                  onClick={() => setEditorMode("outline")}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors ${
-                    editorMode === "outline"
-                      ? "border-amber-400 text-amber-400"
-                      : "border-transparent text-[#555] hover:text-[#888]"
-                  }`}
-                >
-                  <List size={12} /> Outline
-                </button>
-                <button
-                  onClick={() => setEditorMode("write")}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors ${
-                    editorMode === "write"
-                      ? "border-amber-400 text-amber-400"
-                      : "border-transparent text-[#555] hover:text-[#888]"
-                  }`}
-                >
-                  <PenLine size={12} /> Write
-                </button>
-                {activeCh && (
-                  <button
-                    onClick={() => {
-                      if (!book || !activeCh) return;
-                      const idx = STATUS_OPTS.indexOf(activeCh.status);
-                      const next = STATUS_OPTS[(idx + 1) % STATUS_OPTS.length];
-                      const updated = { ...book };
-                      const ch = updated.chapters.find((c) => c.chapter_number === activeChapter);
-                      if (ch) ch.status = next;
-                      setBook(updated);
-                      fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${activeChapter}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ status: next }),
-                      });
-                    }}
-                    className="ml-auto flex items-center gap-1.5 text-[10px] font-medium tracking-wide uppercase transition-colors hover:opacity-80"
-                    style={{ color: STATUS_COLORS[activeCh.status] || "#555" }}
-                    title="Click to cycle status"
-                  >
-                    <span
-                      className="inline-block w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: STATUS_COLORS[activeCh.status] || "#555" }}
-                    />
-                    {activeCh.status}
-                  </button>
+                {pageMode ? (
+                  <>
+                    {/* Page mode navigation */}
+                    <button
+                      onClick={() => { setPageMode(false); setEditorMode("write"); }}
+                      className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium text-[#555] hover:text-[#888] transition-colors"
+                    >
+                      <ArrowLeft size={12} /> Back to Chapter
+                    </button>
+                    <div className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium text-cyan-400">
+                      <FileText size={12} />
+                      <button
+                        onClick={() => activePage && activePage > 1 && activeChapter && loadPage(activeChapter, activePage - 1)}
+                        disabled={!activePage || activePage <= 1}
+                        className="text-[#555] hover:text-[#888] disabled:opacity-20 transition-colors"
+                      >
+                        <ChevronLeft size={14} />
+                      </button>
+                      <span>Pg {activePage} of {pages.length}</span>
+                      <button
+                        onClick={() => activePage && activePage < pages.length && activeChapter && loadPage(activeChapter, activePage + 1)}
+                        disabled={!activePage || activePage >= pages.length}
+                        className="text-[#555] hover:text-[#888] disabled:opacity-20 transition-colors"
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                    {activePage && activeChapter && (
+                      <div className="flex items-center gap-2 ml-2">
+                        <button
+                          onClick={() => togglePageApproval(activeChapter, activePage)}
+                          className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                            pages.find(p => p.page_number === activePage)?.status === "approved"
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-[#1a1a1f] text-[#555] hover:text-[#888]"
+                          }`}
+                        >
+                          <Check size={10} />
+                          {pages.find(p => p.page_number === activePage)?.status === "approved" ? "Approved" : "Approve"}
+                        </button>
+                        <button
+                          onClick={() => splitPageAtCursor(activeChapter, activePage)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-[#1a1a1f] text-[#555] hover:text-[#888] transition-colors"
+                          title="Split at cursor"
+                        >
+                          <Scissors size={10} /> Split
+                        </button>
+                        {activePage < pages.length && (
+                          <button
+                            onClick={() => mergePageWithNext(activeChapter, activePage)}
+                            className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-[#1a1a1f] text-[#555] hover:text-[#888] transition-colors"
+                            title="Merge with next page"
+                          >
+                            <Merge size={10} /> Merge
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    <div className="ml-auto flex items-center gap-2">
+                      {pages.length > 0 && pages.every(p => p.status === "approved") && (
+                        <button
+                          onClick={() => activeChapter && compilePages(activeChapter)}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-medium bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+                        >
+                          <Check size={10} /> Compile
+                        </button>
+                      )}
+                      <button
+                        onClick={() => activeChapter && dissolvePages(activeChapter)}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-red-400/50 hover:text-red-400 transition-colors"
+                        title="Dissolve all pages"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setEditorMode("outline")}
+                      className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors ${
+                        editorMode === "outline"
+                          ? "border-amber-400 text-amber-400"
+                          : "border-transparent text-[#555] hover:text-[#888]"
+                      }`}
+                    >
+                      <List size={12} /> Outline
+                    </button>
+                    <button
+                      onClick={() => setEditorMode("write")}
+                      className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors ${
+                        editorMode === "write"
+                          ? "border-amber-400 text-amber-400"
+                          : "border-transparent text-[#555] hover:text-[#888]"
+                      }`}
+                    >
+                      <PenLine size={12} /> Write
+                    </button>
+                    {/* Split into Pages button */}
+                    {editorMode === "write" && content.trim() && !activeCh?.has_pages && (
+                      <button
+                        onClick={() => activeChapter && splitIntoPages(activeChapter)}
+                        disabled={pageSplitting}
+                        className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium text-cyan-400/60 hover:text-cyan-400 border-b-2 border-transparent transition-colors disabled:opacity-30"
+                      >
+                        {pageSplitting ? <Loader2 size={12} className="animate-spin" /> : <Scissors size={12} />}
+                        Split into Pages
+                      </button>
+                    )}
+                    {activeCh && (
+                      <button
+                        onClick={() => {
+                          if (!book || !activeCh) return;
+                          const idx = STATUS_OPTS.indexOf(activeCh.status);
+                          const next = STATUS_OPTS[(idx + 1) % STATUS_OPTS.length];
+                          const updated = { ...book };
+                          const ch = updated.chapters.find((c) => c.chapter_number === activeChapter);
+                          if (ch) ch.status = next;
+                          setBook(updated);
+                          fetch(`${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${activeChapter}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status: next }),
+                          });
+                        }}
+                        className="ml-auto flex items-center gap-1.5 text-[10px] font-medium tracking-wide uppercase transition-colors hover:opacity-80"
+                        style={{ color: STATUS_COLORS[activeCh.status] || "#555" }}
+                        title="Click to cycle status"
+                      >
+                        <span
+                          className="inline-block w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: STATUS_COLORS[activeCh.status] || "#555" }}
+                        />
+                        {activeCh.status}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -863,7 +1167,40 @@ export default function SpiritTalesEditor() {
               )}
 
               {/* Text area(s) */}
-              {editorMode === "outline" ? (
+              {pageMode && activePage ? (
+                /* Page mode editor */
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    <textarea
+                      ref={textareaRef}
+                      value={pageContent}
+                      onChange={(e) => handlePageContentChange(e.target.value)}
+                      className={`flex-1 w-full bg-transparent text-[14px] leading-[1.8] text-[#ccc] outline-none resize-none ${zenMode ? "px-[15%] py-12" : "p-5"}`}
+                      style={{ fontFamily: "var(--font-lora), Georgia, serif" }}
+                      placeholder="Page content..."
+                      spellCheck
+                    />
+                    {/* Illustration note */}
+                    {!zenMode && (
+                      <div className="border-t border-[#1a1a1f] px-5 py-3 shrink-0">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Image size={11} className="text-amber-400/50" />
+                          <span className="text-[10px] text-[#444] font-semibold tracking-wider">ILLUSTRATION NOTE</span>
+                          <span className="text-[10px] text-[#333] font-mono">
+                            {pageContent.split(/\s+/).filter(Boolean).length} words
+                          </span>
+                        </div>
+                        <input
+                          value={pageIllustration}
+                          onChange={(e) => handlePageIllustrationChange(e.target.value)}
+                          className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-2 text-[12px] text-[#999] outline-none focus:border-amber-500/30 placeholder-[#333]"
+                          placeholder="Describe the illustration for this spread..."
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : editorMode === "outline" ? (
                 <div className="flex-1 flex flex-col overflow-hidden">
                   <textarea
                     value={outline}
