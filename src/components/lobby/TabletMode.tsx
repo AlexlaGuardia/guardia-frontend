@@ -10,6 +10,7 @@ import AnalyticsTab from "./AnalyticsTab";
 import CommentsInbox from "./CommentsInbox";
 import ContentDirectionPanel from "./ContentDirectionPanel";
 import PlanningPreferencesPanel from "./PlanningPreferencesPanel";
+import PostComposerScreen from "../gio/PostComposerScreen";
 // VideoTab archived - see guardia-core/archive/video_pipeline_jan15/
 
 interface TabletModeProps {
@@ -232,17 +233,10 @@ export default function TabletMode({
             </div>
           )}
           {activeTab === "post" && (
-            <div className="h-full overflow-y-auto p-6">
-              <div className="max-w-2xl mx-auto text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Create a Post</h2>
-                <p className="text-[var(--text-secondary)]">Post composer loading...</p>
-              </div>
-            </div>
+            <PostComposerScreen
+              jwt={jwt}
+              onComplete={() => setActiveTab("calendar")}
+            />
           )}
           {activeTab === "store" && (
             <div className="h-full overflow-y-auto p-6">
