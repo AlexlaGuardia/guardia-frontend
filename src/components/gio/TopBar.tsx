@@ -3,7 +3,7 @@
 import TabIcon from "./TabIcon";
 import GioAvatar from "./GioAvatar";
 
-export type Screen = "feed" | "faro" | "post" | "store" | "account" | "post-detail" | "gio-chat" | "factory" | "calendar" | "stats";
+export type Screen = "feed" | "faro" | "post" | "store" | "account" | "post-detail" | "gio-chat" | "calendar" | "stats";
 
 const tabs: { screen: Screen; label: string; icon: "Home" | "Link2" | "PenSquare" | "Store" | "CircleUserRound" }[] = [
   { screen: "feed", label: "Feed", icon: "Home" },

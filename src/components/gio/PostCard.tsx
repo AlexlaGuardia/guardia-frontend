@@ -90,7 +90,7 @@ export default function PostCard({ post, onClick }: PostCardProps) {
     >
       {/* Image or text-only fallback */}
       {post.image_url ? (
-        <div className="relative w-full aspect-[4/3] bg-[var(--bg-surface)]">
+        <div className="relative w-full aspect-[4/5] bg-[var(--bg-surface)]">
           <Image
             src={post.image_url}
             alt=""

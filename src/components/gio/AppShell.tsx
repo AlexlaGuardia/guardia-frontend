@@ -5,7 +5,6 @@ import TopBar, { Screen } from "./TopBar";
 import BottomTabs from "./BottomTabs";
 import FeedScreen from "./FeedScreen";
 import PostDetail from "./PostDetail";
-import FactoryScreen from "./FactoryScreen";
 import CalendarScreen from "./CalendarScreen";
 import StatsScreen from "./StatsScreen";
 import AccountScreen from "./AccountScreen";
@@ -427,10 +426,10 @@ export default function AppShell() {
           content: `Welcome to Guardia, ${clientData.contact_name || "there"}! Your Faro page is ready — let's set it up. Add your bio, links, and pick a theme to make it yours.`,
         }]);
       } else {
-        setActiveScreen("factory");
+        setActiveScreen("feed");
         gioChat.setMessages([{
           role: "assistant",
-          content: `Welcome to Guardia, ${clientData.contact_name || "there"}! I've opened your Factory to get started. Upload some photos and we'll style them up — your first posts go live this week.`,
+          content: `Welcome to Guardia, ${clientData.contact_name || "there"}! Your Feed is ready. Upload some photos and we'll style them up — your first posts go live this week.`,
         }]);
       }
       window.history.replaceState({}, "", "/client");
@@ -529,7 +528,7 @@ export default function AppShell() {
   function renderScreen() {
     switch (activeScreen) {
       case "feed":
-        return <FeedScreen jwt={jwt} onPostSelect={handlePostSelect} onNavigate={handleScreenChange} />;
+        return <FeedScreen jwt={jwt} clientTier={client?.tier} onPostSelect={handlePostSelect} onNavigate={handleScreenChange} />;
       case "faro":
         return <FaroScreen jwt={jwt} client={client} />;
       case "post":
@@ -552,8 +551,6 @@ export default function AppShell() {
         );
       case "store":
         return <StoreScreen client={client} jwt={jwt} />;
-      case "factory":
-        return <FactoryScreen jwt={jwt} clientTier={client?.tier} />;
       case "calendar":
         return <CalendarScreen {...screenProps} />;
       case "stats":
@@ -565,7 +562,7 @@ export default function AppShell() {
       case "gio-chat":
         return <GioChatScreen {...chatProps} onClose={() => setActiveScreen("feed")} />;
       default:
-        return <FeedScreen jwt={jwt} onPostSelect={handlePostSelect} onNavigate={handleScreenChange} />;
+        return <FeedScreen jwt={jwt} clientTier={client?.tier} onPostSelect={handlePostSelect} onNavigate={handleScreenChange} />;
     }
   }
 
