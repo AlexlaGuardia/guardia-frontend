@@ -283,7 +283,7 @@ export default function AppShell() {
   const [composerDate, setComposerDate] = useState<string | null>(null);
 
   // Gio sidebar collapse (desktop/tablet)
-  const [gioSidebarOpen, setGioSidebarOpen] = useState(true);
+  const [gioSidebarOpen, setGioSidebarOpen] = useState(false);
 
   // Responsive
   const [isMobile, setIsMobile] = useState(false);
