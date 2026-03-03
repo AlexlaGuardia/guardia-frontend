@@ -282,6 +282,9 @@ export default function AppShell() {
   const [showComposer, setShowComposer] = useState(false);
   const [composerDate, setComposerDate] = useState<string | null>(null);
 
+  // Gio sidebar collapse (desktop/tablet)
+  const [gioSidebarOpen, setGioSidebarOpen] = useState(true);
+
   // Responsive
   const [isMobile, setIsMobile] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -470,6 +473,8 @@ export default function AppShell() {
   const handleGioClick = useCallback(() => {
     if (isMobile) {
       setActiveScreen("gio-chat");
+    } else {
+      setGioSidebarOpen((prev) => !prev);
     }
     gioChat.clearUnread();
   }, [isMobile, gioChat]);
@@ -591,10 +596,16 @@ export default function AppShell() {
           {renderScreen()}
         </div>
 
-        {/* Right sidebar — Gio chat (tablet + desktop) */}
+        {/* Right sidebar — Gio chat (tablet + desktop), collapsible */}
         {showGioSidebar && (
-          <aside className="w-[320px] border-l border-[var(--border-subtle)] bg-[var(--bg-base)] flex-shrink-0 hidden md:flex flex-col min-h-0">
-            <GioChatPanel {...chatProps} />
+          <aside
+            className={`border-l border-[var(--border-subtle)] bg-[var(--bg-base)] flex-shrink-0 hidden md:flex flex-col min-h-0 transition-all duration-300 overflow-hidden ${
+              gioSidebarOpen ? "w-[320px]" : "w-0 border-l-0"
+            }`}
+          >
+            <div className="w-[320px] h-full flex-shrink-0">
+              <GioChatPanel {...chatProps} />
+            </div>
           </aside>
         )}
       </div>
