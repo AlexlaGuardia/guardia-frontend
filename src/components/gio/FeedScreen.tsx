@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import ReviewCard, { ReviewPost } from "./ReviewCard";
+import type { ReviewPost } from "./ReviewCard";
 import PipelineCard, { PipelineItem } from "./PipelineCard";
 import PostCard, { PostedItem } from "./PostCard";
 import type { Screen } from "./TopBar";
@@ -60,6 +60,14 @@ function formatScheduleDate(dateStr: string): string {
   return date.toLocaleDateString([], { month: "short", day: "numeric" }) +
     `, ${date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
 }
+
+const PLATFORM_BADGES: Record<string, { label: string; bg: string; text: string }> = {
+  facebook: { label: "FB", bg: "#E8F0FE", text: "#1877F2" },
+  instagram: { label: "IG", bg: "#FCEEF5", text: "#E4405F" },
+  tiktok: { label: "TT", bg: "#F0F0F0", text: "#000000" },
+  linkedin: { label: "LI", bg: "#E8F4FD", text: "#0A66C2" },
+  pinterest: { label: "PN", bg: "#FDE8E8", text: "#E60023" },
+};
 
 function SkeletonCard() {
   return (
@@ -196,18 +204,64 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
 
   // ── Handlers ──
 
-  const handleApprove = useCallback((postId: number) => {
-    setAnimatingOutIds((prev) => new Set(prev).add(postId));
-    setTimeout(() => {
-      setAnimatingOutIds(new Set());
-      loadFactory();
-      loadFeed(0, false);
-    }, 450);
-  }, [loadFactory, loadFeed]);
+  // Track which cards are mid-action (prevent double-tap)
+  const [actingIds, setActingIds] = useState<Set<number>>(new Set());
+  const [heartPopId, setHeartPopId] = useState<number | null>(null);
 
-  const handleReject = useCallback(() => {
+  const handleCardApprove = useCallback(async (post: ReviewPost) => {
+    if (!jwt || actingIds.has(post.id)) return;
+    setActingIds((prev) => new Set(prev).add(post.id));
+    setHeartPopId(post.id);
+    setTimeout(() => setHeartPopId(null), 600);
+
+    try {
+      // Record reaction (non-blocking)
+      if (post.asset_id) {
+        fetch(`${API_BASE}/approval/review/${post.asset_id}/react`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reaction: "loved" }),
+        }).catch(() => {});
+      }
+      const res = await fetch(`${API_BASE}/lobby/content-review/${post.id}/approve`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Animate out, then refresh
+        setAnimatingOutIds((prev) => new Set(prev).add(post.id));
+        setTimeout(() => {
+          setAnimatingOutIds(new Set());
+          setActingIds(new Set());
+          loadFactory();
+          loadFeed(0, false);
+        }, 450);
+        return;
+      }
+    } catch {}
+    setActingIds((prev) => { const s = new Set(prev); s.delete(post.id); return s; });
+  }, [jwt, actingIds, loadFactory, loadFeed]);
+
+  const handleCardReject = useCallback(async (post: ReviewPost) => {
+    if (!jwt || actingIds.has(post.id)) return;
+    setActingIds((prev) => new Set(prev).add(post.id));
+    try {
+      if (post.asset_id) {
+        fetch(`${API_BASE}/approval/review/${post.asset_id}/react`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reaction: "skipped" }),
+        }).catch(() => {});
+      }
+      await fetch(`${API_BASE}/lobby/content-review/${post.id}/reject`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+    } catch {}
+    setActingIds(new Set());
     loadFactory();
-  }, [loadFactory]);
+  }, [jwt, actingIds, loadFactory]);
 
   const handleBulkApprove = async () => {
     if (reviewPosts.length === 0 || !jwt) return;
@@ -349,7 +403,7 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
           </div>
         )}
 
-        {/* ── Fresh from the Factory ── */}
+        {/* ── Fresh from the Factory (horizontal carousel) ── */}
         {reviewPosts.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3">
@@ -366,21 +420,70 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
                 </button>
               )}
             </div>
-            <div className="space-y-3">
-              {reviewPosts.map((post) => (
-                <div
-                  key={post.id}
-                  style={animatingOutIds.has(post.id) ? { animation: "approve-out 400ms ease forwards", overflow: "hidden" } : undefined}
-                >
-                  <ReviewCard
-                    post={post}
-                    jwt={jwt}
-                    onApproved={() => handleApprove(post.id)}
-                    onRejected={handleReject}
-                    onMessage={() => {}}
-                  />
-                </div>
-              ))}
+            {/* Horizontal scroll */}
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
+              {reviewPosts.map((post) => {
+                const badge = PLATFORM_BADGES[post.platform] || { label: post.platform.slice(0, 2).toUpperCase(), bg: "#F3F4F6", text: "#6B7280" };
+                return (
+                  <div
+                    key={post.id}
+                    className="min-w-[220px] max-w-[220px] snap-start flex-shrink-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl overflow-hidden transition-all duration-200"
+                    style={animatingOutIds.has(post.id) ? { animation: "approve-out 400ms ease forwards", overflow: "hidden" } : undefined}
+                  >
+                    {/* Image */}
+                    <div className="relative w-full aspect-[4/3] bg-[var(--bg-surface)] overflow-hidden">
+                      {post.image_url ? (
+                        <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <path d="M21 15l-5-5L5 21" />
+                          </svg>
+                        </div>
+                      )}
+                      {/* Heart pop */}
+                      {heartPopId === post.id && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <svg width={48} height={48} viewBox="0 0 24 24" fill="#e74c6f" stroke="none" className="animate-ping opacity-70" style={{ filter: "drop-shadow(0 2px 8px rgba(231,76,111,0.4))" }}>
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    {/* Meta */}
+                    <div className="px-3 py-2">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide" style={{ background: badge.bg, color: badge.text }}>{badge.label}</span>
+                        <span className="text-[10px] text-[var(--text-muted)] truncate">Publishing to {post.platform === "facebook" ? "Facebook" : post.platform === "instagram" ? "Instagram" : post.platform}</span>
+                      </div>
+                      {post.caption && (
+                        <p className="text-[11px] text-[var(--text-secondary)] line-clamp-2 leading-relaxed">{post.caption}</p>
+                      )}
+                    </div>
+                    {/* Actions */}
+                    <div className="flex border-t border-[var(--border)]">
+                      <button
+                        onClick={() => handleCardReject(post)}
+                        disabled={actingIds.has(post.id)}
+                        className="flex-1 flex items-center justify-center gap-1 py-2.5 text-[11px] font-semibold text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50/50 transition-all disabled:opacity-50 border-r border-[var(--border)]"
+                      >
+                        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
+                        Skip
+                      </button>
+                      <button
+                        onClick={() => handleCardApprove(post)}
+                        disabled={actingIds.has(post.id)}
+                        className="flex-1 flex items-center justify-center gap-1 py-2.5 text-[11px] font-semibold text-[#4338CA] hover:bg-indigo-500/10 transition-all disabled:opacity-50"
+                      >
+                        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                        Approve
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
