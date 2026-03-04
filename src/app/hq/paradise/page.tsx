@@ -36,7 +36,7 @@ interface CatData {
   } | null;
   vulture: { approved: boolean; consecutive_losses: number };
   performance: CatPerformance;
-  trades: { realized_pnl: number; total: number };
+  trades: { realized_pnl: number; total: number; wins?: number; losses?: number };
 }
 
 interface Position {
@@ -595,8 +595,8 @@ function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
       <div className="space-y-4">
         {Object.entries(cats).map(([name, cat]) => {
           const p = cat.performance;
-          const total = p.wins + p.losses;
-          const winPct = total > 0 ? (p.wins / total) * 100 : 0;
+          const tradeTotal = (cat.trades.wins ?? 0) + (cat.trades.losses ?? 0);
+          const winPct = tradeTotal > 0 ? ((cat.trades.wins ?? 0) / tradeTotal) * 100 : 0;
           return (
             <div key={name}>
               <div className="flex items-center justify-between mb-1">
@@ -609,16 +609,17 @@ function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
                 </span>
               </div>
               <div className="flex items-center gap-3 text-xs text-[#666] mb-1.5">
-                <span className="text-[#10b981]">{p.wins}W</span>
-                <span className="text-[#ef4444]">{p.losses}L</span>
-                <span className="text-[#f59e0b]">{p.expired}E</span>
-                <span className="text-[#555]">&middot;</span>
-                <span>{cat.trades.total} trades</span>
+                <span className="text-[#10b981]">{cat.trades.wins ?? 0}W</span>
+                <span className="text-[#ef4444]">{cat.trades.losses ?? 0}L</span>
                 <span className={`font-mono ${cat.trades.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
                   ${cat.trades.realized_pnl.toFixed(2)}
                 </span>
               </div>
-              {total > 0 && (
+              <div className="flex items-center gap-2 text-[10px] text-[#444] mb-1.5">
+                <span>Signals: {p.wins}W / {p.losses}L / {p.expired}E</span>
+                <span>({p.total_pips >= 0 ? "+" : ""}{p.total_pips} pips)</span>
+              </div>
+              {tradeTotal > 0 && (
                 <div className="h-1 bg-[#1a1a1f] rounded-full overflow-hidden">
                   <div className="h-full bg-[#10b981] rounded-full" style={{ width: `${winPct}%` }} />
                 </div>
