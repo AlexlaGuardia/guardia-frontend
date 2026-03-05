@@ -135,6 +135,16 @@ interface Chapter {
   status: string;
   has_pages?: boolean;
   page_count?: number;
+  canon_context?: string;
+  summary?: string;
+}
+
+interface ReviewIssue {
+  page: number;
+  type: string;
+  quote: string;
+  issue: string;
+  suggestion: string;
 }
 
 interface Book {
@@ -193,6 +203,14 @@ export default function SpiritTalesEditor() {
   const [pageContent, setPageContent] = useState("");
   const [pageIllustration, setPageIllustration] = useState("");
   const [pageSplitting, setPageSplitting] = useState(false);
+  // Canon & Luna review state
+  const [canonContext, setCanonContext] = useState("");
+  const [chapterSummary, setChapterSummary] = useState("");
+  const [showCanon, setShowCanon] = useState(false);
+  const [reviewIssues, setReviewIssues] = useState<ReviewIssue[]>([]);
+  const [reviewing, setReviewing] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pageSaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -263,7 +281,11 @@ export default function SpiritTalesEditor() {
     setContent(ch.content || "");
     setOutline(ch.outline || "");
     setGhostContent(ch.ghost_content || "");
+    setCanonContext(ch.canon_context || "");
+    setChapterSummary(ch.summary || "");
     setShowGhost(false);
+    setReviewIssues([]);
+    setShowReview(false);
     setDirty(false);
     setSaved(false);
     // Handle page mode
@@ -351,6 +373,53 @@ export default function SpiritTalesEditor() {
       setBook(updated);
     }
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  async function saveCanonContext(chNum: number, text: string) {
+    await fetch(
+      `${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canon_context: text }),
+      }
+    );
+  }
+
+  async function runLunaReview(chNum: number) {
+    setReviewing(true);
+    setShowReview(true);
+    setReviewIssues([]);
+    try {
+      const res = await fetch(
+        `${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/luna-review`,
+        { method: "POST" }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setReviewIssues(data.issues || []);
+      }
+    } catch { /* silently fail */ }
+    setReviewing(false);
+  }
+
+  async function generateSummary(chNum: number) {
+    setGeneratingSummary(true);
+    try {
+      const res = await fetch(
+        `${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/summary`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ auto: true }),
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setChapterSummary(data.summary || "");
+      }
+    } catch { /* silently fail */ }
+    setGeneratingSummary(false);
   }
 
   async function addChapter() {
@@ -985,6 +1054,25 @@ export default function SpiritTalesEditor() {
                     )}
                     {editorMode === "outline" && !pageMode ? "Draft from Outline" : "Ghost Writer"}
                   </button>
+                  {pageMode && pages.length > 0 && (
+                    <button
+                      onClick={() => activeChapter && runLunaReview(activeChapter)}
+                      disabled={reviewing}
+                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                        reviewIssues.length > 0
+                          ? "bg-red-500/15 text-red-400 hover:bg-red-500/25"
+                          : "bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25"
+                      } disabled:opacity-30`}
+                      title="Luna reviews pages against canon"
+                    >
+                      {reviewing ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <Eye size={12} />
+                      )}
+                      {reviewIssues.length > 0 ? `${reviewIssues.length} issues` : "Luna QC"}
+                    </button>
+                  )}
                   <button
                     onClick={() => setCharPanelOpen(!charPanelOpen)}
                     className={`transition-colors ${charPanelOpen ? "text-amber-400" : "text-[#555] hover:text-[#888]"}`}
@@ -1029,6 +1117,60 @@ export default function SpiritTalesEditor() {
                         <p className="text-[11px] text-[#555] leading-relaxed">
                           {book.synopsis}
                         </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Canon Context + Summary */}
+              {activeCh && !zenMode && (
+                <div className="border-b border-[#1a1a1f] shrink-0">
+                  <button
+                    onClick={() => setShowCanon(!showCanon)}
+                    className="flex items-center gap-2 px-5 py-1.5 text-[10px] text-[#444] hover:text-[#666] transition-colors w-full"
+                  >
+                    {showCanon ? <EyeOff size={10} /> : <Eye size={10} />}
+                    <span className="font-semibold tracking-wider">CANON CONTEXT</span>
+                    {canonContext.trim() && (
+                      <span className="text-[9px] text-amber-400/40 ml-1">has notes</span>
+                    )}
+                    {chapterSummary.trim() && (
+                      <span className="text-[9px] text-green-400/40 ml-1">has summary</span>
+                    )}
+                  </button>
+                  {showCanon && (
+                    <div className="px-5 pb-3 space-y-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] text-amber-400/50 font-semibold tracking-wider">CHAPTER LORE NOTES</span>
+                          <span className="text-[9px] text-[#333]">Tell the ghost writer what it needs to know</span>
+                        </div>
+                        <textarea
+                          value={canonContext}
+                          onChange={(e) => setCanonContext(e.target.value)}
+                          onBlur={() => activeChapter && saveCanonContext(activeChapter, canonContext)}
+                          rows={3}
+                          className="w-full bg-[#111] border border-[#1a1a1f] rounded px-3 py-2 text-[12px] text-[#999] outline-none focus:border-amber-500/30 placeholder-[#333] resize-none"
+                          placeholder="e.g. This chapter introduces Gregory. He lives in the Shimmer Garden. He knows what Momo is — looks at him like he recognizes the species..."
+                        />
+                      </div>
+                      {chapterSummary.trim() ? (
+                        <div>
+                          <span className="text-[10px] text-green-400/50 font-semibold tracking-wider">CHAPTER SUMMARY</span>
+                          <p className="text-[11px] text-[#666] leading-relaxed mt-1">{chapterSummary}</p>
+                        </div>
+                      ) : (
+                        activeCh.has_pages && (activeCh.page_count ?? 0) > 0 && (
+                          <button
+                            onClick={() => activeChapter && generateSummary(activeChapter)}
+                            disabled={generatingSummary}
+                            className="flex items-center gap-1.5 text-[10px] text-purple-400/60 hover:text-purple-400 transition-colors disabled:opacity-30"
+                          >
+                            {generatingSummary ? <Loader2 size={10} className="animate-spin" /> : <Wand2 size={10} />}
+                            Generate summary with Luna
+                          </button>
+                        )
                       )}
                     </div>
                   )}
@@ -1224,6 +1366,54 @@ export default function SpiritTalesEditor() {
                   >
                     <X size={12} /> Dismiss
                   </button>
+                </div>
+              )}
+
+              {/* Luna Review Results */}
+              {showReview && (reviewIssues.length > 0 || reviewing) && (
+                <div className="border-b border-[#1a1a1f] shrink-0 max-h-[200px] overflow-y-auto">
+                  <div className="flex items-center gap-2 px-5 py-1.5">
+                    <span className="text-[10px] font-semibold tracking-wider text-cyan-400/60">
+                      LUNA CANON REVIEW
+                    </span>
+                    {reviewing && <Loader2 size={10} className="animate-spin text-cyan-400/40" />}
+                    {!reviewing && reviewIssues.length === 0 && (
+                      <span className="text-[10px] text-green-400/60">All clear</span>
+                    )}
+                    <div className="flex-1" />
+                    <button
+                      onClick={() => setShowReview(false)}
+                      className="text-[#555] hover:text-[#888] transition-colors"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                  {reviewIssues.length > 0 && (
+                    <div className="px-5 pb-3 space-y-2">
+                      {reviewIssues.map((issue, i) => (
+                        <div key={i} className="rounded-lg bg-[#111] border border-[#1a1a1f] p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-[9px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded ${
+                              issue.type === "canon" ? "bg-red-500/15 text-red-400" :
+                              issue.type === "world" ? "bg-orange-500/15 text-orange-400" :
+                              issue.type === "voice" ? "bg-amber-500/15 text-amber-400" :
+                              "bg-purple-500/15 text-purple-400"
+                            }`}>
+                              {issue.type}
+                            </span>
+                            <span className="text-[10px] text-[#555]">Page {issue.page}</span>
+                          </div>
+                          {issue.quote && (
+                            <p className="text-[11px] text-[#666] italic mb-1">&ldquo;{issue.quote}&rdquo;</p>
+                          )}
+                          <p className="text-[11px] text-[#999]">{issue.issue}</p>
+                          {issue.suggestion && (
+                            <p className="text-[10px] text-cyan-400/50 mt-1">{issue.suggestion}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
