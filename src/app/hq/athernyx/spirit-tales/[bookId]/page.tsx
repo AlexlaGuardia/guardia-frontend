@@ -211,6 +211,11 @@ export default function SpiritTalesEditor() {
   const [reviewing, setReviewing] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
+  // Luna Polish state
+  const [polishing, setPolishing] = useState(false);
+  const [polished, setPolished] = useState<Record<number, string>>({});
+  const [showPolish, setShowPolish] = useState(false);
+  const [applyingPolish, setApplyingPolish] = useState(false);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pageSaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -286,6 +291,8 @@ export default function SpiritTalesEditor() {
     setShowGhost(false);
     setReviewIssues([]);
     setShowReview(false);
+    setPolished({});
+    setShowPolish(false);
     setDirty(false);
     setSaved(false);
     // Handle page mode
@@ -420,6 +427,82 @@ export default function SpiritTalesEditor() {
       }
     } catch { /* silently fail */ }
     setGeneratingSummary(false);
+  }
+
+  async function runLunaPolish(chNum: number) {
+    setPolishing(true);
+    setShowPolish(true);
+    setPolished({});
+    try {
+      const res = await fetch(
+        `${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/luna-polish`,
+        { method: "POST" }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        // Convert string keys to numbers
+        const fixes: Record<number, string> = {};
+        if (data.polished) {
+          for (const [k, v] of Object.entries(data.polished)) {
+            fixes[Number(k)] = v as string;
+          }
+        }
+        setPolished(fixes);
+      }
+    } catch { /* silently fail */ }
+    setPolishing(false);
+  }
+
+  async function applyAllPolish(chNum: number) {
+    if (Object.keys(polished).length === 0) return;
+    setApplyingPolish(true);
+    try {
+      const res = await fetch(
+        `${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/luna-polish/apply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pages: polished }),
+        }
+      );
+      if (res.ok) {
+        // Reload pages to show fixes
+        await loadPages(chNum);
+        if (activePage && polished[activePage]) {
+          setPageContent(polished[activePage]);
+        }
+        setPolished({});
+        setShowPolish(false);
+      }
+    } catch { /* silently fail */ }
+    setApplyingPolish(false);
+  }
+
+  async function applySinglePolish(chNum: number, pageNum: number) {
+    const corrected = polished[pageNum];
+    if (!corrected) return;
+    try {
+      const res = await fetch(
+        `${API}/hq/athernyx/spirit-tales/books/${bookId}/chapters/${chNum}/luna-polish/apply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pages: { [pageNum]: corrected } }),
+        }
+      );
+      if (res.ok) {
+        // Remove from polished list
+        const remaining = { ...polished };
+        delete remaining[pageNum];
+        setPolished(remaining);
+        // Update current page if viewing it
+        if (activePage === pageNum) {
+          setPageContent(corrected);
+        }
+        await loadPages(chNum);
+        if (Object.keys(remaining).length === 0) setShowPolish(false);
+      }
+    } catch { /* silently fail */ }
   }
 
   async function addChapter() {
@@ -1055,23 +1138,38 @@ export default function SpiritTalesEditor() {
                     {editorMode === "outline" && !pageMode ? "Draft from Outline" : "Ghost Writer"}
                   </button>
                   {pageMode && pages.length > 0 && (
-                    <button
-                      onClick={() => activeChapter && runLunaReview(activeChapter)}
-                      disabled={reviewing}
-                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors ${
-                        reviewIssues.length > 0
-                          ? "bg-red-500/15 text-red-400 hover:bg-red-500/25"
-                          : "bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25"
-                      } disabled:opacity-30`}
-                      title="Luna reviews pages against canon"
-                    >
-                      {reviewing ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        <Eye size={12} />
-                      )}
-                      {reviewIssues.length > 0 ? `${reviewIssues.length} issues` : "Luna QC"}
-                    </button>
+                    <>
+                      <button
+                        onClick={() => activeChapter && runLunaPolish(activeChapter)}
+                        disabled={polishing}
+                        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 disabled:opacity-30 transition-colors"
+                        title="Luna fixes typos, grammar, and voice issues"
+                      >
+                        {polishing ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <Paintbrush size={12} />
+                        )}
+                        Luna Polish
+                      </button>
+                      <button
+                        onClick={() => activeChapter && runLunaReview(activeChapter)}
+                        disabled={reviewing}
+                        className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
+                          reviewIssues.length > 0
+                            ? "bg-red-500/15 text-red-400 hover:bg-red-500/25"
+                            : "bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25"
+                        } disabled:opacity-30`}
+                        title="Luna reviews pages against canon"
+                      >
+                        {reviewing ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <Eye size={12} />
+                        )}
+                        {reviewIssues.length > 0 ? `${reviewIssues.length}` : "QC"}
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={() => setCharPanelOpen(!charPanelOpen)}
@@ -1412,6 +1510,75 @@ export default function SpiritTalesEditor() {
                           )}
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Luna Polish Results */}
+              {showPolish && (Object.keys(polished).length > 0 || polishing) && (
+                <div className="border-b border-[#1a1a1f] shrink-0 max-h-[280px] overflow-y-auto">
+                  <div className="flex items-center gap-2 px-5 py-2">
+                    <Paintbrush size={11} className="text-emerald-400/60" />
+                    <span className="text-[10px] font-semibold tracking-wider text-emerald-400/60">
+                      LUNA POLISH
+                    </span>
+                    {polishing && <Loader2 size={10} className="animate-spin text-emerald-400/40" />}
+                    {!polishing && Object.keys(polished).length === 0 && (
+                      <span className="text-[10px] text-green-400/60">No fixes needed</span>
+                    )}
+                    {!polishing && Object.keys(polished).length > 0 && (
+                      <span className="text-[10px] text-emerald-400/50">
+                        {Object.keys(polished).length} page{Object.keys(polished).length !== 1 ? "s" : ""} with fixes
+                      </span>
+                    )}
+                    <div className="flex-1" />
+                    {Object.keys(polished).length > 0 && (
+                      <button
+                        onClick={() => activeChapter && applyAllPolish(activeChapter)}
+                        disabled={applyingPolish}
+                        className="flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors font-medium disabled:opacity-30"
+                      >
+                        {applyingPolish ? <Loader2 size={10} className="animate-spin" /> : <Check size={12} />}
+                        Apply All
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowPolish(false)}
+                      className="text-[#555] hover:text-[#888] transition-colors"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                  {Object.keys(polished).length > 0 && (
+                    <div className="px-5 pb-3 space-y-2">
+                      {Object.entries(polished).sort(([a], [b]) => Number(a) - Number(b)).map(([pageNum, corrected]) => {
+                        const original = pages.find(p => p.page_number === Number(pageNum));
+                        return (
+                          <div key={pageNum} className="rounded-lg bg-[#111] border border-[#1a1a1f] p-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[10px] text-emerald-400/60 font-semibold">Page {pageNum}</span>
+                              <div className="flex-1" />
+                              <button
+                                onClick={() => activePage !== Number(pageNum) && activeChapter && loadPage(activeChapter, Number(pageNum))}
+                                className="text-[10px] text-[#555] hover:text-[#888] transition-colors"
+                              >
+                                View
+                              </button>
+                              <button
+                                onClick={() => activeChapter && applySinglePolish(activeChapter, Number(pageNum))}
+                                className="flex items-center gap-1 text-[10px] text-emerald-400 hover:text-emerald-300 transition-colors font-medium"
+                              >
+                                <Check size={10} /> Apply
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-[#777] leading-relaxed line-clamp-3"
+                               style={{ fontFamily: "var(--font-lora), Georgia, serif" }}>
+                              {corrected.slice(0, 200)}{corrected.length > 200 ? "..." : ""}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
