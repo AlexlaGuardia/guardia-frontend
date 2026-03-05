@@ -95,7 +95,6 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
   const [postsUsed, setPostsUsed] = useState(0);
   const [postsLimit, setPostsLimit] = useState(12);
   const [slotsLimit, setSlotsLimit] = useState(30);
-  const [uploading, setUploading] = useState(false);
 
   // Feed state
   const [posts, setPosts] = useState<PostedItem[]>([]);
@@ -188,19 +187,32 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
       await Promise.all([loadFactory(), loadFeed(0, false)]);
       setLoading(false);
       isInitialLoad.current = false;
+
+      // Background: refresh engagement from Meta, then reload feed
+      fetch(`${API_BASE}/lobby/posted/refresh-insights`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}` },
+      })
+        .then((r) => { if (r.ok) loadFeed(0, false); })
+        .catch(() => {});
     };
     init();
   }, [jwt, loadFactory, loadFeed]);
 
   // Adaptive polling for factory data (fast when busy, slow when idle)
+  const isBusyRef = useRef(false);
+  isBusyRef.current = pipelineItems.length > 0 || styledPending > 0;
+
   useEffect(() => {
-    const isBusy = pipelineItems.length > 0 || styledPending > 0;
-    const interval = isBusy ? 5000 : 30000;
-    const timer = setInterval(() => {
+    const tick = () => {
       if (!document.hidden) loadFactory();
-    }, interval);
-    return () => clearInterval(timer);
-  }, [pipelineItems.length, styledPending, loadFactory]);
+    };
+    // Check busy state via ref to avoid re-creating the timer on every poll
+    const id = setInterval(() => {
+      tick();
+    }, isBusyRef.current ? 5000 : 30000);
+    return () => clearInterval(id);
+  }, [loadFactory]);
 
   // ── Handlers ──
 
@@ -215,11 +227,11 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
     setTimeout(() => setHeartPopId(null), 600);
 
     try {
-      // Record reaction (non-blocking)
+      // Record reaction (non-blocking, with auth)
       if (post.asset_id) {
         fetch(`${API_BASE}/approval/review/${post.asset_id}/react`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
           body: JSON.stringify({ reaction: "loved" }),
         }).catch(() => {});
       }
@@ -229,17 +241,18 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
       });
       const data = await res.json();
       if (data.success) {
-        // Animate out, then refresh
+        // Animate out only after confirmed success, then refresh
         setAnimatingOutIds((prev) => new Set(prev).add(post.id));
-        setTimeout(() => {
+        setTimeout(async () => {
           setAnimatingOutIds(new Set());
           setActingIds(new Set());
-          loadFactory();
+          await loadFactory();
           loadFeed(0, false);
         }, 450);
         return;
       }
     } catch {}
+    // On failure: remove acting state, don't animate out
     setActingIds((prev) => { const s = new Set(prev); s.delete(post.id); return s; });
   }, [jwt, actingIds, loadFactory, loadFeed]);
 
@@ -250,7 +263,7 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
       if (post.asset_id) {
         fetch(`${API_BASE}/approval/review/${post.asset_id}/react`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
           body: JSON.stringify({ reaction: "skipped" }),
         }).catch(() => {});
       }
@@ -271,8 +284,8 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
         headers: { Authorization: `Bearer ${jwt}` },
       });
       if (res.ok) {
-        loadFactory();
-        setTimeout(() => loadFeed(0, false), 500);
+        await loadFactory();
+        await loadFeed(0, false);
       }
     } catch {}
   };
@@ -290,24 +303,17 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
     loadFactory();
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !jwt) return;
-    const totalQueue = reviewPosts.length + pipelineItems.length + styledPending;
-    if (totalQueue >= slotsLimit) return;
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API_BASE}/lobby/gallery/upload`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${jwt}` },
-        body: formData,
-      });
-      if (res.ok) loadFactory();
-    } catch {}
-    setUploading(false);
-    e.target.value = "";
+  const handleDiscardStale = async () => {
+    if (!jwt) return;
+    await Promise.all(
+      staleItems.map((item) =>
+        fetch(`${API_BASE}/lobby/gallery/${item.id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${jwt}` },
+        }).catch(() => {})
+      )
+    );
+    loadFactory();
   };
 
   const handleLoadMore = () => {
@@ -347,37 +353,6 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
 
       <div className="max-w-xl mx-auto px-4 pt-10 pb-24 xl:pb-4 space-y-5">
 
-        {/* ── Upload Card ── */}
-        <label
-          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm cursor-pointer transition-all active:scale-[0.98] hover:brightness-110 text-white"
-          style={{
-            background: "linear-gradient(135deg, #C9A227, #D4AF37)",
-            boxShadow: "0 4px 16px rgba(201,162,39,0.35)",
-          }}
-        >
-          <input
-            type="file"
-            accept=".jpg,.jpeg,.png,.webp,.heic"
-            onChange={handleUpload}
-            className="hidden"
-            disabled={uploading}
-          />
-          {uploading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-              </svg>
-              Upload Photos
-              <span className="ml-2 px-2 py-0.5 rounded-lg text-xs font-medium bg-white/20">{postsUsed}/{postsLimit}</span>
-            </>
-          )}
-        </label>
-
         {/* ── Stale Warning ── */}
         {staleItems.length > 0 && (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
@@ -393,12 +368,20 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
                 </p>
                 <p className="text-xs text-[var(--text-secondary)] mt-0.5">Something went wrong during processing.</p>
               </div>
-              <button
-                onClick={handleRetryStale}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-500 border border-amber-500/30 hover:bg-amber-500/10 transition-all"
-              >
-                Retry
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDiscardStale}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--text-secondary)] border border-[var(--border-primary)] hover:bg-[var(--bg-tertiary)] transition-all"
+                >
+                  Discard
+                </button>
+                <button
+                  onClick={handleRetryStale}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-500 border border-amber-500/30 hover:bg-amber-500/10 transition-all"
+                >
+                  Retry
+                </button>
+              </div>
             </div>
           </div>
         )}

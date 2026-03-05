@@ -347,7 +347,7 @@ function StoreScreenInner({ client, jwt }: StoreScreenProps) {
     activeData?.addons.some((a) => a.slug === slug) ?? false;
 
   const handleSubscribe = async (addon: AddonItem) => {
-    if (!jwt) return;
+    if (!jwt || togglingSlug === addon.slug || isActive(addon.slug)) return;
     setTogglingSlug(addon.slug);
 
     try {

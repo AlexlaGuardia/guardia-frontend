@@ -107,8 +107,9 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
   const [blockUrl, setBlockUrl] = useState("");
 
   const [copied, setCopied] = useState(false);
+  const [blockError, setBlockError] = useState<string | null>(null);
 
-  const resetBlockForm = () => { setBlockTitle(""); setBlockUrl(""); };
+  const resetBlockForm = () => { setBlockTitle(""); setBlockUrl(""); setBlockError(null); };
 
   const copyUrl = () => {
     if (!page) return;
@@ -176,6 +177,7 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
   const addBlock = async (type: string) => {
     if (!jwt) return;
     setSaving(true);
+    setBlockError(null);
     const body: Record<string, unknown> = { type };
     if (type === "link") {
       body.title = blockTitle || "My Link";
@@ -198,9 +200,11 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
         setAddingBlock(false);
         setNewBlockType(null);
         resetBlockForm();
+      } else {
+        setBlockError("Failed to add block. Try again.");
       }
     } catch {
-      console.error("Failed to add block");
+      setBlockError("Connection error. Check your network.");
     }
     setSaving(false);
   };
@@ -208,15 +212,18 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
   const updateBlock = async (blockId: string, updates: Record<string, unknown>) => {
     if (!jwt) return;
     setSaving(true);
+    setBlockError(null);
     try {
       const res = await faroFetch(jwt, `/blocks/${blockId}`, "PUT", updates);
       if (res.ok) {
         await loadPage();
         setEditingBlock(null);
         resetBlockForm();
+      } else {
+        setBlockError("Failed to update block. Try again.");
       }
     } catch {
-      console.error("Failed to update block");
+      setBlockError("Connection error. Check your network.");
     }
     setSaving(false);
   };
@@ -224,11 +231,16 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
   const deleteBlock = async (blockId: string) => {
     if (!jwt) return;
     setSaving(true);
+    setBlockError(null);
     try {
       const res = await faroFetch(jwt, `/blocks/${blockId}`, "DELETE");
-      if (res.ok) await loadPage();
+      if (res.ok) {
+        await loadPage();
+      } else {
+        setBlockError("Failed to delete block. Try again.");
+      }
     } catch {
-      console.error("Failed to delete block");
+      setBlockError("Connection error. Check your network.");
     }
     setSaving(false);
   };
@@ -537,6 +549,13 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                 <Plus size={12} /> Add Block
               </button>
             </div>
+
+            {/* Block error */}
+            {blockError && (
+              <div className="mb-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                {blockError}
+              </div>
+            )}
 
             {/* Type selector */}
             {addingBlock && !newBlockType && (
