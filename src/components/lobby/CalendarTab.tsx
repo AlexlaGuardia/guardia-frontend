@@ -1173,26 +1173,31 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                         <button
                           onClick={() => setSelectedPostIndex(i => Math.max(0, i - 1))}
                           disabled={selectedPostIndex === 0}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 disabled:opacity-30 glass"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 disabled:opacity-30"
+                          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
                         >
-                          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+                          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2.5" strokeLinecap="round">
                             <path d="M15 18l-6-6 6-6"/>
                           </svg>
                         </button>
                         <button
                           onClick={() => setSelectedPostIndex(i => Math.min(selectedPosts.length - 1, i + 1))}
                           disabled={selectedPostIndex === selectedPosts.length - 1}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 disabled:opacity-30 glass"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 disabled:opacity-30"
+                          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
                         >
-                          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+                          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2.5" strokeLinecap="round">
                             <path d="M9 18l6-6-6-6"/>
                           </svg>
                         </button>
                       </>
                     )}
-                    
+
                     {selectedPosts.length > 1 && (
-                      <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-sm font-medium glass text-white">
+                      <div
+                        className="absolute top-3 right-3 px-3 py-1 rounded-full text-sm font-medium"
+                        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                      >
                         {selectedPostIndex + 1} / {selectedPosts.length}
                       </div>
                     )}

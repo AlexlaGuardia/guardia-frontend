@@ -51,6 +51,7 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [platform, setPlatform] = useState("");
+  const [scheduleDate, setScheduleDate] = useState(selectedDate || "");
 
   // Submit state
   const [posting, setPosting] = useState(false);
@@ -126,7 +127,7 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
       formData.append("caption", caption);
       formData.append("hashtags", hashtags);
       formData.append("platform", platform);
-      if (selectedDate) formData.append("scheduled_for", selectedDate);
+      if (scheduleDate) formData.append("scheduled_for", scheduleDate);
 
       const res = await fetch(`${API_BASE}/post/manual`, {
         method: "POST",
@@ -167,15 +168,15 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
             </svg>
           </div>
           <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
-            {selectedDate && selectedDate > new Date().toISOString().slice(0, 10) ? "Post scheduled!" : "Post queued!"}
+            {scheduleDate && scheduleDate > new Date().toISOString().slice(0, 10) ? "Post scheduled!" : "Post queued!"}
           </h2>
           <p className="text-sm text-[var(--text-secondary)] mb-6">
             Your post to{" "}
             <span className="font-medium" style={{ color: PLATFORM_META[platform]?.color || "var(--accent)" }}>
               {PLATFORM_META[platform]?.label || platform}
             </span>{" "}
-            {selectedDate && selectedDate > new Date().toISOString().slice(0, 10)
-              ? `is scheduled for ${new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
+            {scheduleDate && scheduleDate > new Date().toISOString().slice(0, 10)
+              ? `is scheduled for ${new Date(scheduleDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`
               : "will publish within 60 seconds."}
           </p>
           <div className="flex flex-col gap-3">
@@ -236,9 +237,9 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
           )}
           <div>
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">Create Post</h2>
-            {selectedDate && (
+            {scheduleDate && (
               <p className="text-xs text-[var(--accent)]">
-                {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+                {new Date(scheduleDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
               </p>
             )}
           </div>
@@ -351,6 +352,36 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
           )}
         </div>
 
+        {/* Schedule date */}
+        <div>
+          <label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">When</label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setScheduleDate("")}
+              className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+                !scheduleDate
+                  ? "border-[var(--accent)] bg-[var(--accent-muted)] text-[var(--accent)]"
+                  : "border-[var(--border)] text-[var(--text-secondary)] bg-[var(--bg-elevated)] hover:border-[var(--text-muted)]"
+              }`}
+            >
+              Post Now
+            </button>
+            <div className="flex-1 relative">
+              <input
+                type="date"
+                value={scheduleDate}
+                min={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => setScheduleDate(e.target.value)}
+                className={`w-full px-4 py-2.5 rounded-xl text-sm font-medium border transition-all appearance-none cursor-pointer ${
+                  scheduleDate
+                    ? "border-[var(--accent)] bg-[var(--accent-muted)] text-[var(--accent)]"
+                    : "border-[var(--border)] text-[var(--text-secondary)] bg-[var(--bg-elevated)] hover:border-[var(--text-muted)]"
+                }`}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Error */}
         {error && (
           <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
@@ -382,8 +413,8 @@ export default function PostComposerScreen({ jwt, selectedDate, onBack, onComple
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
-              {selectedDate && selectedDate > new Date().toISOString().slice(0, 10)
-                ? `Schedule for ${new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+              {scheduleDate && scheduleDate > new Date().toISOString().slice(0, 10)
+                ? `Schedule for ${new Date(scheduleDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                 : `Post to ${PLATFORM_META[platform]?.label || platform || "..."}`}
             </>
           )}
