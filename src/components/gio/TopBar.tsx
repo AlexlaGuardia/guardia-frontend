@@ -15,7 +15,6 @@ const tabs: { screen: Screen; label: string; icon: "Home" | "Link2" | "PenSquare
 
 interface TopBarProps {
   clientName?: string;
-  tier?: string;
   activeScreen: Screen;
   onScreenChange: (screen: Screen) => void;
   onGioClick: () => void;

@@ -5,12 +5,11 @@ import TopBar, { Screen } from "./TopBar";
 import BottomTabs from "./BottomTabs";
 import FeedScreen from "./FeedScreen";
 import PostDetail from "./PostDetail";
-import CalendarScreen from "./CalendarScreen";
+import PostScreen from "./PostScreen";
 import StatsScreen from "./StatsScreen";
 import AccountScreen from "./AccountScreen";
 import GioChatScreen from "./GioChatScreen";
 import GioChatPanel from "./GioChatPanel";
-import PostComposerScreen from "./PostComposerScreen";
 import FaroScreen from "./FaroScreen";
 import StoreScreen from "./StoreScreen";
 import { useGioChat } from "./chat-logic";
@@ -278,10 +277,6 @@ export default function AppShell() {
   const [activeScreen, setActiveScreen] = useState<Screen>("feed");
   const [selectedPost, setSelectedPost] = useState<PostedItem | null>(null);
 
-  // Post tab: calendar/composer toggle
-  const [showComposer, setShowComposer] = useState(false);
-  const [composerDate, setComposerDate] = useState<string | null>(null);
-
   // Gio sidebar collapse (desktop/tablet)
   const [gioSidebarOpen, setGioSidebarOpen] = useState(false);
 
@@ -459,10 +454,6 @@ export default function AppShell() {
   const handleScreenChange = useCallback((screen: Screen) => {
     setActiveScreen(screen);
     setSelectedPost(null);
-    if (screen !== "post") {
-      setShowComposer(false);
-      setComposerDate(null);
-    }
   }, []);
 
   const handlePostSelect = useCallback((post: PostedItem) => {
@@ -533,31 +524,26 @@ export default function AppShell() {
   function renderScreen() {
     switch (activeScreen) {
       case "feed":
-        return <FeedScreen jwt={jwt} clientTier={client?.tier} onPostSelect={handlePostSelect} onNavigate={handleScreenChange} />;
+        return (
+          <FeedScreen
+            jwt={jwt}
+            clientTier={client?.tier}
+            onPostSelect={handlePostSelect}
+            onNavigate={handleScreenChange}
+          />
+        );
       case "faro":
         return <FaroScreen jwt={jwt} client={client} />;
       case "post":
-        if (showComposer) {
-          return (
-            <PostComposerScreen
-              jwt={jwt}
-              selectedDate={composerDate}
-              onBack={() => { setShowComposer(false); setComposerDate(null); }}
-              onComplete={() => { setShowComposer(false); setComposerDate(null); }}
-            />
-          );
-        }
         return (
-          <CalendarScreen
-            {...screenProps}
-            onCreatePost={(date) => { setComposerDate(date); setShowComposer(true); }}
-            onNewPost={() => { setComposerDate(null); setShowComposer(true); }}
+          <PostScreen
+            jwt={jwt}
+            client={client}
+            onNavigate={handleScreenChange}
           />
         );
       case "store":
         return <StoreScreen client={client} jwt={jwt} />;
-      case "calendar":
-        return <CalendarScreen {...screenProps} />;
       case "stats":
         return <StatsScreen {...screenProps} />;
       case "account":
@@ -580,7 +566,6 @@ export default function AppShell() {
       {activeScreen !== "gio-chat" && (
         <TopBar
           clientName={client?.business_name}
-          tier={client?.tier}
           activeScreen={activeScreen}
           onScreenChange={handleScreenChange}
           onGioClick={handleGioClick}

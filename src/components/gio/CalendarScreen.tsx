@@ -20,9 +20,11 @@ interface CalendarScreenProps extends ScreenProps {
 
 export default function CalendarScreen({ client, jwt, onMessage, onCreatePost, onNewPost }: CalendarScreenProps) {
   const [stats, setStats] = useState<MonthStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   const loadStats = useCallback(async () => {
-    if (!jwt || !client) return;
+    if (!jwt || !client) { setStatsLoading(false); return; }
+    setStatsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/engagement/analytics/${client.id}?period=30d`, {
         headers: { Authorization: `Bearer ${jwt}` },
@@ -39,6 +41,7 @@ export default function CalendarScreen({ client, jwt, onMessage, onCreatePost, o
     } catch {
       // silent — stats are non-critical
     }
+    setStatsLoading(false);
   }, [jwt, client]);
 
   useEffect(() => {
@@ -61,7 +64,22 @@ export default function CalendarScreen({ client, jwt, onMessage, onCreatePost, o
       />
 
       {/* Month Stats */}
-      {stats && (stats.posts > 0 || stats.likes > 0) && (
+      {statsLoading && (
+        <div className="border-t border-[var(--border-subtle)]">
+          <div className="px-4 py-4 max-w-3xl mx-auto">
+            <div className="h-3 w-24 bg-[var(--bg-elevated)] rounded animate-pulse mb-3" />
+            <div className="grid grid-cols-4 gap-2">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="rounded-xl p-3" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+                  <div className="h-5 w-8 mx-auto bg-[var(--bg-surface)] rounded animate-pulse mb-1" />
+                  <div className="h-2 w-12 mx-auto bg-[var(--bg-surface)] rounded animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {!statsLoading && stats && (stats.posts > 0 || stats.likes > 0) && (
         <div className="border-t border-[var(--border-subtle)]">
           <div className="px-4 py-4 max-w-3xl mx-auto">
             <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">
