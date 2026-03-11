@@ -137,23 +137,29 @@ interface WidgetProps {
 function Widget({ title, color, href, loading, error, alert, children }: WidgetProps) {
   return (
     <Link href={href}>
-      <div className="group relative bg-[#0a0a0b] border border-[#1a1a1f] rounded-xl p-5 transition-all duration-200 hover:border-[#2a2a2f] cursor-pointer min-h-[140px]">
+      <div className="group relative bg-[#0a0a0b] border border-[#1a1a1f] rounded-xl p-5 transition-all duration-200 hover:border-[#2a2a2f] hover:scale-[1.02] cursor-pointer min-h-[140px]">
+        <div
+          className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+          style={{ boxShadow: `0 4px 30px ${color}25, inset 0 0 0 1px ${color}15` }}
+        />
         {alert && <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: color }} />}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+        <div className="flex items-center gap-2 mb-4 relative z-10">
+          <div className="w-2 h-2 rounded-full transition-transform duration-200 group-hover:scale-150" style={{ backgroundColor: color }} />
           <h3 className="text-xs font-medium tracking-wider uppercase" style={{ color }}>{title}</h3>
         </div>
-        {loading ? (
-          <div className="space-y-2">
-            <div className="h-4 bg-[#1a1a1f] rounded animate-pulse w-1/2" />
-            <div className="h-3 bg-[#1a1a1f] rounded animate-pulse w-3/4" />
-          </div>
-        ) : error ? (
-          <div className="text-xs">
-            <p className="text-red-400/60 mb-1">Error loading data</p>
-            <p className="text-[#444]">{error}</p>
-          </div>
-        ) : children}
+        <div className="relative z-10">
+          {loading ? (
+            <div className="space-y-2">
+              <div className="h-4 bg-[#1a1a1f] rounded animate-pulse w-1/2" />
+              <div className="h-3 bg-[#1a1a1f] rounded animate-pulse w-3/4" />
+            </div>
+          ) : error ? (
+            <div className="text-xs">
+              <p className="text-red-400/60 mb-1">Error loading data</p>
+              <p className="text-[#444]">{error}</p>
+            </div>
+          ) : children}
+        </div>
       </div>
     </Link>
   );
@@ -588,18 +594,24 @@ function HQPageContent() {
 
   return (
     <RefreshContext.Provider value={refreshKey}>
-    <div className="min-h-screen bg-[#171513] text-[#e8e8e8]">
+    <div className="text-[#e8e8e8]">
       <main className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-end gap-3 mb-4">
-          <span className="text-[#333] text-[10px] font-mono">{ago}</span>
-          <button
-            onClick={doRefresh}
-            className="text-[#444] hover:text-[#888] text-[10px] font-mono tracking-wider transition-colors"
-          >
-            REFRESH
-          </button>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500" />
+            <h1 className="text-[#555] text-xs font-semibold tracking-[0.2em] uppercase">Dashboard</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-[#333] text-[10px] font-mono">{ago}</span>
+            <button
+              onClick={doRefresh}
+              className="text-[#444] hover:text-[#888] text-[10px] font-mono tracking-wider transition-colors"
+            >
+              REFRESH
+            </button>
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
           <ParadiseWidget />
           <FactoryWidget />
           <CortexWidget />

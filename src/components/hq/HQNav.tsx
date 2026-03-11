@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { label: "Atlas", href: "/hq/atlas", color: "#06b6d4" },
   { label: "Lab", href: "/hq/lab", color: "#14b8a6" },
   { label: "Athernyx", href: "/hq/athernyx", color: "#a855f7" },
+  { label: "Console", href: "/hq/console", color: "#ec4899" },
   { label: "Luna", href: "/hq/luna", color: "#a78bfa" },
 ];
 
