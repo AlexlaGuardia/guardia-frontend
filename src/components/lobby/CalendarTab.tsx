@@ -25,6 +25,10 @@ interface CalendarPost {
   thumbnail_url?: string;
   preview_url?: string;
   asset_id?: number | null;
+  predicted_score?: number;
+  likes?: number;
+  comments_count?: number;
+  shares?: number;
 }
 
 interface CalendarTabProps {
@@ -1243,6 +1247,34 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
                         </span>
                       </div>
                       
+                      {/* Predicted score badge (pre-publish) */}
+                      {(() => {
+                        const p = selectedPosts[selectedPostIndex];
+                        if (!p || !p.predicted_score || p.predicted_score <= 0 || p.status === 'posted') return null;
+                        const s = p.predicted_score;
+                        return (
+                          <span
+                            className="text-xs px-2.5 py-1 rounded-full font-medium"
+                            style={{
+                              background: s >= 70 ? 'rgba(34,197,94,0.15)' : s >= 40 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                              color: s >= 70 ? '#22c55e' : s >= 40 ? '#f59e0b' : '#ef4444',
+                            }}
+                          >
+                            Score: {s}
+                          </span>
+                        );
+                      })()}
+                      {/* Engagement metrics (post-publish) */}
+                      {(() => {
+                        const p = selectedPosts[selectedPostIndex];
+                        if (!p || p.status !== 'posted' || (!p.likes && !p.comments_count)) return null;
+                        return (
+                          <span className="text-xs text-[var(--text-muted)]">
+                            {p.likes || 0} likes · {p.comments_count || 0} comments · {p.shares || 0} shares
+                          </span>
+                        );
+                      })()}
+
                       {/* Edit & Delete buttons - only for non-posted content */}
                       {selectedPosts[selectedPostIndex]?.status !== 'posted' && (
                         <div className="flex items-center gap-2">
