@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ClientContext } from "./LobbyShell";
+import WeekView from "./WeekView";
 
 /**
  * GUARDIA CALENDAR — Factory Floor Edition v3
@@ -293,11 +294,21 @@ interface SlotModalProps {
   onClose: () => void;
   onCreated: () => void;
   onMessage: (msg: string) => void;
+  presetHour?: number;
 }
 
-function SlotCreationModal({ day, month, year, jwt, onClose, onCreated, onMessage }: SlotModalProps) {
-  const [hour, setHour] = useState(10);
-  const [ampm, setAmpm] = useState<"AM" | "PM">("AM");
+function SlotCreationModal({ day, month, year, jwt, onClose, onCreated, onMessage, presetHour }: SlotModalProps) {
+  const [hour, setHour] = useState(() => {
+    if (presetHour !== undefined) {
+      const h = presetHour % 12 || 12;
+      return h;
+    }
+    return 10;
+  });
+  const [ampm, setAmpm] = useState<"AM" | "PM">(() => {
+    if (presetHour !== undefined) return presetHour >= 12 ? "PM" : "AM";
+    return "AM";
+  });
   const [platform, setPlatform] = useState("facebook");
   const [caption, setCaption] = useState("");
   const [loading, setLoading] = useState(false);
@@ -495,10 +506,20 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedPosts, setSelectedPosts] = useState<CalendarPost[]>([]);
   const [selectedPostIndex, setSelectedPostIndex] = useState(0);
-  
+
+  // View mode
+  const [viewMode, setViewMode] = useState<"month" | "week">("month");
+  const [weekStart, setWeekStart] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - d.getDay()); // Start of current week (Sunday)
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+
   // Slot creation
   const [showSlotModal, setShowSlotModal] = useState(false);
   const [slotDay, setSlotDay] = useState<number | null>(null);
+  const [slotHour, setSlotHour] = useState<number | null>(null);
   
   // Auto-schedule state
   const [autoSchedule, setAutoSchedule] = useState(false);
@@ -779,9 +800,60 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
   const getDateStr = (day: number) =>
     `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-  const openSlotModal = (day: number) => {
+  const openSlotModal = (day: number, presetHour?: number) => {
     setSlotDay(day);
+    setSlotHour(presetHour ?? null);
     setShowSlotModal(true);
+  };
+
+  const prevWeek = () => {
+    setWeekStart(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() - 7);
+      return d;
+    });
+  };
+
+  const nextWeek = () => {
+    setWeekStart(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + 7);
+      return d;
+    });
+  };
+
+  const weekEndDate = useMemo(() => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + 6);
+    return d;
+  }, [weekStart]);
+
+  const weekLabel = useMemo(() => {
+    const s = weekStart;
+    const e = weekEndDate;
+    const sMonth = s.toLocaleString("en-US", { month: "short" });
+    const eMonth = e.toLocaleString("en-US", { month: "short" });
+    if (s.getMonth() === e.getMonth()) {
+      return `${sMonth} ${s.getDate()}–${e.getDate()}, ${s.getFullYear()}`;
+    }
+    return `${sMonth} ${s.getDate()} – ${eMonth} ${e.getDate()}`;
+  }, [weekStart, weekEndDate]);
+
+  const handleWeekSlotClick = (day: number, month: number, year: number, hour: number) => {
+    // Use the month/year from the clicked day (may differ from currentMonth)
+    setCurrentMonth(month);
+    setCurrentYear(year);
+    openSlotModal(day, hour);
+  };
+
+  const handleWeekPostClick = (post: CalendarPost) => {
+    const dateStr = post.scheduled_for || post.posted_at || "";
+    const d = new Date(dateStr);
+    setCurrentMonth(d.getMonth());
+    setCurrentYear(d.getFullYear());
+    setSelectedDay(d.getDate());
+    setSelectedPosts([post]);
+    setSelectedPostIndex(0);
   };
 
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
@@ -832,24 +904,58 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
       {/* Header */}
       <div className="px-4 pt-2 pb-3">
         <div className="flex items-center justify-between">
-          <button 
-            onClick={prevMonth}
+          <button
+            onClick={viewMode === "month" ? prevMonth : prevWeek}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-95 bg-[var(--bg-elevated)] border border-[var(--border)]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
-          
-          <div className="text-center">
-            <span className="text-lg font-semibold text-[var(--text-primary)] tracking-wide">
-              {MONTHS[currentMonth]}
-            </span>
-            <span className="text-sm text-[var(--text-muted)] ml-2">{currentYear}</span>
+
+          <div className="flex items-center gap-3">
+            <div className="text-center">
+              {viewMode === "month" ? (
+                <>
+                  <span className="text-lg font-semibold text-[var(--text-primary)] tracking-wide">
+                    {MONTHS[currentMonth]}
+                  </span>
+                  <span className="text-sm text-[var(--text-muted)] ml-2">{currentYear}</span>
+                </>
+              ) : (
+                <span className="text-sm font-semibold text-[var(--text-primary)] tracking-wide">
+                  {weekLabel}
+                </span>
+              )}
+            </div>
+
+            {/* View toggle */}
+            <div className="flex rounded-lg overflow-hidden border border-[var(--border)]">
+              <button
+                onClick={() => setViewMode("month")}
+                className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider transition-all"
+                style={{
+                  background: viewMode === "month" ? "var(--accent)" : "var(--bg-elevated)",
+                  color: viewMode === "month" ? "var(--bg-base)" : "var(--text-muted)",
+                }}
+              >
+                Month
+              </button>
+              <button
+                onClick={() => setViewMode("week")}
+                className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider transition-all"
+                style={{
+                  background: viewMode === "week" ? "var(--accent)" : "var(--bg-elevated)",
+                  color: viewMode === "week" ? "var(--bg-base)" : "var(--text-muted)",
+                }}
+              >
+                Week
+              </button>
+            </div>
           </div>
-          
-          <button 
-            onClick={nextMonth}
+
+          <button
+            onClick={viewMode === "month" ? nextMonth : nextWeek}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-95 bg-[var(--bg-elevated)] border border-[var(--border)]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
@@ -859,6 +965,17 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
         </div>
       </div>
 
+      {viewMode === "week" ? (
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <WeekView
+            weekStart={weekStart}
+            posts={posts}
+            onSlotClick={handleWeekSlotClick}
+            onPostClick={handleWeekPostClick}
+          />
+        </div>
+      ) : (
+      <>
       {/* Day headers */}
       <div className="overflow-x-auto px-3">
         <div className="grid grid-cols-7 min-w-[320px]">
@@ -1027,6 +1144,8 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
           </div>
         ))}
       </div>
+      </>
+      )}
 
       {/* Day Modal */}
       {selectedDay !== null && (
@@ -1310,9 +1429,11 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
           month={currentMonth}
           year={currentYear}
           jwt={jwt}
+          presetHour={slotHour ?? undefined}
           onClose={() => {
             setShowSlotModal(false);
             setSlotDay(null);
+            setSlotHour(null);
           }}
           onCreated={loadCalendar}
           onMessage={onMessage}
