@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, ReactNode } from "react";
+import { useEffect, useRef, useState, ReactNode } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.guardiacontent.com";
 
@@ -84,4 +84,50 @@ export default function FaroPageClient({ slug, blockId, type, children }: Props)
   }, [slug, blockId, type]);
 
   return <div ref={ref}>{children}</div>;
+}
+
+interface LinkedPost {
+  id: number;
+  platform: string;
+  caption: string | null;
+  post_url: string | null;
+  posted_at: string | null;
+  image_url: string | null;
+}
+
+export function FaroLinkedPosts({ slug }: { slug: string }) {
+  const [posts, setPosts] = useState<LinkedPost[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/faro/public/${slug}/posts`)
+      .then(r => r.ok ? r.json() : { posts: [] })
+      .then(d => setPosts(d.posts || []))
+      .catch(() => {});
+  }, [slug]);
+
+  if (posts.length === 0) return null;
+
+  return (
+    <div className="faro-linked-posts">
+      <div className="faro-linked-posts-label">Recent Posts</div>
+      <div className="faro-linked-posts-grid">
+        {posts.map(post => (
+          <a
+            key={post.id}
+            href={post.post_url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="faro-linked-post"
+          >
+            {post.image_url ? (
+              <img src={post.image_url} alt="" className="faro-linked-post-img" />
+            ) : (
+              <div className="faro-linked-post-placeholder" />
+            )}
+            <div className="faro-linked-post-platform">{post.platform}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
 }

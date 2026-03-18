@@ -646,6 +646,32 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
             </div>
           </section>
 
+          {/* Linked Posts */}
+          <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">Linked Posts</h3>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Show your latest posted content on your Faro page</p>
+              </div>
+              <button
+                onClick={() => {
+                  const current = (() => { try { return JSON.parse(page.settings || "{}"); } catch { return {}; } })();
+                  const toggled = !current.show_linked_posts;
+                  updatePage({ settings: JSON.stringify({ ...current, show_linked_posts: toggled }) });
+                }}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  (() => { try { return JSON.parse(page.settings || "{}").show_linked_posts; } catch { return false; } })()
+                    ? "bg-[var(--accent)]" : "bg-[var(--border)]"
+                }`}
+              >
+                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  (() => { try { return JSON.parse(page.settings || "{}").show_linked_posts; } catch { return false; } })()
+                    ? "translate-x-[22px]" : "translate-x-0.5"
+                }`} />
+              </button>
+            </div>
+          </section>
+
           {/* Blocks */}
           <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">

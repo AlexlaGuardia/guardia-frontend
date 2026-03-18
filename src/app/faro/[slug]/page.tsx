@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import "../themes.css";
-import FaroPageClient from "./client";
+import FaroPageClient, { FaroLinkedPosts } from "./client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.guardiacontent.com";
 
@@ -308,6 +308,15 @@ export default async function FaroPublicPage({
               }
             })}
           </div>
+
+          {/* Linked Posts */}
+          {(() => {
+            try {
+              const s = page.settings ? JSON.parse(page.settings) : {};
+              if (s.show_linked_posts) return <FaroLinkedPosts slug={slug} />;
+            } catch { /* */ }
+            return null;
+          })()}
 
           {/* Footer */}
           <div className="faro-footer">
