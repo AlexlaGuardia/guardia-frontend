@@ -497,7 +497,7 @@ function SlotCreationModal({ day, month, year, jwt, onClose, onCreated, onMessag
 // Main Component
 // ─────────────────────────────────────────────────────────────
 
-export default function CalendarTab({ client: _client, jwt, onMessage, onDateSelect, onCreatePost }: CalendarTabProps) {
+export default function CalendarTab({ client, jwt, onMessage, onDateSelect, onCreatePost }: CalendarTabProps) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -970,6 +970,8 @@ export default function CalendarTab({ client: _client, jwt, onMessage, onDateSel
           <WeekView
             weekStart={weekStart}
             posts={posts}
+            clientId={client?.id}
+            jwt={jwt}
             onSlotClick={handleWeekSlotClick}
             onPostClick={handleWeekPostClick}
           />

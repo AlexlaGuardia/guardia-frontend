@@ -1,15 +1,26 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 /**
  * GUARDIA CALENDAR — Week View
  *
  * Hourly timeline showing 7 days × hours (6 AM–10 PM).
  * Posts placed in their scheduled time slots.
+ * Chronos suggestions highlighted with golden glow.
  * Click empty cells to create slots.
  * Desert Mirage design tokens.
  */
+
+const API_BASE = "https://api.guardiacontent.com";
+
+interface ChronosSuggestions {
+  best_hours: { hour: number; score: number }[];
+  best_days: { day: string; score: number }[];
+  pref_times: string[];
+  pref_days: string[];
+  has_data: boolean;
+}
 
 interface CalendarPost {
   id: number;
@@ -27,6 +38,8 @@ interface CalendarPost {
 interface WeekViewProps {
   weekStart: Date;
   posts: CalendarPost[];
+  clientId?: string;
+  jwt?: string | null;
   onSlotClick: (day: number, month: number, year: number, hour: number) => void;
   onPostClick: (post: CalendarPost) => void;
 }
@@ -76,8 +89,44 @@ const STATUS_COLORS: Record<string, { bg: string; border: string; text: string }
   failed: { bg: "rgba(239,68,68,0.15)", border: "rgba(239,68,68,0.3)", text: "#ef4444" },
 };
 
-export default function WeekView({ weekStart, posts, onSlotClick, onPostClick }: WeekViewProps) {
+export default function WeekView({ weekStart, posts, clientId, jwt, onSlotClick, onPostClick }: WeekViewProps) {
   const weekDays = useMemo(() => getWeekDays(weekStart), [weekStart]);
+  const [chronos, setChronos] = useState<ChronosSuggestions | null>(null);
+
+  // Fetch Chronos suggestions
+  useEffect(() => {
+    if (!clientId) return;
+    const fetchChronos = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/clients/${clientId}/chronos-suggestions`, {
+          headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+        });
+        if (res.ok) setChronos(await res.json());
+      } catch { /* silent */ }
+    };
+    fetchChronos();
+  }, [clientId, jwt]);
+
+  // Build set of recommended hours for quick lookup
+  const recommendedHours = useMemo(() => {
+    const set = new Set<number>();
+    if (chronos) {
+      for (const h of chronos.best_hours) set.add(h.hour);
+      for (const t of chronos.pref_times) {
+        try { set.add(parseInt(t.split(":")[0])); } catch { /* */ }
+      }
+    }
+    return set;
+  }, [chronos]);
+
+  const recommendedDays = useMemo(() => {
+    const set = new Set<string>();
+    if (chronos) {
+      for (const d of chronos.best_days) set.add(d.day);
+      for (const d of chronos.pref_days) set.add(d.toLowerCase());
+    }
+    return set;
+  }, [chronos]);
 
   // Build a map: "YYYY-MM-DD-HH" → CalendarPost[]
   const postMap = useMemo(() => {
@@ -141,20 +190,42 @@ export default function WeekView({ weekStart, posts, onSlotClick, onPostClick }:
                 const cellPosts = postMap.get(key) || [];
                 const today = isToday(day);
                 const past = isPast(day, hour);
+                const dayName = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"][day.getDay()];
+                const isRecommended = !past && cellPosts.length === 0 &&
+                  (recommendedHours.has(hour) || recommendedDays.has(dayName));
+                const isStrongRec = !past && cellPosts.length === 0 &&
+                  recommendedHours.has(hour) && recommendedDays.has(dayName);
 
                 return (
                   <div
                     key={di}
-                    className={`flex-1 min-w-0 border-l border-[var(--border)]/50 p-0.5 transition-colors ${
+                    className={`flex-1 min-w-0 border-l border-[var(--border)]/50 p-0.5 transition-colors relative ${
                       cellPosts.length === 0 && !past ? "cursor-pointer hover:bg-[var(--accent-muted)]/30" : ""
                     }`}
-                    style={today ? { background: "rgba(232,160,96,0.03)" } : undefined}
+                    style={{
+                      background: isStrongRec
+                        ? "rgba(232,160,96,0.08)"
+                        : isRecommended
+                        ? "rgba(232,160,96,0.04)"
+                        : today
+                        ? "rgba(232,160,96,0.03)"
+                        : undefined,
+                    }}
                     onClick={() => {
                       if (cellPosts.length === 0 && !past) {
                         onSlotClick(day.getDate(), day.getMonth(), day.getFullYear(), hour);
                       }
                     }}
                   >
+                    {/* Chronos recommendation indicator */}
+                    {isStrongRec && (
+                      <div className="absolute top-0.5 right-0.5" title="Chronos recommends this time">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                            fill="#e8a060" opacity="0.6" />
+                        </svg>
+                      </div>
+                    )}
                     {cellPosts.map((post) => {
                       const colors = STATUS_COLORS[post.status] || STATUS_COLORS.draft;
                       const isSlot = post.status === "draft" && !post.asset_id;
