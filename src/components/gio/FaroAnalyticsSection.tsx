@@ -38,10 +38,23 @@ interface Referrer {
   visits: number;
 }
 
+interface Country {
+  country: string;
+  visits: number;
+}
+
+interface PreviousPeriod {
+  views: number;
+  clicks: number;
+  emails: number;
+}
+
 interface FaroAnalyticsData {
   summary: FaroSummary;
   top_links: TopLink[];
   referrers: Referrer[];
+  countries: Country[];
+  previous: PreviousPeriod;
 }
 
 interface FaroAnalyticsSectionProps {
@@ -128,9 +141,9 @@ export default function FaroAnalyticsSection({ jwt, faroSlug }: FaroAnalyticsSec
         <>
           {/* KPI row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <KPICard label="Views" value={data.summary.views} color="#8B5CF6" icon="eye" />
-            <KPICard label="Clicks" value={data.summary.clicks} color="#3B82F6" icon="pointer" />
-            <KPICard label="Emails" value={data.summary.emails} color="#22C55E" icon="mail" />
+            <KPICard label="Views" value={data.summary.views} prev={data.previous?.views} color="#8B5CF6" icon="eye" />
+            <KPICard label="Clicks" value={data.summary.clicks} prev={data.previous?.clicks} color="#3B82F6" icon="pointer" />
+            <KPICard label="Emails" value={data.summary.emails} prev={data.previous?.emails} color="#22C55E" icon="mail" />
             <KPICard label="CTR" value={data.summary.ctr} color="var(--accent)" icon="percent" suffix="%" />
           </div>
 
@@ -142,6 +155,9 @@ export default function FaroAnalyticsSection({ jwt, faroSlug }: FaroAnalyticsSec
 
           {/* Referrers */}
           {data.referrers.length > 0 && <ReferrersSection referrers={data.referrers} />}
+
+          {/* Countries */}
+          {data.countries && data.countries.length > 0 && <CountriesSection countries={data.countries} />}
         </>
       ) : null}
     </div>
@@ -176,9 +192,10 @@ function PeriodPicker({ period, onChange }: { period: Period; onChange: (p: Peri
 }
 
 // ── KPI card ──
-function KPICard({ label, value, color, icon, suffix }: {
+function KPICard({ label, value, prev, color, icon, suffix }: {
   label: string;
   value: number;
+  prev?: number;
   color: string;
   icon: string;
   suffix?: string;
@@ -188,6 +205,10 @@ function KPICard({ label, value, color, icon, suffix }: {
     if (n >= 10_000) return `${(n / 1_000).toFixed(1)}K`;
     return n.toLocaleString();
   };
+
+  const trend = prev !== undefined && prev > 0
+    ? Math.round(((value - prev) / prev) * 100)
+    : null;
 
   const iconPaths: Record<string, string> = {
     eye: "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z",
@@ -204,6 +225,13 @@ function KPICard({ label, value, color, icon, suffix }: {
             <path strokeLinecap="round" strokeLinejoin="round" d={iconPaths[icon] || iconPaths.eye} />
           </svg>
         </div>
+        {trend !== null && trend !== 0 && (
+          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
+            trend > 0 ? "text-emerald-400 bg-emerald-500/10" : "text-red-400 bg-red-500/10"
+          }`}>
+            {trend > 0 ? "+" : ""}{trend}%
+          </span>
+        )}
       </div>
       <p className="text-2xl font-semibold text-[var(--text-primary)]">
         {formatNum(value)}{suffix || ""}
@@ -346,6 +374,38 @@ function ReferrersSection({ referrers }: { referrers: Referrer[] }) {
                 {formatSource(r.source)}
               </span>
               <span className="text-xs text-[var(--text-muted)] flex-shrink-0">{r.visits}</span>
+              <span className="text-[10px] text-[var(--text-muted)] w-8 text-right flex-shrink-0">{pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Countries ──
+const COUNTRY_NAMES: Record<string, string> = {
+  US: "United States", GB: "United Kingdom", CA: "Canada", AU: "Australia",
+  DE: "Germany", FR: "France", IN: "India", BR: "Brazil", JP: "Japan",
+  MX: "Mexico", ES: "Spain", IT: "Italy", NL: "Netherlands", SE: "Sweden",
+  KR: "South Korea", AR: "Argentina", CO: "Colombia", PH: "Philippines",
+  NG: "Nigeria", ZA: "South Africa", HN: "Honduras", PR: "Puerto Rico",
+};
+
+function CountriesSection({ countries }: { countries: Country[] }) {
+  const total = countries.reduce((sum, c) => sum + c.visits, 0);
+
+  return (
+    <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+      <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Visitors by Country</h3>
+      <div className="space-y-2">
+        {countries.map((c, i) => {
+          const pct = total > 0 ? Math.round((c.visits / total) * 100) : 0;
+          const name = COUNTRY_NAMES[c.country] || c.country;
+          return (
+            <div key={i} className="flex items-center gap-3">
+              <span className="text-sm text-[var(--text-primary)] flex-1 min-w-0 truncate">{name}</span>
+              <span className="text-xs text-[var(--text-muted)] flex-shrink-0">{c.visits}</span>
               <span className="text-[10px] text-[var(--text-muted)] w-8 text-right flex-shrink-0">{pct}%</span>
             </div>
           );
