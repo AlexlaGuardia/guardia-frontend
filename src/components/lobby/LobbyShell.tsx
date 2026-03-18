@@ -60,6 +60,9 @@ export default function LobbyShell() {
   const [jwt, setJwt] = useState<string | null>(null);
   const [client, setClient] = useState<ClientContext | null>(null);
 
+  // Add-ons
+  const [activeAddons, setActiveAddons] = useState<Set<string>>(new Set());
+
   // Mode state
   const [tabletOpen, setTabletOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabletTab>("calendar");
@@ -137,6 +140,13 @@ export default function LobbyShell() {
         setClient(data);
         const greeting = getGreeting(data);
         setMessages([{ role: "assistant", content: greeting }]);
+      }
+      const addonsRes = await fetch(`${API_BASE}/addons/active`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (addonsRes.ok) {
+        const addonsData = await addonsRes.json();
+        setActiveAddons(new Set(addonsData.addons.map((a: { slug: string }) => a.slug)));
       }
     } catch {
       console.error("Failed to load context");
@@ -263,6 +273,7 @@ export default function LobbyShell() {
             setMessages((m) => [...m, { role: "assistant", content: msg }]);
           }}
           selectedPostId={selectedPostId}
+          activeAddons={activeAddons}
         />
       )}
 

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { GioClient } from "./types";
 import FaroDomainSection from "./FaroDomainSection";
+import AddonGate from "@/components/ui/AddonGate";
 
 const API_BASE = "https://api.guardiacontent.com";
 
@@ -85,6 +86,8 @@ async function faroFetch(jwt: string, path: string, method = "GET", body?: unkno
 interface FaroScreenProps {
   jwt: string | null;
   client: GioClient | null;
+  activeAddons?: Set<string>;
+  onNavigateToStore?: () => void;
 }
 
 function FaroBroadcastSection({ jwt }: { jwt: string | null }) {
@@ -677,7 +680,7 @@ function DigitalProductsSection({ jwt }: { jwt: string | null }) {
   );
 }
 
-export default function FaroScreen({ jwt, client }: FaroScreenProps) {
+export default function FaroScreen({ jwt, client, activeAddons, onNavigateToStore }: FaroScreenProps) {
   const [page, setPage] = useState<FaroPage | null>(null);
   const [blocks, setBlocks] = useState<FaroBlock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1096,7 +1099,9 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
           </section>
 
           {/* Custom Domain */}
-          <FaroDomainSection jwt={jwt} />
+          <AddonGate addonSlug="faro_domain" addonName="Custom Faro Domain" activeAddons={activeAddons} onNavigateToStore={onNavigateToStore}>
+            <FaroDomainSection jwt={jwt} />
+          </AddonGate>
 
           {/* QR Code */}
           <FaroQRSection jwt={jwt} slug={page.slug} />
@@ -1228,10 +1233,14 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
           </section>
 
           {/* Email Broadcast */}
-          <FaroBroadcastSection jwt={jwt} />
+          <AddonGate addonSlug="email_marketing" addonName="Email Marketing" activeAddons={activeAddons} onNavigateToStore={onNavigateToStore}>
+            <FaroBroadcastSection jwt={jwt} />
+          </AddonGate>
 
           {/* Drip Sequence */}
-          <DripSequenceSection jwt={jwt} />
+          <AddonGate addonSlug="email_marketing" addonName="Email Marketing" activeAddons={activeAddons} onNavigateToStore={onNavigateToStore}>
+            <DripSequenceSection jwt={jwt} />
+          </AddonGate>
 
           {/* Digital Products */}
           <DigitalProductsSection jwt={jwt} />

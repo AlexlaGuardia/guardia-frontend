@@ -29,4 +29,6 @@ export interface ScreenProps {
   jwt: string | null;
   onMessage?: (msg: string) => void;
   onPostSelect?: (postId: number) => void;
+  activeAddons?: Set<string>;
+  onNavigateToStore?: () => void;
 }

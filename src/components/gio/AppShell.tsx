@@ -273,6 +273,9 @@ export default function AppShell() {
   const [jwt, setJwt] = useState<string | null>(null);
   const [client, setClient] = useState<GioClient | null>(null);
 
+  // Add-ons
+  const [activeAddons, setActiveAddons] = useState<Set<string>>(new Set());
+
   // Screen routing
   const [activeScreen, setActiveScreen] = useState<Screen>("feed");
   const [selectedPost, setSelectedPost] = useState<PostedItem | null>(null);
@@ -324,6 +327,13 @@ export default function AppShell() {
         setClient(data);
         const greeting = getGreeting(data);
         gioChat.setMessages([{ role: "assistant", content: greeting }]);
+      }
+      const addonsRes = await fetch(`${API_BASE}/addons/active`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (addonsRes.ok) {
+        const addonsData = await addonsRes.json();
+        setActiveAddons(new Set(addonsData.addons.map((a: { slug: string }) => a.slug)));
       }
     } catch {
       console.error("Failed to load context");
@@ -533,7 +543,7 @@ export default function AppShell() {
           />
         );
       case "faro":
-        return <FaroScreen jwt={jwt} client={client} />;
+        return <FaroScreen jwt={jwt} client={client} activeAddons={activeAddons} onNavigateToStore={() => setActiveScreen("store")} />;
       case "post":
         return (
           <PostScreen
@@ -545,7 +555,7 @@ export default function AppShell() {
       case "store":
         return <StoreScreen client={client} jwt={jwt} />;
       case "stats":
-        return <StatsScreen {...screenProps} />;
+        return <StatsScreen {...screenProps} activeAddons={activeAddons} onNavigateToStore={() => setActiveScreen("store")} />;
       case "account":
         return <AccountScreen jwt={jwt} onLogout={handleLogout} onNavigateToStore={() => setActiveScreen("store")} />;
       case "post-detail":

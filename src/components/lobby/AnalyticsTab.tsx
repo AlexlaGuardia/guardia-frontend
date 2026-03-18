@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Heart, MessageCircle, Share2, FileText, TrendingUp, TrendingDown, Clock, Sparkles, ExternalLink } from "lucide-react";
 import { ClientContext } from "./LobbyShell";
+import AddonGate from "@/components/ui/AddonGate";
 
 /**
  * GUARDIA ANALYTICS — Full Dashboard
@@ -82,13 +83,15 @@ interface AnalyticsTabProps {
   client: ClientContext | null;
   jwt: string | null;
   selectedPostId?: number | null;
+  activeAddons?: Set<string>;
+  onNavigateToStore?: () => void;
 }
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
-export default function AnalyticsTab({ client, jwt, selectedPostId }: AnalyticsTabProps) {
+export default function AnalyticsTab({ client, jwt, selectedPostId, activeAddons, onNavigateToStore }: AnalyticsTabProps) {
   const [period, setPeriod] = useState<Period>("30d");
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,6 +126,7 @@ export default function AnalyticsTab({ client, jwt, selectedPostId }: AnalyticsT
   const hasData = data && data.kpi.posts_count.current > 0;
 
   return (
+    <AddonGate addonSlug="analytics_pro" addonName="Analytics Pro" activeAddons={activeAddons} onNavigateToStore={onNavigateToStore}>
     <div className="h-full overflow-y-auto bg-[var(--bg-base)]">
       <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6">
 
@@ -183,6 +187,7 @@ export default function AnalyticsTab({ client, jwt, selectedPostId }: AnalyticsT
         <div className="h-4" />
       </div>
     </div>
+    </AddonGate>
   );
 }
 

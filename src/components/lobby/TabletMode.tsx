@@ -21,6 +21,7 @@ interface TabletModeProps {
   onClose: () => void;
   onMessage: (msg: string) => void;
   selectedPostId?: number | null;
+  activeAddons?: Set<string>;
 }
 
 export default function TabletMode({
@@ -31,6 +32,7 @@ export default function TabletMode({
   onClose,
   onMessage,
   selectedPostId,
+  activeAddons,
 }: TabletModeProps) {
   // Calculate badge counts from client context
   const galleryBadge = (client?.pending_uploads || 0) + (client?.styled_ready || 0);
@@ -210,7 +212,7 @@ export default function TabletMode({
             </div>
           )}
           {activeTab === "analytics" && (
-            <AnalyticsTab client={client} jwt={jwt} selectedPostId={selectedPostId} />
+            <AnalyticsTab client={client} jwt={jwt} selectedPostId={selectedPostId} activeAddons={activeAddons} onNavigateToStore={() => setActiveTab("store")} />
           )}
           {activeTab === "engage" && client && jwt && (
             <div className="h-full overflow-y-auto p-6">
