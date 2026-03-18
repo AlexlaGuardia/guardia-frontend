@@ -23,6 +23,7 @@ interface FaroPage {
   profile_image_url: string | null;
   display_name: string | null;
   bio: string | null;
+  settings: string | null;
   is_published: number;
 }
 
@@ -116,7 +117,17 @@ export default async function FaroPublicPage({
         rel="stylesheet"
       />
 
-      <div className="faro-page" data-faro-theme={theme}>
+      <div
+        className="faro-page"
+        data-faro-theme={theme}
+        style={(() => {
+          try {
+            const s = page.settings ? JSON.parse(page.settings) : {};
+            if (s.accent_color) return { "--faro-accent": s.accent_color } as React.CSSProperties;
+          } catch { /* */ }
+          return undefined;
+        })()}
+      >
         <div className="faro-inner">
           {/* Profile */}
           <div className="faro-profile">

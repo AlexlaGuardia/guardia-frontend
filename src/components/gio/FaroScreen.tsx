@@ -594,6 +594,47 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                 </button>
               ))}
             </div>
+
+            {/* Accent Color */}
+            <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
+              <label className="text-xs font-medium text-[var(--text-muted)] mb-2 block">Accent Color</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={(() => {
+                    try { return JSON.parse(page.settings || "{}").accent_color || THEMES[page.theme]?.accent || "#1A1A1A"; }
+                    catch { return THEMES[page.theme]?.accent || "#1A1A1A"; }
+                  })()}
+                  onChange={(e) => {
+                    const current = (() => { try { return JSON.parse(page.settings || "{}"); } catch { return {}; } })();
+                    updatePage({ settings: JSON.stringify({ ...current, accent_color: e.target.value }) });
+                  }}
+                  className="w-10 h-10 rounded-xl border border-[var(--border)] cursor-pointer bg-transparent"
+                  style={{ padding: 2 }}
+                />
+                <span className="text-sm text-[var(--text-secondary)]">
+                  Customize the button and link color on your page
+                </span>
+                {(() => {
+                  try {
+                    const c = JSON.parse(page.settings || "{}").accent_color;
+                    if (c) return (
+                      <button
+                        onClick={() => {
+                          const current = (() => { try { return JSON.parse(page.settings || "{}"); } catch { return {}; } })();
+                          const { accent_color: _, ...rest } = current;
+                          updatePage({ settings: JSON.stringify(rest) });
+                        }}
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] ml-auto flex-shrink-0"
+                      >
+                        Reset
+                      </button>
+                    );
+                  } catch { /* */ }
+                  return null;
+                })()}
+              </div>
+            </div>
           </section>
 
           {/* Blocks */}
