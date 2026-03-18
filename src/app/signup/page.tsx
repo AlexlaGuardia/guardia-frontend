@@ -203,7 +203,7 @@ export default function SignupPage() {
                   )}
                 </div>
                 <p className="text-[#52525b] text-xs mt-1.5">
-                  This becomes guardiacontent.com/faro/{form.username || "yourname"}
+                  This becomes guardia.page/{form.username || "yourname"}
                 </p>
                 {usernameStatus === "taken" && (
                   <p className="text-red-400 text-xs mt-1">That username is taken. Try another.</p>

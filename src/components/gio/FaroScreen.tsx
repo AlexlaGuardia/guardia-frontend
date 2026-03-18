@@ -538,6 +538,24 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                 </button>
               )}
             </div>
+            {/* Share buttons */}
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--border-subtle)]">
+              <span className="text-xs text-[var(--text-muted)] mr-1">Share:</span>
+              {[
+                { label: "WhatsApp", href: `https://wa.me/?text=${encodeURIComponent(`Check out my page: https://guardia.page/${page.slug}`)}`, color: "#25D366" },
+                { label: "X", href: `https://x.com/intent/tweet?text=${encodeURIComponent(`Check out my page: https://guardia.page/${page.slug}`)}`, color: "#1DA1F2" },
+                { label: "Email", href: `mailto:?subject=${encodeURIComponent("Check out my page")}&body=${encodeURIComponent(`https://guardia.page/${page.slug}`)}`, color: "#8B5CF6" },
+              ].map(s => (
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
+                  className="px-2.5 py-1 text-[11px] font-medium rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:text-white transition-all"
+                  style={{ ["--tw-hover-bg" as string]: s.color }}
+                  onMouseEnter={e => { (e.target as HTMLElement).style.background = s.color; (e.target as HTMLElement).style.borderColor = s.color; }}
+                  onMouseLeave={e => { (e.target as HTMLElement).style.background = ""; (e.target as HTMLElement).style.borderColor = ""; }}
+                >
+                  {s.label}
+                </a>
+              ))}
+            </div>
           </section>
 
           {/* Custom Domain */}
