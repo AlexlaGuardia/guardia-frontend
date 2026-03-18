@@ -85,16 +85,17 @@ const bundles = [
 ];
 
 const competitors = [
-  { name: "Feature", guardia: "Guardia", linktree: "Linktree", beacons: "Beacons", later: "Later" },
-  { name: "Free bio page", guardia: true, linktree: true, beacons: true, later: false },
-  { name: "Custom themes", guardia: "6 free", linktree: "1 free", beacons: "Limited", later: "N/A" },
-  { name: "Email capture", guardia: "Free", linktree: "$24/mo", beacons: "$10/mo", later: "$25/mo" },
-  { name: "Basic analytics", guardia: "Free", linktree: "$5/mo", beacons: "Free", later: "$25/mo" },
-  { name: "Manual posting", guardia: "Free", linktree: "N/A", beacons: "N/A", later: "$25/mo" },
-  { name: "AI content", guardia: "$4.99/mo", linktree: "N/A", beacons: "N/A", later: "N/A" },
-  { name: "Platform connections", guardia: "From $1.99", linktree: "N/A", beacons: "N/A", later: "From $25/mo" },
-  { name: "SEO-optimized", guardia: true, linktree: false, beacons: true, later: false },
-  { name: "Pay for only what you use", guardia: true, linktree: false, beacons: false, later: false },
+  { name: "Feature", guardia: "Guardia", linktree: "Linktree", beacons: "Beacons", later: "Later", buffer: "Buffer" },
+  { name: "Free bio page", guardia: true, linktree: true, beacons: true, later: false, buffer: true },
+  { name: "Custom themes", guardia: "6 free", linktree: "1 free", beacons: "Limited", later: "With plan", buffer: "Limited" },
+  { name: "Email capture", guardia: "Free", linktree: "$9/mo", beacons: "$10/mo", later: "N/A", buffer: "N/A" },
+  { name: "Basic analytics", guardia: "Free", linktree: "$5/mo", beacons: "Free", later: "$25/mo", buffer: "Free" },
+  { name: "Manual posting", guardia: "Free", linktree: "N/A", beacons: "N/A", later: "$25/mo", buffer: "Free" },
+  { name: "AI content styling", guardia: "$4.99/mo", linktree: "N/A", beacons: "N/A", later: "N/A", buffer: "N/A" },
+  { name: "Auto-scheduling", guardia: "$1.99/mo", linktree: "N/A", beacons: "N/A", later: "$25/mo", buffer: "$6/ch/mo" },
+  { name: "Platform connections", guardia: "From $1.99", linktree: "N/A", beacons: "N/A", later: "From $25/mo", buffer: "$6/ch/mo" },
+  { name: "SEO-optimized", guardia: true, linktree: false, beacons: true, later: false, buffer: false },
+  { name: "Pay for only what you use", guardia: true, linktree: false, beacons: false, later: false, buffer: false },
 ];
 
 const faqs = [
@@ -539,38 +540,43 @@ function Comparison() {
           </p>
         </div>
 
-        <div className={`overflow-x-auto transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b-2 border-[#E8DDD3]">
-                <th className="text-left py-3 px-4 text-[#635C54] font-medium">Feature</th>
-                <th className="text-center py-3 px-4 text-[#4338CA] font-bold">Guardia</th>
-                <th className="text-center py-3 px-4 text-[#635C54] font-medium">Linktree</th>
-                <th className="text-center py-3 px-4 text-[#635C54] font-medium hidden md:table-cell">Beacons</th>
-                <th className="text-center py-3 px-4 text-[#635C54] font-medium hidden md:table-cell">Later</th>
-              </tr>
-            </thead>
-            <tbody>
-              {competitors.slice(1).map((row, i) => (
-                <tr key={i} className="border-b border-[#E8DDD3]/60">
-                  <td className="py-3 px-4 text-[#2A2A2A] font-medium">{row.name}</td>
-                  {[row.guardia, row.linktree, row.beacons, row.later].map((val, j) => (
-                    <td key={j} className={`py-3 px-4 text-center ${j >= 2 ? "hidden md:table-cell" : ""}`}>
-                      {val === true ? (
-                        <Check className="w-5 h-5 text-[#C9A227] mx-auto" />
-                      ) : val === false ? (
-                        <span className="text-[#D4D0CC]">—</span>
-                      ) : (
-                        <span className={j === 0 ? "font-semibold text-[#4338CA]" : "text-[#635C54]"}>
-                          {val as string}
-                        </span>
-                      )}
-                    </td>
-                  ))}
+        <div className={`relative transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          {/* Scroll hint for mobile */}
+          <div className="md:hidden text-xs text-[#635C54]/60 text-right mb-2 pr-1">Swipe to compare →</div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
+              <thead>
+                <tr className="border-b-2 border-[#E8DDD3]">
+                  <th className="text-left py-3 px-3 text-[#635C54] font-medium sticky left-0 bg-[#FAF6F1] z-10">Feature</th>
+                  <th className="text-center py-3 px-3 text-[#4338CA] font-bold">Guardia</th>
+                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Linktree</th>
+                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Beacons</th>
+                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Later</th>
+                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Buffer</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {competitors.slice(1).map((row, i) => (
+                  <tr key={i} className="border-b border-[#E8DDD3]/60">
+                    <td className="py-3 px-3 text-[#2A2A2A] font-medium sticky left-0 bg-[#FAF6F1] z-10">{row.name}</td>
+                    {[row.guardia, row.linktree, row.beacons, row.later, row.buffer].map((val, j) => (
+                      <td key={j} className="py-3 px-3 text-center whitespace-nowrap">
+                        {val === true ? (
+                          <Check className="w-5 h-5 text-[#C9A227] mx-auto" />
+                        ) : val === false ? (
+                          <span className="text-[#D4D0CC]">—</span>
+                        ) : (
+                          <span className={j === 0 ? "font-semibold text-[#4338CA]" : "text-[#635C54]"}>
+                            {val as string}
+                          </span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

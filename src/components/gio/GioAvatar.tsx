@@ -19,7 +19,7 @@ export default function GioAvatar({ onClick, unreadCount, size = 130, variant = 
       className={`relative transition-all active:scale-95 flex-shrink-0 ${
         isWidget ? "rounded-2xl hover:scale-105" : "rounded-lg"
       }`}
-      style={isWidget ? { filter: "drop-shadow(0 6px 28px rgba(124, 58, 237, 0.3))" } : undefined}
+      style={isWidget ? { filter: "drop-shadow(0 4px 16px rgba(124, 58, 237, 0.2))" } : undefined}
       aria-label="Chat with Giovanni"
     >
       <div
