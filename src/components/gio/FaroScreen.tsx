@@ -5,7 +5,7 @@ import {
   Link2, Type, Share2, Mail, AlignLeft, Plus, Trash2,
   ChevronUp, ChevronDown, Eye, EyeOff, Pencil, X,
   Check, Globe, ExternalLink, Loader2, Image as ImageIcon,
-  Copy, Sparkles,
+  Copy, Sparkles, Play,
 } from "lucide-react";
 import type { GioClient } from "./types";
 import FaroDomainSection from "./FaroDomainSection";
@@ -30,7 +30,7 @@ interface FaroPage {
 interface FaroBlock {
   id: string;
   page_id: string;
-  type: "link" | "header" | "social" | "email_capture" | "text";
+  type: "link" | "header" | "social" | "email_capture" | "text" | "embed";
   title: string | null;
   url: string | null;
   icon: string | null;
@@ -65,6 +65,7 @@ const BLOCK_TYPES = [
   { type: "social",        label: "Social Icons",  icon: Share2,   description: "Social media links row" },
   { type: "email_capture", label: "Email Capture", icon: Mail,     description: "Collect email addresses" },
   { type: "text",          label: "Text",          icon: AlignLeft, description: "Freeform text block" },
+  { type: "embed",         label: "Media Embed",   icon: Play,      description: "YouTube, Spotify, or SoundCloud" },
 ] as const;
 
 // ── API Helper ───────────────────────────────────────────────
@@ -245,6 +246,10 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
     } else if (type === "social") {
       body.title = "Social Links";
       body.settings = JSON.stringify({ platforms: [] });
+    } else if (type === "embed") {
+      body.title = blockTitle || "Media";
+      body.url = blockUrl || "";
+      body.settings = JSON.stringify({ embed_url: blockUrl || "" });
     }
     try {
       const res = await faroFetch(jwt, "/blocks", "POST", body);
@@ -689,15 +694,20 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                     <X size={14} />
                   </button>
                 </div>
-                {(newBlockType === "link" || newBlockType === "header" || newBlockType === "text" || newBlockType === "email_capture") && (
+                {(newBlockType === "link" || newBlockType === "header" || newBlockType === "text" || newBlockType === "email_capture" || newBlockType === "embed") && (
                   <input type="text" value={blockTitle} onChange={e => setBlockTitle(e.target.value)}
-                    placeholder={newBlockType === "link" ? "Link label" : newBlockType === "header" ? "Header text" : newBlockType === "email_capture" ? "Widget title" : "Text content"}
+                    placeholder={newBlockType === "link" ? "Link label" : newBlockType === "header" ? "Header text" : newBlockType === "email_capture" ? "Widget title" : newBlockType === "embed" ? "Label (optional)" : "Text content"}
                     className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
                     autoFocus />
                 )}
                 {newBlockType === "link" && (
                   <input type="url" value={blockUrl} onChange={e => setBlockUrl(e.target.value)}
                     placeholder="https://..."
+                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
+                )}
+                {newBlockType === "embed" && (
+                  <input type="url" value={blockUrl} onChange={e => setBlockUrl(e.target.value)}
+                    placeholder="Paste YouTube, Spotify, or SoundCloud URL"
                     className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
                 )}
                 <div className="flex gap-2">
@@ -765,6 +775,7 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                       {block.type === "social" && <Share2 size={14} className="text-[var(--accent)]" />}
                       {block.type === "email_capture" && <Mail size={14} className="text-[var(--accent)]" />}
                       {block.type === "text" && <AlignLeft size={14} className="text-[var(--accent)]" />}
+                      {block.type === "embed" && <Play size={14} className="text-[var(--accent)]" />}
                     </div>
 
                     {/* Content */}
@@ -795,7 +806,7 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                         <div className="text-sm font-medium text-[var(--text-primary)] truncate">
                           {block.title || block.type}
                         </div>
-                        {block.type === "link" && block.url && (
+                        {(block.type === "link" || block.type === "embed") && block.url && (
                           <div className="text-xs text-[var(--text-muted)] truncate">{block.url}</div>
                         )}
                       </div>

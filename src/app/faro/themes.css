@@ -133,6 +133,27 @@
   height: 20px;
 }
 
+/* ── Media Embed Block ────────────────────────────────────── */
+.faro-block-embed {
+  padding: 8px 0;
+  width: 100%;
+}
+
+.faro-embed-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--faro-text);
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.faro-embed-iframe {
+  width: 100%;
+  border: none;
+  border-radius: var(--faro-radius);
+  overflow: hidden;
+}
+
 /* ── Email Capture Block ──────────────────────────────────── */
 .faro-block-email {
   padding: 8px 0;

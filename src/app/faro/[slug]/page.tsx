@@ -7,7 +7,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.guardiacontent.
 
 interface FaroBlock {
   id: string;
-  type: "link" | "header" | "social" | "email_capture" | "text";
+  type: "link" | "header" | "social" | "email_capture" | "text" | "embed";
   title: string | null;
   url: string | null;
   icon: string | null;
@@ -30,6 +30,22 @@ interface FaroPage {
 interface PageData {
   page: FaroPage;
   blocks: FaroBlock[];
+}
+
+function getEmbedSrc(url: string): { src: string; height: number } | null {
+  if (!url) return null;
+  // YouTube
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
+  if (ytMatch) return { src: `https://www.youtube.com/embed/${ytMatch[1]}`, height: 315 };
+  // Spotify track
+  const spotifyTrack = url.match(/spotify\.com\/track\/([\w]+)/);
+  if (spotifyTrack) return { src: `https://open.spotify.com/embed/track/${spotifyTrack[1]}?theme=0`, height: 152 };
+  // Spotify album/playlist
+  const spotifyCollection = url.match(/spotify\.com\/(album|playlist)\/([\w]+)/);
+  if (spotifyCollection) return { src: `https://open.spotify.com/embed/${spotifyCollection[1]}/${spotifyCollection[2]}?theme=0`, height: 352 };
+  // SoundCloud
+  if (url.includes("soundcloud.com")) return { src: `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`, height: 166 };
+  return null;
 }
 
 async function getPageData(slug: string): Promise<PageData | null> {
@@ -98,6 +114,13 @@ export default async function FaroPublicPage({
       }
     }
     if (block.type === "email_capture" && block.settings) {
+      try {
+        return { ...block, parsedSettings: JSON.parse(block.settings) };
+      } catch {
+        return block;
+      }
+    }
+    if (block.type === "embed" && block.settings) {
       try {
         return { ...block, parsedSettings: JSON.parse(block.settings) };
       } catch {
@@ -200,6 +223,28 @@ export default async function FaroPublicPage({
                           </a>
                         )
                       )}
+                    </div>
+                  );
+                }
+
+                case "embed": {
+                  const embedSettings = (block as any).parsedSettings || {};
+                  const embedUrl = embedSettings.embed_url || block.url || "";
+                  const embedSrc = getEmbedSrc(embedUrl);
+                  if (!embedSrc) return null;
+                  return (
+                    <div key={block.id} className="faro-block-embed">
+                      {block.title && block.title !== "Media" && (
+                        <div className="faro-embed-label">{block.title}</div>
+                      )}
+                      <iframe
+                        src={embedSrc.src}
+                        className="faro-embed-iframe"
+                        style={{ height: embedSrc.height }}
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                        allowFullScreen
+                        loading="lazy"
+                      />
                     </div>
                   );
                 }
