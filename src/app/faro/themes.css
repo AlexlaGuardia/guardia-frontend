@@ -154,6 +154,34 @@
   overflow: hidden;
 }
 
+/* ── Testimonial Block ────────────────────────────────────── */
+.faro-block-testimonial {
+  padding: 20px 24px;
+  border-left: 3px solid var(--faro-accent);
+  background: var(--faro-surface);
+  border-radius: var(--faro-radius);
+}
+
+.faro-testimonial-quote {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--faro-text);
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.faro-testimonial-author {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--faro-text);
+  opacity: 0.7;
+}
+
+.faro-testimonial-role {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
 /* ── Email Capture Block ──────────────────────────────────── */
 .faro-block-email {
   padding: 8px 0;

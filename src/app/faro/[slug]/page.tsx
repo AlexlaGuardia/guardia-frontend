@@ -7,7 +7,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.guardiacontent.
 
 interface FaroBlock {
   id: string;
-  type: "link" | "header" | "social" | "email_capture" | "text" | "embed";
+  type: "link" | "header" | "social" | "email_capture" | "text" | "embed" | "testimonial";
   title: string | null;
   url: string | null;
   icon: string | null;
@@ -121,6 +121,13 @@ export default async function FaroPublicPage({
       }
     }
     if (block.type === "embed" && block.settings) {
+      try {
+        return { ...block, parsedSettings: JSON.parse(block.settings) };
+      } catch {
+        return block;
+      }
+    }
+    if (block.type === "testimonial" && block.settings) {
       try {
         return { ...block, parsedSettings: JSON.parse(block.settings) };
       } catch {
@@ -278,6 +285,21 @@ export default async function FaroPublicPage({
                         </form>
                       </div>
                     </FaroPageClient>
+                  );
+                }
+
+                case "testimonial": {
+                  const tSettings = (block as any).parsedSettings || {};
+                  return (
+                    <div key={block.id} className="faro-block-testimonial">
+                      <div className="faro-testimonial-quote">{block.title}</div>
+                      {tSettings.author && (
+                        <div className="faro-testimonial-author">
+                          — {tSettings.author}
+                          {tSettings.role && <span className="faro-testimonial-role">, {tSettings.role}</span>}
+                        </div>
+                      )}
+                    </div>
                   );
                 }
 

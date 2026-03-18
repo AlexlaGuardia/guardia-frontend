@@ -5,7 +5,7 @@ import {
   Link2, Type, Share2, Mail, AlignLeft, Plus, Trash2,
   ChevronUp, ChevronDown, Eye, EyeOff, Pencil, X,
   Check, Globe, ExternalLink, Loader2, Image as ImageIcon,
-  Copy, Sparkles, Play,
+  Copy, Sparkles, Play, Quote,
 } from "lucide-react";
 import type { GioClient } from "./types";
 import FaroDomainSection from "./FaroDomainSection";
@@ -30,7 +30,7 @@ interface FaroPage {
 interface FaroBlock {
   id: string;
   page_id: string;
-  type: "link" | "header" | "social" | "email_capture" | "text" | "embed";
+  type: "link" | "header" | "social" | "email_capture" | "text" | "embed" | "testimonial";
   title: string | null;
   url: string | null;
   icon: string | null;
@@ -66,6 +66,7 @@ const BLOCK_TYPES = [
   { type: "email_capture", label: "Email Capture", icon: Mail,     description: "Collect email addresses" },
   { type: "text",          label: "Text",          icon: AlignLeft, description: "Freeform text block" },
   { type: "embed",         label: "Media Embed",   icon: Play,      description: "YouTube, Spotify, or SoundCloud" },
+  { type: "testimonial",   label: "Testimonial",   icon: Quote,     description: "Customer quote or review" },
 ] as const;
 
 // ── API Helper ───────────────────────────────────────────────
@@ -250,6 +251,9 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
       body.title = blockTitle || "Media";
       body.url = blockUrl || "";
       body.settings = JSON.stringify({ embed_url: blockUrl || "" });
+    } else if (type === "testimonial") {
+      body.title = blockTitle || "Great service!";
+      body.settings = JSON.stringify({ author: blockUrl || "Happy Customer", role: "" });
     }
     try {
       const res = await faroFetch(jwt, "/blocks", "POST", body);
@@ -694,9 +698,9 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                     <X size={14} />
                   </button>
                 </div>
-                {(newBlockType === "link" || newBlockType === "header" || newBlockType === "text" || newBlockType === "email_capture" || newBlockType === "embed") && (
+                {(newBlockType === "link" || newBlockType === "header" || newBlockType === "text" || newBlockType === "email_capture" || newBlockType === "embed" || newBlockType === "testimonial") && (
                   <input type="text" value={blockTitle} onChange={e => setBlockTitle(e.target.value)}
-                    placeholder={newBlockType === "link" ? "Link label" : newBlockType === "header" ? "Header text" : newBlockType === "email_capture" ? "Widget title" : newBlockType === "embed" ? "Label (optional)" : "Text content"}
+                    placeholder={newBlockType === "link" ? "Link label" : newBlockType === "header" ? "Header text" : newBlockType === "email_capture" ? "Widget title" : newBlockType === "embed" ? "Label (optional)" : newBlockType === "testimonial" ? "Quote text" : "Text content"}
                     className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
                     autoFocus />
                 )}
@@ -708,6 +712,11 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                 {newBlockType === "embed" && (
                   <input type="url" value={blockUrl} onChange={e => setBlockUrl(e.target.value)}
                     placeholder="Paste YouTube, Spotify, or SoundCloud URL"
+                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
+                )}
+                {newBlockType === "testimonial" && (
+                  <input type="text" value={blockUrl} onChange={e => setBlockUrl(e.target.value)}
+                    placeholder="Author name"
                     className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
                 )}
                 <div className="flex gap-2">
@@ -776,6 +785,7 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
                       {block.type === "email_capture" && <Mail size={14} className="text-[var(--accent)]" />}
                       {block.type === "text" && <AlignLeft size={14} className="text-[var(--accent)]" />}
                       {block.type === "embed" && <Play size={14} className="text-[var(--accent)]" />}
+                      {block.type === "testimonial" && <Quote size={14} className="text-[var(--accent)]" />}
                     </div>
 
                     {/* Content */}
