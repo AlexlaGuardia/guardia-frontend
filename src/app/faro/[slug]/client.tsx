@@ -86,6 +86,131 @@ export default function FaroPageClient({ slug, blockId, type, children }: Props)
   return <div ref={ref}>{children}</div>;
 }
 
+/* ── Shop (Digital Products) ──────────────────────────────── */
+
+interface ShopProduct {
+  id: number;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  price_display: string;
+  file_name: string;
+}
+
+interface PurchaseInfo {
+  found: boolean;
+  download_token?: string;
+  product_name?: string;
+  file_name?: string;
+  downloads_used?: number;
+  downloads_max?: number;
+}
+
+export function FaroShop({ slug }: { slug: string }) {
+  const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [buying, setBuying] = useState<number | null>(null);
+  const [purchase, setPurchase] = useState<PurchaseInfo | null>(null);
+
+  // Fetch products
+  useEffect(() => {
+    fetch(`${API_BASE}/faro/shop/${slug}`)
+      .then(r => r.ok ? r.json() : { products: [] })
+      .then(d => setProducts(d.products || []))
+      .catch(() => {});
+  }, [slug]);
+
+  // Check for post-purchase redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (!sessionId) return;
+
+    let attempts = 0;
+    const poll = () => {
+      fetch(`${API_BASE}/faro/shop/purchase/lookup?session_id=${sessionId}`)
+        .then(r => r.json())
+        .then((data: PurchaseInfo) => {
+          if (data.found) {
+            setPurchase(data);
+            // Clean URL
+            window.history.replaceState({}, "", window.location.pathname);
+          } else if (attempts < 5) {
+            attempts++;
+            setTimeout(poll, 2000);
+          }
+        })
+        .catch(() => {});
+    };
+    poll();
+  }, []);
+
+  const handleBuy = async (productId: number) => {
+    setBuying(productId);
+    try {
+      const res = await fetch(`${API_BASE}/faro/shop/${productId}/checkout`, { method: "POST" });
+      const data = await res.json();
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      }
+    } catch {
+      setBuying(null);
+    }
+  };
+
+  if (products.length === 0 && !purchase) return null;
+
+  return (
+    <div className="faro-shop">
+      {/* Purchase success banner */}
+      {purchase?.found && (
+        <div className="faro-shop-success">
+          <div className="faro-shop-success-title">Purchase complete!</div>
+          <div className="faro-shop-success-detail">
+            {purchase.product_name} — {purchase.file_name}
+          </div>
+          <a
+            href={`${API_BASE}/faro/download/${purchase.download_token}`}
+            className="faro-shop-download-btn"
+          >
+            Download ({purchase.downloads_max! - purchase.downloads_used!} remaining)
+          </a>
+        </div>
+      )}
+
+      {products.length > 0 && (
+        <>
+          <div className="faro-shop-label">Shop</div>
+          <div className="faro-shop-grid">
+            {products.map(product => (
+              <div key={product.id} className="faro-shop-card">
+                <div className="faro-shop-card-body">
+                  <div className="faro-shop-card-name">{product.name}</div>
+                  {product.description && (
+                    <div className="faro-shop-card-desc">{product.description}</div>
+                  )}
+                  <div className="faro-shop-card-file">{product.file_name}</div>
+                </div>
+                <div className="faro-shop-card-footer">
+                  <span className="faro-shop-card-price">{product.price_display}</span>
+                  <button
+                    onClick={() => handleBuy(product.id)}
+                    disabled={buying !== null}
+                    className="faro-shop-card-buy"
+                  >
+                    {buying === product.id ? "..." : "Buy"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── Linked Posts ─────────────────────────────────────────── */
+
 interface LinkedPost {
   id: number;
   platform: string;

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import "../themes.css";
-import FaroPageClient, { FaroLinkedPosts } from "./client";
+import FaroPageClient, { FaroShop, FaroLinkedPosts } from "./client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.guardiacontent.com";
 
@@ -308,6 +308,9 @@ export default async function FaroPublicPage({
               }
             })}
           </div>
+
+          {/* Shop */}
+          <FaroShop slug={slug} />
 
           {/* Linked Posts */}
           {(() => {
