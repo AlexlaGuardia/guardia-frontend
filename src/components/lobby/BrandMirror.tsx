@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 const API_BASE = "https://api.guardiacontent.com";
 
 interface BrandMirrorProps {
@@ -49,6 +49,22 @@ export default function BrandMirror({ clientId: _clientId, jwt, onStyleUpdated }
   const [showOriginals, setShowOriginals] = useState(false);
   const [_stylePreview, setStylePreview] = useState<{ prompt: string; strength: number; style_name: string } | null>(null);
 
+  // Style browser
+  interface StyleOption {
+    id: number;
+    name: string;
+    display_name: string;
+    description: string | null;
+    mood: string | null;
+    color_palette: string[];
+    lighting: string | null;
+  }
+  const [browseStyles, setBrowseStyles] = useState<StyleOption[]>([]);
+  const [currentStyle, setCurrentStyle] = useState<string>("");
+  const [favoriteStyles, setFavoriteStyles] = useState<string[]>([]);
+  const [browseLoading, setBrowseLoading] = useState(true);
+  const [activating, setActivating] = useState<string | null>(null);
+
   // Edit states
   const [editingColors, setEditingColors] = useState(false);
   const [editingVoice, setEditingVoice] = useState(false);
@@ -91,6 +107,65 @@ export default function BrandMirror({ clientId: _clientId, jwt, onStyleUpdated }
     fetchBrand();
     fetchStylePreview();
   }, [jwt]);
+
+  // Fetch style browser data
+  const fetchStyles = useCallback(async () => {
+    if (!jwt) return;
+    setBrowseLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/styles/me/browse`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBrowseStyles(data.styles || []);
+        setCurrentStyle(data.current_style || "");
+        setFavoriteStyles(data.favorites || []);
+      }
+    } catch {}
+    setBrowseLoading(false);
+  }, [jwt]);
+
+  useEffect(() => {
+    fetchStyles();
+  }, [fetchStyles]);
+
+  const handleActivateStyle = async (styleName: string) => {
+    if (!jwt || activating) return;
+    setActivating(styleName);
+    try {
+      const res = await fetch(`${API_BASE}/styles/me/activate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ style_name: styleName }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentStyle(data.display_name || styleName);
+        onStyleUpdated?.();
+      }
+    } catch {}
+    setActivating(null);
+  };
+
+  const handleToggleFavorite = async (styleName: string) => {
+    if (!jwt) return;
+    try {
+      const res = await fetch(`${API_BASE}/styles/me/favorite`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ style_name: styleName }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.is_favorite) {
+          setFavoriteStyles((prev) => [...prev, styleName]);
+        } else {
+          setFavoriteStyles((prev) => prev.filter((n) => n !== styleName));
+        }
+      }
+    } catch {}
+  };
 
   const saveBrandField = async (payload: Record<string, unknown>) => {
     setSaving(true);
@@ -406,6 +481,113 @@ export default function BrandMirror({ clientId: _clientId, jwt, onStyleUpdated }
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{brand.visual.style}</p>
           ) : (
             <p className="text-sm text-[var(--text-muted)] italic">No visual style set</p>
+          )}
+        </div>
+
+        {/* Style Gallery */}
+        <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Style Gallery</h3>
+            {favoriteStyles.length > 0 && (
+              <span className="text-[10px] text-[var(--text-muted)]">
+                {favoriteStyles.length}/3 favorites
+              </span>
+            )}
+          </div>
+
+          {browseLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="w-6 h-6 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+            </div>
+          ) : browseStyles.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)] text-center py-4">No styles available</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Favorites first, then rest */}
+              {[...browseStyles]
+                .sort((a, b) => {
+                  const aFav = favoriteStyles.includes(a.name) ? -1 : 0;
+                  const bFav = favoriteStyles.includes(b.name) ? -1 : 0;
+                  const aCurrent = (currentStyle === a.display_name || currentStyle === a.name) ? -2 : 0;
+                  const bCurrent = (currentStyle === b.display_name || currentStyle === b.name) ? -2 : 0;
+                  return (aCurrent + aFav) - (bCurrent + bFav);
+                })
+                .map((style) => {
+                  const isActive = currentStyle === style.display_name || currentStyle === style.name;
+                  const isFav = favoriteStyles.includes(style.name);
+                  const isActivating = activating === style.name;
+
+                  return (
+                    <button
+                      key={style.id}
+                      onClick={() => !isActive && handleActivateStyle(style.name)}
+                      disabled={isActive || !!activating}
+                      className={`text-left rounded-xl p-4 transition-all duration-200 ${
+                        isActive
+                          ? "ring-2 ring-[var(--accent)]"
+                          : "hover:shadow-md hover:scale-[1.01] active:scale-[0.99]"
+                      }`}
+                      style={{
+                        background: isActive ? "var(--accent-muted)" : "var(--bg-surface)",
+                        border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
+                        opacity: activating && !isActivating ? 0.6 : 1,
+                      }}
+                    >
+                      {/* Header: name + favorite star */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                              {style.display_name}
+                            </span>
+                            {isActive && (
+                              <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md"
+                                style={{ background: "var(--accent)", color: "var(--bg-base)" }}>
+                                Active
+                              </span>
+                            )}
+                            {isActivating && (
+                              <div className="w-3.5 h-3.5 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin flex-shrink-0" />
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleFavorite(style.name);
+                          }}
+                          className="flex-shrink-0 p-1 -m-1 rounded-lg transition-colors hover:bg-[var(--bg-elevated)]"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24"
+                            fill={isFav ? "var(--accent)" : "none"}
+                            stroke={isFav ? "var(--accent)" : "var(--text-muted)"}
+                            strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round"
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Color palette swatches */}
+                      {style.color_palette && style.color_palette.length > 0 && (
+                        <div className="flex gap-1.5 mb-2">
+                          {style.color_palette.slice(0, 5).map((hex, i) => (
+                            <div key={i} className="w-5 h-5 rounded-md shadow-sm"
+                              style={{ backgroundColor: hex, border: "1px solid rgba(0,0,0,0.1)" }} />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Mood tag */}
+                      {style.mood && (
+                        <p className="text-[11px] text-[var(--text-muted)] leading-snug line-clamp-2">
+                          {style.mood}
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
+            </div>
           )}
         </div>
 

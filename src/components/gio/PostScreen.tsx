@@ -82,6 +82,11 @@ export default function PostScreen({ jwt, client, onNavigate }: PostScreenProps)
   const [composeError, setComposeError] = useState<string | null>(null);
   const composeFileRef = useRef<HTMLInputElement>(null);
 
+  // Caption templates
+  const [templates, setTemplates] = useState<{ id: number; name: string; template: string; hashtags: string }[]>([]);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+
   // ── Fetch gallery items (camera roll) ──
   const fetchGallery = useCallback(async () => {
     if (!jwt) return;
@@ -158,6 +163,43 @@ export default function PostScreen({ jwt, client, onNavigate }: PostScreenProps)
   useEffect(() => {
     loadPlatforms();
   }, [loadPlatforms]);
+
+  // ── Load caption templates ──
+  const fetchTemplates = useCallback(async () => {
+    if (!jwt) return;
+    try {
+      const res = await fetch(`${API_BASE}/client/me/templates`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTemplates(data.templates || []);
+      }
+    } catch {}
+  }, [jwt]);
+
+  useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
+
+  const applyTemplate = (t: { template: string; hashtags: string }) => {
+    setCaption(t.template);
+    if (t.hashtags) setHashtags(t.hashtags);
+  };
+
+  const saveAsTemplate = async () => {
+    if (!jwt || !templateName.trim() || !caption.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE}/client/me/templates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ name: templateName.trim(), template: caption, hashtags }),
+      });
+      if (res.ok) {
+        setShowSaveTemplate(false);
+        setTemplateName("");
+        fetchTemplates();
+      }
+    } catch {}
+  };
 
   // ── Toggle auto-schedule ──
   const handleToggle = async () => {
@@ -612,11 +654,29 @@ export default function PostScreen({ jwt, client, onNavigate }: PostScreenProps)
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Caption</label>
-                      {caption.length > 0 && (
-                        <span className={`text-xs font-medium ${caption.length > MAX_CAPTION ? "text-red-500" : "text-[var(--text-muted)]"}`}>
-                          {caption.length}/{MAX_CAPTION}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {templates.length > 0 && (
+                          <select
+                            onChange={(e) => {
+                              const t = templates.find((t) => t.id === parseInt(e.target.value));
+                              if (t) applyTemplate(t);
+                              e.target.value = "";
+                            }}
+                            defaultValue=""
+                            className="text-[11px] px-2 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] focus:outline-none"
+                          >
+                            <option value="" disabled>Templates</option>
+                            {templates.map((t) => (
+                              <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                          </select>
+                        )}
+                        {caption.length > 0 && (
+                          <span className={`text-xs font-medium ${caption.length > MAX_CAPTION ? "text-red-500" : "text-[var(--text-muted)]"}`}>
+                            {caption.length}/{MAX_CAPTION}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <textarea
                       value={caption}
@@ -626,6 +686,26 @@ export default function PostScreen({ jwt, client, onNavigate }: PostScreenProps)
                       maxLength={MAX_CAPTION + 50}
                       className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)] transition-all resize-none"
                     />
+                    {/* Save as template */}
+                    {caption.trim() && !showSaveTemplate && (
+                      <button onClick={() => setShowSaveTemplate(true)}
+                        className="mt-1.5 text-[11px] text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors">
+                        Save as template
+                      </button>
+                    )}
+                    {showSaveTemplate && (
+                      <div className="flex gap-2 mt-2">
+                        <input type="text" value={templateName} onChange={(e) => setTemplateName(e.target.value)}
+                          placeholder="Template name..."
+                          className="flex-1 px-3 py-1.5 text-xs bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
+                        <button onClick={saveAsTemplate} disabled={!templateName.trim()}
+                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--accent)] text-white disabled:opacity-50">
+                          Save
+                        </button>
+                        <button onClick={() => { setShowSaveTemplate(false); setTemplateName(""); }}
+                          className="px-2 py-1.5 text-xs text-[var(--text-muted)]">Cancel</button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Hashtags */}

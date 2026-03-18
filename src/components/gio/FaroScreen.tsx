@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Link2, Type, Share2, Mail, AlignLeft, Plus, Trash2,
   ChevronUp, ChevronDown, Eye, EyeOff, Pencil, X,
@@ -92,6 +92,9 @@ function FaroBroadcastSection({ jwt }: { jwt: string | null }) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [drafting, setDrafting] = useState(false);
+  const [aiTopic, setAiTopic] = useState("");
+  const [showAiInput, setShowAiInput] = useState(false);
   const [result, setResult] = useState<{ sent: number; total: number } | null>(null);
 
   const send = async () => {
@@ -115,6 +118,26 @@ function FaroBroadcastSection({ jwt }: { jwt: string | null }) {
     setSending(false);
   };
 
+  const aiDraft = async () => {
+    if (!jwt || !aiTopic.trim() || drafting) return;
+    setDrafting(true);
+    try {
+      const res = await fetch(`${API_BASE}/faro/broadcast/ai-draft`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: aiTopic }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSubject(data.subject || "");
+        setBody(data.body || "");
+        setShowAiInput(false);
+        setAiTopic("");
+      }
+    } catch { /* silent */ }
+    setDrafting(false);
+  };
+
   return (
     <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
       <div className="flex items-center justify-between">
@@ -131,11 +154,33 @@ function FaroBroadcastSection({ jwt }: { jwt: string | null }) {
       </div>
       {composing && (
         <div className="mt-4 space-y-3">
+          {/* AI Draft input */}
+          {showAiInput ? (
+            <div className="flex gap-2">
+              <input type="text" value={aiTopic} onChange={e => setAiTopic(e.target.value)}
+                placeholder="What's this email about? (e.g. &quot;summer sale&quot;, &quot;new product launch&quot;)"
+                onKeyDown={e => e.key === "Enter" && aiDraft()}
+                className="flex-1 px-3 py-2 bg-violet-500/10 border border-violet-500/30 rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-violet-500" />
+              <button onClick={aiDraft} disabled={drafting || !aiTopic.trim()}
+                className="px-3 py-2 text-sm font-medium rounded-lg bg-violet-500 text-white disabled:opacity-50 flex items-center gap-1.5 flex-shrink-0">
+                {drafting ? <><Loader2 size={14} className="animate-spin" /> Drafting...</> : <><Sparkles size={14} /> Draft</>}
+              </button>
+              <button onClick={() => { setShowAiInput(false); setAiTopic(""); }}
+                className="px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setShowAiInput(true)}
+              className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors">
+              <Sparkles size={12} /> AI Draft — describe what you want to say
+            </button>
+          )}
           <input type="text" value={subject} onChange={e => setSubject(e.target.value)}
             placeholder="Subject line"
             className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
           <textarea value={body} onChange={e => setBody(e.target.value)}
-            placeholder="Write your message..."
+            placeholder="Write your message... Use {{name}} for subscriber's name"
             rows={4}
             className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] resize-none" />
           <div className="flex items-center gap-2">
@@ -143,7 +188,7 @@ function FaroBroadcastSection({ jwt }: { jwt: string | null }) {
               className="px-4 py-2 text-sm font-medium bg-[var(--accent)] text-white rounded-lg hover:bg-[var(--accent-hover)] disabled:opacity-50 flex items-center gap-1.5">
               {sending ? <><Loader2 size={14} className="animate-spin" /> Sending...</> : "Send to all subscribers"}
             </button>
-            <button onClick={() => { setComposing(false); setResult(null); }}
+            <button onClick={() => { setComposing(false); setResult(null); setShowAiInput(false); }}
               className="px-3 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]">
               Cancel
             </button>
@@ -208,6 +253,426 @@ function FaroQRSection({ jwt, slug }: { jwt: string | null; slug: string }) {
           </button>
         </div>
       </div>
+    </section>
+  );
+}
+
+// ── Drip Sequence Builder ──
+
+interface DripStep {
+  delay_hours: number;
+  subject: string;
+  body: string;
+}
+
+interface DripSequenceData {
+  id: number;
+  name: string;
+  is_active: number;
+  steps: DripStep[];
+  stats: Record<string, number>;
+}
+
+function DripSequenceSection({ jwt }: { jwt: string | null }) {
+  const [seq, setSeq] = useState<DripSequenceData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [toggling, setToggling] = useState(false);
+  const [steps, setSteps] = useState<DripStep[]>([]);
+  const [name, setName] = useState("Welcome Series");
+
+  const fetchDrip = useCallback(async () => {
+    if (!jwt) return;
+    try {
+      const res = await fetch(`${API_BASE}/faro/drip`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSeq(data.sequence);
+        if (data.sequence) {
+          setSteps(data.sequence.steps || []);
+          setName(data.sequence.name || "Welcome Series");
+        }
+      }
+    } catch {}
+    setLoading(false);
+  }, [jwt]);
+
+  useEffect(() => { fetchDrip(); }, [fetchDrip]);
+
+  const handleSave = async () => {
+    if (!jwt || saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/faro/drip`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ name, steps }),
+      });
+      if (res.ok) {
+        setEditing(false);
+        fetchDrip();
+      }
+    } catch {}
+    setSaving(false);
+  };
+
+  const handleToggle = async () => {
+    if (!jwt || toggling) return;
+    setToggling(true);
+    try {
+      const res = await fetch(`${API_BASE}/faro/drip/toggle`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) {
+        fetchDrip();
+      }
+    } catch {}
+    setToggling(false);
+  };
+
+  const addStep = () => {
+    if (steps.length >= 5) return;
+    setSteps([...steps, { delay_hours: steps.length === 0 ? 0 : 24, subject: "", body: "" }]);
+  };
+
+  const removeStep = (idx: number) => {
+    setSteps(steps.filter((_, i) => i !== idx));
+  };
+
+  const updateStep = (idx: number, field: keyof DripStep, value: string | number) => {
+    setSteps(steps.map((s, i) => (i === idx ? { ...s, [field]: value } : s)));
+  };
+
+  const formatDelay = (hours: number) => {
+    if (hours === 0) return "Immediately";
+    if (hours < 24) return `${hours}h after signup`;
+    const days = Math.round(hours / 24);
+    return `${days} day${days !== 1 ? "s" : ""} after signup`;
+  };
+
+  // Cumulative delay for display
+  const cumulativeDelay = (idx: number) => {
+    let total = 0;
+    for (let i = 0; i <= idx; i++) total += steps[i]?.delay_hours || 0;
+    return total;
+  };
+
+  if (loading) return null;
+
+  const isActive = seq?.is_active === 1;
+  const enrolled = (seq?.stats?.active || 0) + (seq?.stats?.completed || 0);
+
+  return (
+    <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-1">
+        <div>
+          <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">Drip Sequence</h3>
+          <p className="text-xs text-[var(--text-muted)] mt-1">
+            {seq ? `${seq.steps.length} step${seq.steps.length !== 1 ? "s" : ""} · ${enrolled} enrolled` : "Auto-send a welcome series to new subscribers"}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {seq && seq.steps.length > 0 && !editing && (
+            <button
+              onClick={handleToggle}
+              disabled={toggling}
+              className={`relative w-10 h-5 rounded-full transition-all duration-200 ${
+                isActive ? "" : "bg-[var(--bg-surface)] border border-[var(--border)]"
+              }`}
+              style={isActive ? { background: "linear-gradient(135deg, #22c55e, #16a34a)" } : undefined}
+            >
+              <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                isActive ? "translate-x-[22px]" : "translate-x-0.5"
+              }`} />
+            </button>
+          )}
+          {!editing && (
+            <button
+              onClick={() => {
+                if (!seq) {
+                  setSteps([{ delay_hours: 0, subject: "Welcome! 👋", body: "Thanks for subscribing, {{name}}! We're excited to have you." }]);
+                }
+                setEditing(true);
+              }}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-all"
+            >
+              {seq ? "Edit" : "Create"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* View mode — show steps timeline */}
+      {seq && !editing && seq.steps.length > 0 && (
+        <div className="mt-4 space-y-2">
+          {seq.steps.map((step, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                  isActive ? "bg-emerald-500/15 text-emerald-500" : "bg-[var(--bg-surface)] text-[var(--text-muted)]"
+                }`}>
+                  {i + 1}
+                </div>
+                {i < seq.steps.length - 1 && (
+                  <div className="w-px h-4 bg-[var(--border)]" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1 pb-1">
+                <p className="text-sm font-medium text-[var(--text-primary)] truncate">{step.subject}</p>
+                <p className="text-[10px] text-[var(--text-muted)]">{formatDelay(cumulativeDelay(i))}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Edit mode — step builder */}
+      {editing && (
+        <div className="mt-4 space-y-4">
+          {steps.map((step, i) => (
+            <div key={i} className="rounded-xl p-4 space-y-3" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-[var(--text-muted)]">Step {i + 1}</span>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={step.delay_hours}
+                    onChange={(e) => updateStep(i, "delay_hours", parseInt(e.target.value))}
+                    className="text-xs rounded-lg px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] focus:outline-none"
+                  >
+                    <option value={0}>Immediately</option>
+                    <option value={1}>1 hour</option>
+                    <option value={6}>6 hours</option>
+                    <option value={24}>1 day</option>
+                    <option value={48}>2 days</option>
+                    <option value={72}>3 days</option>
+                    <option value={120}>5 days</option>
+                    <option value={168}>7 days</option>
+                  </select>
+                  {steps.length > 1 && (
+                    <button onClick={() => removeStep(i)} className="text-[var(--text-muted)] hover:text-red-400 transition-colors">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+              <input
+                value={step.subject}
+                onChange={(e) => updateStep(i, "subject", e.target.value)}
+                placeholder="Email subject..."
+                className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+              />
+              <textarea
+                value={step.body}
+                onChange={(e) => updateStep(i, "body", e.target.value)}
+                placeholder="Email body... Use {{name}} for subscriber's name"
+                rows={3}
+                className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] resize-none"
+              />
+            </div>
+          ))}
+
+          {steps.length < 5 && (
+            <button onClick={addStep}
+              className="w-full py-2.5 rounded-xl border-2 border-dashed border-[var(--border)] text-sm text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all">
+              + Add Step
+            </button>
+          )}
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button onClick={() => { setEditing(false); if (seq) setSteps(seq.steps); }}
+              className="px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors rounded-lg">
+              Cancel
+            </button>
+            <button onClick={handleSave} disabled={saving || steps.length === 0 || steps.some(s => !s.subject.trim() || !s.body.trim())}
+              className="px-4 py-2 text-sm font-medium rounded-lg text-white transition-all disabled:opacity-40"
+              style={{ background: "var(--accent)" }}>
+              {saving ? "Saving..." : "Save Sequence"}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ── Digital Products Manager ──
+
+interface DigitalProduct {
+  id: number;
+  name: string;
+  description: string;
+  price_cents: number;
+  file_name: string;
+  is_active: number;
+  download_count: number;
+}
+
+function DigitalProductsSection({ jwt }: { jwt: string | null }) {
+  const [products, setProducts] = useState<DigitalProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+  const [newFile, setNewFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const fetchProducts = useCallback(async () => {
+    if (!jwt) return;
+    try {
+      const res = await fetch(`${API_BASE}/faro/products`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(data.products || []);
+      }
+    } catch {}
+    setLoading(false);
+  }, [jwt]);
+
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  const handleUpload = async () => {
+    if (!jwt || !newFile || !newName.trim() || !newPrice || uploading) return;
+    const priceCents = Math.round(parseFloat(newPrice) * 100);
+    if (priceCents < 99) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("name", newName.trim());
+    formData.append("description", newDesc.trim());
+    formData.append("price_cents", String(priceCents));
+    formData.append("file", newFile);
+
+    try {
+      const res = await fetch(`${API_BASE}/faro/products`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}` },
+        body: formData,
+      });
+      if (res.ok) {
+        setAdding(false);
+        setNewName("");
+        setNewDesc("");
+        setNewPrice("");
+        setNewFile(null);
+        fetchProducts();
+      }
+    } catch {}
+    setUploading(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!jwt) return;
+    try {
+      await fetch(`${API_BASE}/faro/products/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      fetchProducts();
+    } catch {}
+  };
+
+  const handleToggle = async (id: number) => {
+    if (!jwt) return;
+    try {
+      await fetch(`${API_BASE}/faro/products/${id}/toggle`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      fetchProducts();
+    } catch {}
+  };
+
+  if (loading) return null;
+
+  return (
+    <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-1">
+        <div>
+          <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">Digital Products</h3>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Sell files directly from your Faro page</p>
+        </div>
+        {!adding && (
+          <button onClick={() => setAdding(true)}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-all">
+            Add Product
+          </button>
+        )}
+      </div>
+
+      {/* Product list */}
+      {products.length > 0 && !adding && (
+        <div className="mt-3 space-y-2">
+          {products.map((p) => (
+            <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl"
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", opacity: p.is_active ? 1 : 0.5 }}>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-[var(--text-primary)] truncate">{p.name}</p>
+                <p className="text-[10px] text-[var(--text-muted)]">
+                  ${(p.price_cents / 100).toFixed(2)} · {p.file_name} · {p.download_count} sold
+                </p>
+              </div>
+              <button onClick={() => handleToggle(p.id)}
+                className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${
+                  p.is_active ? "bg-emerald-500/10 text-emerald-500" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                }`}>
+                {p.is_active ? "Live" : "Off"}
+              </button>
+              <button onClick={() => handleDelete(p.id)}
+                className="text-[var(--text-muted)] hover:text-red-400 transition-colors">
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add product form */}
+      {adding && (
+        <div className="mt-4 space-y-3">
+          <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)}
+            placeholder="Product name (e.g. Instagram Presets Pack)"
+            className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
+          <input type="text" value={newDesc} onChange={(e) => setNewDesc(e.target.value)}
+            placeholder="Short description (optional)"
+            className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-2 text-sm text-[var(--text-muted)]">$</span>
+              <input type="number" step="0.01" min="0.99" value={newPrice} onChange={(e) => setNewPrice(e.target.value)}
+                placeholder="4.99"
+                className="w-full pl-7 pr-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
+            </div>
+            <label className="flex-1 flex items-center gap-2 px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--accent)] transition-colors">
+              <input ref={fileRef} type="file" className="hidden"
+                onChange={(e) => setNewFile(e.target.files?.[0] || null)} />
+              <ImageIcon size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+              <span className="text-sm text-[var(--text-muted)] truncate">
+                {newFile ? newFile.name : "Choose file..."}
+              </span>
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={handleUpload}
+              disabled={uploading || !newName.trim() || !newPrice || !newFile}
+              className="px-4 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40 flex items-center gap-1.5"
+              style={{ background: "var(--accent)" }}>
+              {uploading ? <><Loader2 size={14} className="animate-spin" /> Uploading...</> : "Add Product"}
+            </button>
+            <button onClick={() => { setAdding(false); setNewFile(null); }}
+              className="px-3 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]">Cancel</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -764,6 +1229,12 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
 
           {/* Email Broadcast */}
           <FaroBroadcastSection jwt={jwt} />
+
+          {/* Drip Sequence */}
+          <DripSequenceSection jwt={jwt} />
+
+          {/* Digital Products */}
+          <DigitalProductsSection jwt={jwt} />
 
           {/* Blocks */}
           <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">

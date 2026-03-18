@@ -147,11 +147,11 @@ export default function FaroAnalyticsSection({ jwt, faroSlug }: FaroAnalyticsSec
             <KPICard label="CTR" value={data.summary.ctr} color="var(--accent)" icon="percent" suffix="%" />
           </div>
 
-          {/* Daily chart */}
-          <DailyChart daily={data.summary.daily} />
+          {/* Trend chart */}
+          <TrendChart daily={data.summary.daily} period={period} />
 
           {/* Top links */}
-          {data.top_links.length > 0 && <TopLinksSection links={data.top_links} />}
+          {data.top_links.length > 0 && <TopLinksSection links={data.top_links} totalViews={data.summary.views} />}
 
           {/* Referrers */}
           {data.referrers.length > 0 && <ReferrersSection referrers={data.referrers} />}
@@ -241,14 +241,26 @@ function KPICard({ label, value, prev, color, icon, suffix }: {
   );
 }
 
-// ── Daily chart (simple bar chart) ──
-function DailyChart({ daily }: { daily: Record<string, { views: number; clicks: number; emails: number }> }) {
-  const entries = Object.entries(daily).sort(([a], [b]) => a.localeCompare(b));
+// ── Trend chart (SVG line chart, full period) ──
+function TrendChart({ daily, period }: { daily: Record<string, { views: number; clicks: number; emails: number }>; period: number }) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  if (entries.length === 0) {
+  // Fill all days in the period (including zero-activity days)
+  const entries: [string, { views: number; clicks: number; emails: number }][] = [];
+  const now = new Date();
+  for (let i = period - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    entries.push([key, daily[key] || { views: 0, clicks: 0, emails: 0 }]);
+  }
+
+  const hasData = entries.some(([, d]) => d.views > 0 || d.clicks > 0);
+
+  if (!hasData) {
     return (
       <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
-        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Daily Activity</h3>
+        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Trend</h3>
         <div className="flex items-center justify-center py-8">
           <p className="text-sm text-[var(--text-muted)]">No activity yet in this period</p>
         </div>
@@ -256,68 +268,119 @@ function DailyChart({ daily }: { daily: Record<string, { views: number; clicks: 
     );
   }
 
-  const maxViews = Math.max(...entries.map(([, d]) => d.views), 1);
+  const W = 800, H = 220;
+  const PAD = { top: 15, right: 15, bottom: 28, left: 42 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top - PAD.bottom;
 
-  // Show last 14 bars max for readability
-  const visible = entries.slice(-14);
+  const maxVal = Math.max(...entries.map(([, d]) => Math.max(d.views, d.clicks)), 1);
+  // Round up to a nice number for y-axis
+  const niceMax = maxVal <= 5 ? 5 : Math.ceil(maxVal / Math.pow(10, Math.floor(Math.log10(maxVal)))) * Math.pow(10, Math.floor(Math.log10(maxVal)));
+
+  const xStep = entries.length > 1 ? chartW / (entries.length - 1) : 0;
+  const getX = (i: number) => PAD.left + i * xStep;
+  const getY = (val: number) => PAD.top + chartH - (val / niceMax) * chartH;
+
+  // Build polyline points
+  const viewsPoints = entries.map(([, d], i) => `${getX(i)},${getY(d.views)}`).join(" ");
+  const clicksPoints = entries.map(([, d], i) => `${getX(i)},${getY(d.clicks)}`).join(" ");
+
+  // Area fill paths
+  const baseline = PAD.top + chartH;
+  const viewsArea = `M${getX(0)},${baseline} ${entries.map(([, d], i) => `L${getX(i)},${getY(d.views)}`).join(" ")} L${getX(entries.length - 1)},${baseline}Z`;
+  const clicksArea = `M${getX(0)},${baseline} ${entries.map(([, d], i) => `L${getX(i)},${getY(d.clicks)}`).join(" ")} L${getX(entries.length - 1)},${baseline}Z`;
+
+  // Y-axis labels (0, mid, max)
+  const yLabels = [0, Math.round(niceMax / 2), niceMax];
+
+  // X-axis: ~5 labels spread evenly
+  const labelCount = Math.min(5, entries.length);
+  const xLabelStep = entries.length > 1 ? Math.max(1, Math.floor((entries.length - 1) / (labelCount - 1))) : 1;
 
   const formatDay = (dateStr: string) => {
     const d = new Date(dateStr + "T00:00:00");
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
+  const formatNum = (n: number) => n >= 10_000 ? `${(n / 1_000).toFixed(1)}K` : n.toLocaleString();
+
   return (
     <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Daily Activity</h3>
+        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Trend</h3>
         <div className="flex items-center gap-3 text-[10px] text-[var(--text-muted)]">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-500" />Views</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" />Clicks</span>
         </div>
       </div>
 
-      <div className="flex items-end gap-1 h-32">
-        {visible.map(([day, d]) => {
-          const viewH = (d.views / maxViews) * 100;
-          const clickH = maxViews > 0 ? (d.clicks / maxViews) * 100 : 0;
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="xMidYMid meet">
+        {/* Gridlines */}
+        {yLabels.map((v) => (
+          <line key={v} x1={PAD.left} y1={getY(v)} x2={W - PAD.right} y2={getY(v)}
+            stroke="var(--border-subtle)" strokeWidth="1" strokeDasharray="4 4" />
+        ))}
+
+        {/* Y-axis labels */}
+        {yLabels.map((v) => (
+          <text key={v} x={PAD.left - 8} y={getY(v)} textAnchor="end" dominantBaseline="middle"
+            fill="var(--text-muted)" fontSize="10">{formatNum(v)}</text>
+        ))}
+
+        {/* Area fills */}
+        <path d={viewsArea} fill="rgba(139, 92, 246, 0.1)" />
+        <path d={clicksArea} fill="rgba(59, 130, 246, 0.08)" />
+
+        {/* Lines */}
+        <polyline points={viewsPoints} fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        <polyline points={clicksPoints} fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+
+        {/* Hover regions */}
+        {entries.map(([day, d], i) => {
+          const regionW = i === 0 || i === entries.length - 1 ? xStep / 2 + 1 : xStep;
+          const regionX = i === 0 ? getX(0) : getX(i) - xStep / 2;
           return (
-            <div key={day} className="flex-1 flex flex-col items-center gap-0.5 group relative">
-              {/* Tooltip */}
-              <div className="absolute bottom-full mb-2 px-2 py-1 rounded-lg text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", boxShadow: "var(--shadow-soft)" }}>
-                <p className="font-medium text-[var(--text-primary)]">{formatDay(day)}</p>
-                <p className="text-[var(--text-muted)]">{d.views} views, {d.clicks} clicks</p>
-              </div>
-              {/* Bars */}
-              <div className="w-full flex items-end gap-px" style={{ height: "100%" }}>
-                <div
-                  className="flex-1 rounded-t-sm bg-violet-500/70 transition-all duration-300"
-                  style={{ height: `${Math.max(viewH, 2)}%` }}
-                />
-                <div
-                  className="flex-1 rounded-t-sm bg-blue-500/70 transition-all duration-300"
-                  style={{ height: `${Math.max(clickH, 0)}%` }}
-                />
-              </div>
-            </div>
+            <g key={day} onMouseEnter={() => setHoveredIdx(i)} onMouseLeave={() => setHoveredIdx(null)}>
+              <rect x={regionX} y={PAD.top} width={Math.max(regionW, 4)} height={chartH} fill="transparent" />
+              {hoveredIdx === i && (
+                <>
+                  <line x1={getX(i)} y1={PAD.top} x2={getX(i)} y2={baseline} stroke="var(--border)" strokeWidth="1" strokeDasharray="2 2" />
+                  <circle cx={getX(i)} cy={getY(d.views)} r="4" fill="#8B5CF6" />
+                  <circle cx={getX(i)} cy={getY(d.clicks)} r="4" fill="#3B82F6" />
+                </>
+              )}
+            </g>
           );
         })}
-      </div>
 
-      {/* X-axis labels (first, middle, last) */}
-      {visible.length >= 3 && (
-        <div className="flex justify-between mt-2 text-[9px] text-[var(--text-muted)]">
-          <span>{formatDay(visible[0][0])}</span>
-          <span>{formatDay(visible[Math.floor(visible.length / 2)][0])}</span>
-          <span>{formatDay(visible[visible.length - 1][0])}</span>
+        {/* X-axis labels */}
+        {entries.map(([day], i) => {
+          if (i !== 0 && i !== entries.length - 1 && i % xLabelStep !== 0) return null;
+          return (
+            <text key={day} x={getX(i)} y={H - 5} textAnchor="middle" fill="var(--text-muted)" fontSize="9">
+              {formatDay(day)}
+            </text>
+          );
+        })}
+      </svg>
+
+      {/* Hover tooltip (rendered outside SVG for better styling) */}
+      {hoveredIdx !== null && (
+        <div className="mt-2 flex items-center gap-4 text-[11px] px-1 transition-opacity duration-150">
+          <span className="text-[var(--text-muted)] font-medium">{formatDay(entries[hoveredIdx][0])}</span>
+          <span className="text-violet-400">{entries[hoveredIdx][1].views} views</span>
+          <span className="text-blue-400">{entries[hoveredIdx][1].clicks} clicks</span>
+          {entries[hoveredIdx][1].emails > 0 && (
+            <span className="text-emerald-400">{entries[hoveredIdx][1].emails} emails</span>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// ── Top links ──
-function TopLinksSection({ links }: { links: TopLink[] }) {
+// ── Top links (with per-link CTR) ──
+function TopLinksSection({ links, totalViews }: { links: TopLink[]; totalViews: number }) {
   return (
     <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
       <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Top Links</h3>
@@ -325,15 +388,21 @@ function TopLinksSection({ links }: { links: TopLink[] }) {
         {links.map((link, i) => {
           const maxClicks = links[0]?.clicks || 1;
           const pct = (link.clicks / maxClicks) * 100;
+          const ctr = totalViews > 0 ? ((link.clicks / totalViews) * 100).toFixed(1) : "0.0";
           return (
             <div key={link.block_id || i}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm text-[var(--text-primary)] truncate flex-1 min-w-0 mr-3">
                   {link.title || link.url || "Untitled link"}
                 </span>
-                <span className="text-xs font-medium text-[var(--text-muted)] flex-shrink-0">
-                  {link.clicks} click{link.clicks !== 1 ? "s" : ""}
-                </span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-xs font-medium text-[var(--text-muted)]">
+                    {link.clicks} click{link.clicks !== 1 ? "s" : ""}
+                  </span>
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400">
+                    {ctr}% CTR
+                  </span>
+                </div>
               </div>
               <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-surface)" }}>
                 <div
@@ -349,9 +418,10 @@ function TopLinksSection({ links }: { links: TopLink[] }) {
   );
 }
 
-// ── Referrers ──
+// ── Referrers (with visual bars) ──
 function ReferrersSection({ referrers }: { referrers: Referrer[] }) {
   const total = referrers.reduce((sum, r) => sum + r.visits, 0);
+  const maxVisits = referrers[0]?.visits || 1;
 
   const formatSource = (s: string) => {
     if (s === "direct") return "Direct";
@@ -365,16 +435,27 @@ function ReferrersSection({ referrers }: { referrers: Referrer[] }) {
   return (
     <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
       <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Traffic Sources</h3>
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {referrers.map((r, i) => {
           const pct = total > 0 ? Math.round((r.visits / total) * 100) : 0;
+          const barPct = (r.visits / maxVisits) * 100;
           return (
-            <div key={i} className="flex items-center gap-3">
-              <span className="text-sm text-[var(--text-primary)] flex-1 min-w-0 truncate">
-                {formatSource(r.source)}
-              </span>
-              <span className="text-xs text-[var(--text-muted)] flex-shrink-0">{r.visits}</span>
-              <span className="text-[10px] text-[var(--text-muted)] w-8 text-right flex-shrink-0">{pct}%</span>
+            <div key={i}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm text-[var(--text-primary)] flex-1 min-w-0 truncate mr-3">
+                  {formatSource(r.source)}
+                </span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-xs text-[var(--text-muted)]">{r.visits}</span>
+                  <span className="text-[10px] text-[var(--text-muted)] w-8 text-right">{pct}%</span>
+                </div>
+              </div>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-surface)" }}>
+                <div
+                  className="h-full rounded-full bg-emerald-500/60 transition-all duration-500"
+                  style={{ width: `${Math.max(barPct, 3)}%` }}
+                />
+              </div>
             </div>
           );
         })}
