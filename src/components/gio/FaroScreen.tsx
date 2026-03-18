@@ -87,6 +87,78 @@ interface FaroScreenProps {
   client: GioClient | null;
 }
 
+function FaroBroadcastSection({ jwt }: { jwt: string | null }) {
+  const [composing, setComposing] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ sent: number; total: number } | null>(null);
+
+  const send = async () => {
+    if (!jwt || !subject.trim() || !body.trim()) return;
+    setSending(true);
+    setResult(null);
+    try {
+      const res = await fetch(`${API_BASE}/faro/broadcast`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, body }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setResult(data);
+        setSubject("");
+        setBody("");
+        setTimeout(() => { setComposing(false); setResult(null); }, 3000);
+      }
+    } catch { /* silent */ }
+    setSending(false);
+  };
+
+  return (
+    <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">Email Broadcast</h3>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Send an update to your Faro subscribers</p>
+        </div>
+        {!composing && (
+          <button onClick={() => setComposing(true)}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-all">
+            Compose
+          </button>
+        )}
+      </div>
+      {composing && (
+        <div className="mt-4 space-y-3">
+          <input type="text" value={subject} onChange={e => setSubject(e.target.value)}
+            placeholder="Subject line"
+            className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]" />
+          <textarea value={body} onChange={e => setBody(e.target.value)}
+            placeholder="Write your message..."
+            rows={4}
+            className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] resize-none" />
+          <div className="flex items-center gap-2">
+            <button onClick={send} disabled={sending || !subject.trim() || !body.trim()}
+              className="px-4 py-2 text-sm font-medium bg-[var(--accent)] text-white rounded-lg hover:bg-[var(--accent-hover)] disabled:opacity-50 flex items-center gap-1.5">
+              {sending ? <><Loader2 size={14} className="animate-spin" /> Sending...</> : "Send to all subscribers"}
+            </button>
+            <button onClick={() => { setComposing(false); setResult(null); }}
+              className="px-3 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+              Cancel
+            </button>
+          </div>
+          {result && (
+            <p className="text-sm text-emerald-400">
+              Sent to {result.sent} of {result.total} subscribers
+            </p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function FaroQRSection({ jwt, slug }: { jwt: string | null; slug: string }) {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
 
@@ -689,6 +761,9 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
               </button>
             </div>
           </section>
+
+          {/* Email Broadcast */}
+          <FaroBroadcastSection jwt={jwt} />
 
           {/* Blocks */}
           <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
