@@ -85,6 +85,59 @@ interface FaroScreenProps {
   client: GioClient | null;
 }
 
+function FaroQRSection({ jwt, slug }: { jwt: string | null; slug: string }) {
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!jwt) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/faro/qr`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
+        if (!res.ok || cancelled) return;
+        const blob = await res.blob();
+        if (cancelled) return;
+        setQrUrl(URL.createObjectURL(blob));
+      } catch { /* silent */ }
+    })();
+    return () => { cancelled = true; };
+  }, [jwt, slug]);
+
+  const download = () => {
+    if (!qrUrl) return;
+    const a = document.createElement("a");
+    a.href = qrUrl;
+    a.download = `faro-qr-${slug}.png`;
+    a.click();
+  };
+
+  return (
+    <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5">
+      <label className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] mb-3 block">QR Code</label>
+      <div className="flex items-center gap-4">
+        <div className="w-24 h-24 bg-white rounded-xl p-1.5 border border-[var(--border)] flex-shrink-0 flex items-center justify-center">
+          {qrUrl ? (
+            <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain" style={{ imageRendering: "pixelated" }} />
+          ) : (
+            <Loader2 size={20} className="text-[var(--text-muted)] animate-spin" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-[var(--text-secondary)] mb-2">
+            Share your page anywhere — business cards, flyers, in-store displays.
+          </p>
+          <button onClick={download} disabled={!qrUrl}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-all disabled:opacity-50">
+            Download PNG
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function FaroScreen({ jwt, client }: FaroScreenProps) {
   const [page, setPage] = useState<FaroPage | null>(null);
   const [blocks, setBlocks] = useState<FaroBlock[]>([]);
@@ -480,6 +533,9 @@ export default function FaroScreen({ jwt, client }: FaroScreenProps) {
 
           {/* Custom Domain */}
           <FaroDomainSection jwt={jwt} />
+
+          {/* QR Code */}
+          <FaroQRSection jwt={jwt} slug={page.slug} />
 
           {/* Profile */}
           <section className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-5 space-y-4">
