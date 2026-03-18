@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Share2, FileText, TrendingUp, TrendingDown, Clock, Sparkles, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, Share2, FileText, TrendingUp, TrendingDown, Clock, Sparkles, ExternalLink, Hash, Zap, AlignLeft, Info, AlertTriangle } from "lucide-react";
 import { ClientContext } from "./LobbyShell";
 import AddonGate from "@/components/ui/AddonGate";
 
@@ -170,6 +170,11 @@ export default function AnalyticsTab({ client, jwt, selectedPostId, activeAddons
             {/* Top Posts */}
             {data.top_posts.length > 0 && (
               <TopPosts posts={data.top_posts} selectedPostId={selectedPostId} />
+            )}
+
+            {/* Content Intelligence — suggestions from voice_learner */}
+            {client?.id && (
+              <ContentIntelligencePanel clientId={client.id} jwt={jwt} />
             )}
 
             {/* Content Insights */}
@@ -590,6 +595,96 @@ function TopPosts({ posts, selectedPostId }: { posts: TopPost[]; selectedPostId?
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// CONTENT INTELLIGENCE PANEL
+// ============================================================================
+
+interface Suggestion {
+  type: string;
+  title: string;
+  detail: string;
+  priority: number;
+}
+
+function ContentIntelligencePanel({ clientId, jwt }: { clientId: string; jwt: string | null }) {
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch_intel = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/clients/${clientId}/content-intelligence`, {
+          headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSuggestions(data.suggestions || []);
+        }
+      } catch { /* silent */ }
+      setLoading(false);
+    };
+    fetch_intel();
+  }, [clientId, jwt]);
+
+  if (loading) return null;
+  if (suggestions.length === 0) return null;
+
+  const iconMap: Record<string, React.ReactNode> = {
+    hashtags: <Hash className="w-4 h-4" />,
+    hashtags_avoid: <AlertTriangle className="w-4 h-4" />,
+    length: <AlignLeft className="w-4 h-4" />,
+    hooks: <Zap className="w-4 h-4" />,
+    trend: <TrendingUp className="w-4 h-4" />,
+    info: <Info className="w-4 h-4" />,
+  };
+
+  const colorMap: Record<string, { bg: string; text: string; border: string }> = {
+    hashtags: { bg: "rgba(34,197,94,0.08)", text: "#22c55e", border: "rgba(34,197,94,0.2)" },
+    hashtags_avoid: { bg: "rgba(245,158,11,0.08)", text: "#f59e0b", border: "rgba(245,158,11,0.2)" },
+    length: { bg: "rgba(99,102,241,0.08)", text: "#6366f1", border: "rgba(99,102,241,0.2)" },
+    hooks: { bg: "rgba(232,160,96,0.08)", text: "#e8a060", border: "rgba(232,160,96,0.2)" },
+    trend: { bg: "rgba(34,197,94,0.08)", text: "#22c55e", border: "rgba(34,197,94,0.2)" },
+    info: { bg: "var(--bg-surface)", text: "var(--text-muted)", border: "var(--border)" },
+  };
+
+  return (
+    <div className="rounded-2xl p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+      <div className="flex items-center gap-2 mb-4">
+        <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Content Intelligence</h3>
+      </div>
+
+      <div className="space-y-3">
+        {suggestions.map((s, i) => {
+          const colors = colorMap[s.type] || colorMap.info;
+          const icon = iconMap[s.type] || iconMap.info;
+
+          return (
+            <div
+              key={i}
+              className="rounded-xl p-4 transition-all"
+              style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                  style={{ background: `${colors.text}18`, color: colors.text }}
+                >
+                  {icon}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-[var(--text-primary)] mb-1">{s.title}</p>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{s.detail}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
