@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StyleHeroShowcase from "@/components/StyleHeroShowcase";
 import {
   Check,
@@ -19,7 +21,11 @@ import {
   Calendar,
   TrendingUp,
   AtSign,
+  Zap,
+  Shield,
 } from "lucide-react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* =============================================================================
    DATA
@@ -30,31 +36,37 @@ const freeFeatures = [
     icon: Link2,
     title: "Faro bio page",
     desc: "Your link-in-bio at yourname.guardia.page. 6 themes, unlimited links, social icons.",
+    span: "col-span-2",
   },
   {
     icon: Send,
     title: "Manual posting",
     desc: "Upload a photo, write a caption, post to your connected platforms. No limits.",
+    span: "col-span-1",
   },
   {
     icon: BarChart3,
     title: "Basic analytics",
     desc: "Page views, link clicks, and referrers. Know what's working.",
+    span: "col-span-1",
   },
   {
     icon: Mail,
     title: "Email capture",
     desc: "Collect subscriber emails right from your Faro page. Export anytime.",
+    span: "col-span-1",
   },
   {
     icon: Palette,
     title: "6 clean themes",
     desc: "From minimal to bold. Pick a theme, customize your page, publish in minutes.",
+    span: "col-span-1",
   },
   {
     icon: Calendar,
     title: "Content calendar",
     desc: "See your upcoming and past posts in one place. Stay consistent.",
+    span: "col-span-2",
   },
 ];
 
@@ -134,50 +146,88 @@ const steps = [
     num: "1",
     title: "Create your page",
     desc: "Sign up in 30 seconds. Your Faro page is live instantly.",
+    icon: Zap,
   },
   {
     num: "2",
     title: "Make it yours",
     desc: "Add links, pick a theme, write your bio. Drag to reorder.",
+    icon: Palette,
   },
   {
     num: "3",
     title: "Share it everywhere",
     desc: "Drop your link in your bio, email signature, or business card.",
+    icon: Globe,
   },
   {
     num: "4",
     title: "Grow with add-ons",
     desc: "When you're ready, add AI posting, platform connections, or analytics from the Store.",
+    icon: TrendingUp,
   },
 ];
 
 /* =============================================================================
-   SCROLL REVEAL HOOK
+   HOOKS
 ============================================================================= */
 
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
+function useGsapReveal(containerRef: React.RefObject<HTMLElement | HTMLDivElement | null>) {
   useEffect(() => {
-    const el = ref.current;
+    const el = containerRef.current;
     if (!el) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+    const children = el.querySelectorAll(".gsap-reveal");
+    if (children.length === 0) return;
 
-  return { ref, visible };
+    gsap.set(children, { opacity: 0, y: 50 });
+
+    ScrollTrigger.create({
+      trigger: el,
+      start: "top 85%",
+      onEnter: () => {
+        gsap.to(children, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          stagger: 0.08,
+          ease: "power2.out",
+        });
+      },
+      once: true,
+    });
+
+    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+  }, [containerRef]);
+}
+
+function useTilt(cardRef: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card || window.matchMedia("(pointer: coarse)").matches) return;
+
+    const onMove = (e: MouseEvent) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -6;
+      const rotateY = ((x - centerX) / centerX) * 6;
+      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    };
+
+    const onLeave = () => {
+      card.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)";
+    };
+
+    card.addEventListener("mousemove", onMove);
+    card.addEventListener("mouseleave", onLeave);
+    return () => {
+      card.removeEventListener("mousemove", onMove);
+      card.removeEventListener("mouseleave", onLeave);
+    };
+  }, [cardRef]);
 }
 
 /* =============================================================================
@@ -198,33 +248,52 @@ function Nav() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#FAF6F1]/95 backdrop-blur-md shadow-[0_1px_3px_rgba(42,42,42,0.08)]"
+          ? "bg-[var(--cream)]/95 backdrop-blur-md shadow-[0_1px_3px_rgba(42,42,42,0.08)]"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2.5">
           <img src="/images/guardia-logo.png" alt="Guardia" className="w-9 h-9 object-contain" />
-          <span className="text-[#2A2A2A] font-semibold tracking-tight font-[var(--font-fraunces)]">
+          <span
+            className={`font-semibold tracking-tight font-[var(--font-fraunces)] transition-colors duration-300 ${
+              scrolled ? "text-[var(--charcoal)]" : "text-white"
+            }`}
+          >
             Guardia
           </span>
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">Features</a>
-          <a href="#how" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">How It Works</a>
-          <a href="#addons" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">Add-Ons</a>
-          <a href="#compare" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">Compare</a>
-          <a href="#faq" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors">FAQ</a>
+          {["Features", "How It Works", "Add-Ons", "Compare", "FAQ"].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase().replace(/\s+/g, "").replace("add-ons", "addons")}`}
+              className={`text-sm transition-colors ${
+                scrolled
+                  ? "text-[var(--warmgray)] hover:text-[var(--charcoal)]"
+                  : "text-white/70 hover:text-white"
+              }`}
+            >
+              {item}
+            </a>
+          ))}
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <a href="/client" className="text-sm text-[#635C54] hover:text-[#2A2A2A] transition-colors font-medium">
+          <a
+            href="/client"
+            className={`text-sm font-medium transition-colors ${
+              scrolled
+                ? "text-[var(--warmgray)] hover:text-[var(--charcoal)]"
+                : "text-white/70 hover:text-white"
+            }`}
+          >
             Log In
           </a>
           <a
             href="/signup"
-            className="inline-flex items-center gap-2 bg-[#4338CA] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#3730A3] transition-all hover:-translate-y-px"
+            className="inline-flex items-center gap-2 bg-[var(--gold-500)] text-[var(--warm-black)] text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[var(--gold-300)] transition-all hover:-translate-y-px shadow-[0_4px_14px_rgba(212,168,83,0.35)]"
           >
             Create Your Page
             <ArrowRight className="w-4 h-4" />
@@ -233,7 +302,7 @@ function Nav() {
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 text-[#2A2A2A]"
+          className={`md:hidden p-2 transition-colors ${scrolled ? "text-[var(--charcoal)]" : "text-white"}`}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
         >
@@ -242,14 +311,21 @@ function Nav() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-[#FAF6F1] border-t border-[#E8DDD3] px-4 py-4 space-y-3">
-          <a href="#features" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Features</a>
-          <a href="#how" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">How It Works</a>
-          <a href="#addons" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Add-Ons</a>
-          <a href="#compare" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">Compare</a>
-          <a href="#faq" onClick={() => setMobileOpen(false)} className="block text-sm text-[#3D3D3D] py-2">FAQ</a>
-          <a href="/client" onClick={() => setMobileOpen(false)} className="block text-sm text-[#635C54] font-medium py-2">Log In</a>
-          <a href="/signup" className="block text-center bg-[#4338CA] text-white font-semibold py-3 rounded-xl">
+        <div className="md:hidden bg-[var(--cream)] border-t border-[var(--parchment)] px-4 py-4 space-y-3">
+          {["Features", "How It Works", "Add-Ons", "Compare", "FAQ"].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase().replace(/\s+/g, "").replace("add-ons", "addons")}`}
+              onClick={() => setMobileOpen(false)}
+              className="block text-sm text-[var(--charcoal-light)] py-2"
+            >
+              {item}
+            </a>
+          ))}
+          <a href="/client" onClick={() => setMobileOpen(false)} className="block text-sm text-[var(--warmgray)] font-medium py-2">
+            Log In
+          </a>
+          <a href="/signup" className="block text-center bg-[var(--gold-500)] text-[var(--warm-black)] font-semibold py-3 rounded-xl">
             Create Your Page
           </a>
         </div>
@@ -259,19 +335,77 @@ function Nav() {
 }
 
 function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    // Parallax orbs on scroll
+    const orbs = el.querySelectorAll(".hero-orb");
+    orbs.forEach((orb, i) => {
+      gsap.to(orb, {
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1,
+        },
+        y: i % 2 === 0 ? -80 : -120,
+      });
+    });
+
+    // Hero content entrance
+    const content = el.querySelector(".hero-content");
+    if (content) {
+      gsap.from(content.children, {
+        opacity: 0,
+        y: 40,
+        stagger: 0.12,
+        duration: 0.9,
+        ease: "power3.out",
+        delay: 0.2,
+      });
+    }
+  }, []);
+
   return (
-    <section className="pt-32 pb-20 px-6">
-      <div className="max-w-4xl mx-auto w-full text-center">
-        <div className="inline-flex items-center gap-2 bg-white border border-[#E8DDD3] rounded-full px-5 py-2.5 mb-8 shadow-[0_2px_8px_rgba(42,42,42,0.06)]">
-          <span className="text-sm font-semibold text-[#C9A227]">Free forever</span>
+    <section
+      ref={sectionRef}
+      className="relative min-h-[100vh] flex items-center justify-center px-6 overflow-hidden"
+      style={{ background: "linear-gradient(135deg, var(--warm-black) 0%, var(--warm-charcoal) 50%, var(--warm-black) 100%)" }}
+    >
+      {/* Gradient orbs */}
+      <div className="hero-orb animate-orb-drift absolute w-[500px] h-[500px] md:w-[700px] md:h-[700px] rounded-full opacity-40 -top-[15%] -right-[10%]"
+        style={{ background: "radial-gradient(circle, rgba(212,168,83,0.45) 0%, transparent 70%)", filter: "blur(80px)" }}
+      />
+      <div className="hero-orb animate-orb-drift-reverse absolute w-[400px] h-[400px] md:w-[550px] md:h-[550px] rounded-full opacity-30 -bottom-[10%] -left-[10%]"
+        style={{ background: "radial-gradient(circle, rgba(232,200,122,0.35) 0%, transparent 70%)", filter: "blur(80px)" }}
+      />
+      <div className="hero-orb absolute w-[300px] h-[300px] rounded-full opacity-20 top-[40%] left-[50%] -translate-x-1/2"
+        style={{ background: "radial-gradient(circle, rgba(252,182,159,0.3) 0%, transparent 70%)", filter: "blur(60px)" }}
+      />
+
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+
+      <div className="hero-content relative z-10 max-w-4xl mx-auto w-full text-center">
+        <div className="inline-flex items-center gap-2 glass-dark rounded-full px-5 py-2.5 mb-8">
+          <div className="w-2 h-2 rounded-full bg-[var(--gold-500)] animate-pulse" />
+          <span className="text-sm font-semibold text-[var(--gold-300)]">Free forever</span>
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#2A2A2A] mb-6 leading-[1.1] font-[var(--font-fraunces)]">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-[1.08] font-[var(--font-fraunces)]">
           Your page. Your links.{" "}
-          <span className="text-[#4338CA]">No catch.</span>
+          <span className="text-gradient-gold">No catch.</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-[#635C54] mb-4 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-white/60 mb-4 max-w-2xl mx-auto leading-relaxed">
           A bio page, manual posting, analytics, and email capture.
           All free. Add AI tools and platform connections only when you need them.
         </p>
@@ -279,66 +413,81 @@ function Hero() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10 mt-10">
           <a
             href="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-[#4338CA] text-white font-semibold px-8 py-4 rounded-xl hover:bg-[#3730A3] transition-all hover:-translate-y-px shadow-[0_4px_14px_rgba(67,56,202,0.3)]"
+            className="inline-flex items-center justify-center gap-2 bg-[var(--gold-500)] text-[var(--warm-black)] font-semibold px-8 py-4 rounded-xl hover:bg-[var(--gold-300)] transition-all hover:-translate-y-px shadow-[0_4px_24px_rgba(212,168,83,0.4)]"
           >
             Create Your Page
             <ArrowRight className="w-5 h-5" />
           </a>
           <a
             href="#features"
-            className="inline-flex items-center justify-center gap-2 border-[1.5px] border-[#4338CA] text-[#4338CA] font-medium px-8 py-4 rounded-xl hover:bg-[#4338CA]/5 transition-colors"
+            className="inline-flex items-center justify-center gap-2 border-[1.5px] border-white/20 text-white/80 font-medium px-8 py-4 rounded-xl hover:bg-white/5 hover:border-white/30 transition-all"
           >
             See What's Free
           </a>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-[#635C54]">
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#C9A227]" />
-            <span>No credit card</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#C9A227]" />
-            <span>No hidden fees</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#C9A227]" />
-            <span>Live in 30 seconds</span>
-          </div>
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
+          {["No credit card", "No hidden fees", "Live in 30 seconds"].map((text) => (
+            <div key={text} className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-[var(--gold-500)]" />
+              <span>{text}</span>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Bottom fade to cream */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--cream)] to-transparent" />
     </section>
   );
 }
 
+function TiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useTilt(ref);
+  return (
+    <div ref={ref} className={`transition-transform duration-150 ease-out ${className}`} style={{ transformStyle: "preserve-3d" }}>
+      {children}
+    </div>
+  );
+}
+
 function FreeFeatures() {
-  const { ref, visible } = useScrollReveal();
+  const sectionRef = useRef<HTMLElement>(null);
+  useGsapReveal(sectionRef);
 
   return (
-    <section id="features" className="py-24 px-6">
-      <div ref={ref} className="max-w-5xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            Everything you need. Free.
+    <section id="features" ref={sectionRef} className="relative py-28 px-6 overflow-hidden">
+      {/* Subtle orb behind features */}
+      <div className="absolute w-[500px] h-[500px] rounded-full opacity-20 top-[20%] right-[-10%] animate-orb-drift"
+        style={{ background: "radial-gradient(circle, rgba(212,168,83,0.25) 0%, transparent 70%)", filter: "blur(80px)" }}
+      />
+
+      <div className="max-w-5xl mx-auto relative z-10">
+        <div className="text-center mb-16 gsap-reveal">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--charcoal)] mb-4 font-[var(--font-fraunces)]">
+            Everything you need. <span className="text-gradient-gold">Free.</span>
           </h2>
-          <p className="text-[#635C54] text-lg max-w-xl mx-auto">
+          <p className="text-[var(--warmgray)] text-lg max-w-xl mx-auto">
             Not a trial. Not freemium. These features are yours forever.
           </p>
         </div>
 
-        <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {freeFeatures.map((f, i) => (
-            <div
+            <TiltCard
               key={i}
-              className="bg-white rounded-xl p-7 border border-[#E8DDD3] shadow-[0_4px_20px_rgba(42,42,42,0.06)] hover:shadow-[0_8px_40px_rgba(42,42,42,0.1)] transition-shadow"
-              style={{ transitionDelay: `${i * 80}ms` }}
+              className={`gsap-reveal ${f.span === "col-span-2" ? "md:col-span-2" : "md:col-span-1"}`}
             >
-              <div className="w-11 h-11 rounded-lg bg-[#4338CA]/8 flex items-center justify-center mb-5">
-                <f.icon className="w-5 h-5 text-[#4338CA]" />
+              <div className="gradient-border rounded-2xl p-7 bg-[var(--warm-white)] shadow-[var(--shadow-elevated)] hover:shadow-[var(--shadow-floating)] transition-shadow duration-300 h-full">
+                <div className="w-11 h-11 rounded-xl bg-[var(--gold-500)]/10 flex items-center justify-center mb-5" style={{ transform: "translateZ(20px)" }}>
+                  <f.icon className="w-5 h-5 text-[var(--gold-500)]" />
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--charcoal)] mb-2">{f.title}</h3>
+                <p className="text-[var(--warmgray)] text-sm leading-relaxed">{f.desc}</p>
               </div>
-              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">{f.title}</h3>
-              <p className="text-[#635C54] text-sm leading-relaxed">{f.desc}</p>
-            </div>
+            </TiltCard>
           ))}
         </div>
       </div>
@@ -347,30 +496,31 @@ function FreeFeatures() {
 }
 
 function HowItWorks() {
-  const { ref, visible } = useScrollReveal();
+  const sectionRef = useRef<HTMLElement>(null);
+  useGsapReveal(sectionRef);
 
   return (
-    <section id="how" className="py-24 px-6 bg-[#F0E8E0]">
-      <div ref={ref} className="max-w-5xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            Live in 30 seconds.
+    <section id="howitworks" ref={sectionRef} className="py-28 px-6 bg-[var(--linen)]">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-16 gsap-reveal">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--charcoal)] mb-4 font-[var(--font-fraunces)]">
+            Live in <span className="text-gradient-gold">30 seconds.</span>
           </h2>
-          <p className="text-[#635C54] text-lg">
+          <p className="text-[var(--warmgray)] text-lg">
             Four steps. No setup fees. No waiting.
           </p>
         </div>
 
-        <div className={`grid md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step, i) => (
-            <div key={i} className="text-center" style={{ transitionDelay: `${i * 100}ms` }}>
-              <div className="w-12 h-12 rounded-full bg-[#4338CA] text-white text-lg font-bold flex items-center justify-center mx-auto mb-5">
-                {step.num}
+            <div key={i} className="gsap-reveal text-center group">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--warm-black)] text-[var(--gold-300)] text-lg font-bold flex items-center justify-center mx-auto mb-5 shadow-[0_4px_20px_rgba(28,25,21,0.25)] group-hover:scale-110 transition-transform duration-200">
+                <step.icon className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2 font-[var(--font-fraunces)]">
+              <h3 className="text-lg font-semibold text-[var(--charcoal)] mb-2 font-[var(--font-fraunces)]">
                 {step.title}
               </h3>
-              <p className="text-[#635C54] text-sm leading-relaxed">{step.desc}</p>
+              <p className="text-[var(--warmgray)] text-sm leading-relaxed">{step.desc}</p>
             </div>
           ))}
         </div>
@@ -380,31 +530,37 @@ function HowItWorks() {
 }
 
 function AIShowcase() {
-  const { ref, visible } = useScrollReveal();
+  const sectionRef = useRef<HTMLElement>(null);
+  useGsapReveal(sectionRef);
 
   return (
-    <section className="py-24 px-6">
-      <div ref={ref} className="max-w-6xl mx-auto">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 bg-[#C9A227]/10 border border-[#C9A227]/20 rounded-full px-4 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-[#C9A227]" />
-            <span className="text-sm font-medium text-[#C9A227]">Optional add-on</span>
+    <section ref={sectionRef} className="relative py-28 px-6 overflow-hidden">
+      {/* Subtle orb */}
+      <div className="absolute w-[400px] h-[400px] rounded-full opacity-15 bottom-[10%] left-[-5%] animate-orb-drift-reverse"
+        style={{ background: "radial-gradient(circle, rgba(252,182,159,0.3) 0%, transparent 70%)", filter: "blur(70px)" }}
+      />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="text-center mb-6 gsap-reveal">
+          <div className="inline-flex items-center gap-2 bg-[var(--gold-500)]/10 border border-[var(--gold-500)]/20 rounded-full px-4 py-2 mb-6">
+            <Sparkles className="w-4 h-4 text-[var(--gold-500)]" />
+            <span className="text-sm font-medium text-[var(--gold-500)]">Optional add-on</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            AI Content Pipeline.
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--charcoal)] mb-4 font-[var(--font-fraunces)]">
+            AI Content <span className="text-gradient-gold">Pipeline.</span>
           </h2>
-          <p className="text-[#635C54] max-w-2xl mx-auto">
+          <p className="text-[var(--warmgray)] max-w-2xl mx-auto text-lg">
             Send a photo. We style it, write the caption, and post it on schedule.
             $4.99/mo when you're ready for it.
           </p>
         </div>
 
-        <div className={`mt-12 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div className="mt-12 gsap-reveal">
           <StyleHeroShowcase />
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-[#635C54] mb-4">
+        <div className="text-center mt-12 gsap-reveal">
+          <p className="text-[var(--warmgray)]">
             Works for any business. Bakeries, salons, restaurants, fitness — you name it.
           </p>
         </div>
@@ -414,112 +570,112 @@ function AIShowcase() {
 }
 
 function AddOns() {
-  const { ref, visible } = useScrollReveal();
+  const sectionRef = useRef<HTMLElement>(null);
+  useGsapReveal(sectionRef);
 
   return (
-    <section id="addons" className="py-24 px-6 bg-[#F0E8E0]">
-      <div ref={ref} className="max-w-5xl mx-auto">
-        <div className="text-center mb-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            Pay only for what you use.
+    <section id="addons" ref={sectionRef} className="py-28 px-6 bg-[var(--linen)]">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-4 gsap-reveal">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--charcoal)] mb-4 font-[var(--font-fraunces)]">
+            Pay only for <span className="text-gradient-gold">what you use.</span>
           </h2>
-          <p className="text-[#635C54] mb-2 max-w-xl mx-auto">
+          <p className="text-[var(--warmgray)] mb-2 max-w-xl mx-auto text-lg">
             The Chloe Store. Individual add-ons, each on its own monthly price.
             No bundles forced. Cancel any add-on anytime.
           </p>
         </div>
 
-        <div className={`mt-12 space-y-10 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div className="mt-12 space-y-10">
           {/* Platforms */}
-          <div>
+          <div className="gsap-reveal">
             <div className="flex items-center gap-2 mb-4">
-              <Globe className="w-5 h-5 text-[#4338CA]" />
-              <h3 className="text-lg font-semibold text-[#2A2A2A]">Platform Connections</h3>
+              <Globe className="w-5 h-5 text-[var(--gold-500)]" />
+              <h3 className="text-lg font-semibold text-[var(--charcoal)]">Platform Connections</h3>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {addons.platforms.map((a, i) => (
-                <div key={i} className="bg-white rounded-xl px-5 py-4 border border-[#E8DDD3] flex items-center justify-between">
-                  <span className="text-[#2A2A2A] font-medium text-sm">{a.name}</span>
-                  <span className="text-[#4338CA] font-semibold text-sm">{a.price}/mo</span>
+                <div key={i} className="glass-warm rounded-xl px-5 py-4 flex items-center justify-between shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elevated)] transition-shadow duration-200">
+                  <span className="text-[var(--charcoal)] font-medium text-sm">{a.name}</span>
+                  <span className="text-[var(--gold-500)] font-semibold text-sm">{a.price}/mo</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* AI */}
-          <div>
+          <div className="gsap-reveal">
             <div className="flex items-center gap-2 mb-4">
-              <Cpu className="w-5 h-5 text-[#4338CA]" />
-              <h3 className="text-lg font-semibold text-[#2A2A2A]">AI Tools</h3>
+              <Cpu className="w-5 h-5 text-[var(--gold-500)]" />
+              <h3 className="text-lg font-semibold text-[var(--charcoal)]">AI Tools</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-3">
               {addons.ai.map((a, i) => (
-                <div key={i} className="bg-white rounded-xl px-5 py-4 border border-[#E8DDD3]">
+                <div key={i} className="glass-warm rounded-xl px-5 py-4 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elevated)] transition-shadow duration-200">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[#2A2A2A] font-medium">{a.name}</span>
-                    <span className="text-[#4338CA] font-semibold text-sm">{a.price}/mo</span>
+                    <span className="text-[var(--charcoal)] font-medium">{a.name}</span>
+                    <span className="text-[var(--gold-500)] font-semibold text-sm">{a.price}/mo</span>
                   </div>
-                  <p className="text-[#635C54] text-sm">{a.desc}</p>
+                  <p className="text-[var(--warmgray)] text-sm">{a.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Extras */}
-          <div>
+          <div className="gsap-reveal">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-5 h-5 text-[#4338CA]" />
-              <h3 className="text-lg font-semibold text-[#2A2A2A]">Extras</h3>
+              <TrendingUp className="w-5 h-5 text-[var(--gold-500)]" />
+              <h3 className="text-lg font-semibold text-[var(--charcoal)]">Extras</h3>
             </div>
             <div className="grid md:grid-cols-3 gap-3">
               {addons.extras.map((a, i) => (
-                <div key={i} className="bg-white rounded-xl px-5 py-4 border border-[#E8DDD3]">
+                <div key={i} className="glass-warm rounded-xl px-5 py-4 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elevated)] transition-shadow duration-200">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[#2A2A2A] font-medium text-sm">{a.name}</span>
-                    <span className="text-[#4338CA] font-semibold text-sm">{a.price}/mo</span>
+                    <span className="text-[var(--charcoal)] font-medium text-sm">{a.name}</span>
+                    <span className="text-[var(--gold-500)] font-semibold text-sm">{a.price}/mo</span>
                   </div>
-                  <p className="text-[#635C54] text-sm">{a.desc}</p>
+                  <p className="text-[var(--warmgray)] text-sm">{a.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Bundles */}
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4 text-center">Save with bundles</h3>
+          <div className="mt-8 gsap-reveal">
+            <h3 className="text-lg font-semibold text-[var(--charcoal)] mb-4 text-center">Save with bundles</h3>
             <div className="grid md:grid-cols-3 gap-4">
               {bundles.map((b, i) => (
-                <div key={i} className="bg-white rounded-xl p-5 border border-[#E8DDD3] text-center">
-                  <h4 className="font-semibold text-[#2A2A2A] mb-1">{b.name}</h4>
-                  <p className="text-2xl font-bold text-[#4338CA] mb-2">{b.price}</p>
-                  <p className="text-sm text-[#635C54] mb-2">{b.includes}</p>
-                  <span className="inline-block text-xs font-semibold text-[#C9A227] bg-[#C9A227]/10 px-3 py-1 rounded-full">
-                    {b.save}
-                  </span>
-                </div>
+                <TiltCard key={i}>
+                  <div className="gradient-border rounded-2xl p-6 bg-[var(--warm-white)] shadow-[var(--shadow-elevated)] text-center h-full">
+                    <h4 className="font-semibold text-[var(--charcoal)] mb-1">{b.name}</h4>
+                    <p className="text-2xl font-bold text-gradient-gold mb-2">{b.price}</p>
+                    <p className="text-sm text-[var(--warmgray)] mb-2">{b.includes}</p>
+                    <span className="inline-block text-xs font-semibold text-[var(--gold-500)] bg-[var(--gold-500)]/10 px-3 py-1 rounded-full">
+                      Save {b.save}
+                    </span>
+                  </div>
+                </TiltCard>
               ))}
             </div>
           </div>
 
           {/* Cost examples */}
-          <div className="mt-8 bg-white rounded-xl p-6 border border-[#E8DDD3]">
-            <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4 text-center">What real creators pay</h3>
-            <div className="grid md:grid-cols-4 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-[#2A2A2A]">$0</p>
-                <p className="text-sm text-[#635C54] mt-1">Casual creator. Manual posting, free page.</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-[#2A2A2A]">~$7</p>
-                <p className="text-sm text-[#635C54] mt-1">Growing. Instagram + AI Pipeline.</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-[#2A2A2A]">~$13</p>
-                <p className="text-sm text-[#635C54] mt-1">Serious. 2 platforms + AI + scheduling + analytics.</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-[#2A2A2A]">~$25</p>
-                <p className="text-sm text-[#635C54] mt-1">Full stack. Everything. Still cheaper than competitors.</p>
+          <div className="mt-8 gsap-reveal">
+            <div className="gradient-border rounded-2xl p-6 bg-[var(--warm-white)] shadow-[var(--shadow-elevated)]">
+              <h3 className="text-lg font-semibold text-[var(--charcoal)] mb-4 text-center">What real creators pay</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                {[
+                  { amount: "$0", desc: "Casual creator. Manual posting, free page." },
+                  { amount: "~$7", desc: "Growing. Instagram + AI Pipeline." },
+                  { amount: "~$13", desc: "Serious. 2 platforms + AI + scheduling + analytics." },
+                  { amount: "~$25", desc: "Full stack. Everything. Still cheaper than competitors." },
+                ].map((ex, i) => (
+                  <div key={i}>
+                    <p className="text-2xl font-bold text-gradient-gold">{ex.amount}</p>
+                    <p className="text-sm text-[var(--warmgray)] mt-1">{ex.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -530,47 +686,51 @@ function AddOns() {
 }
 
 function Comparison() {
-  const { ref, visible } = useScrollReveal();
+  const sectionRef = useRef<HTMLElement>(null);
+  useGsapReveal(sectionRef);
 
   return (
-    <section id="compare" className="py-24 px-6">
-      <div ref={ref} className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-            More for less.
+    <section id="compare" ref={sectionRef} className="relative py-28 px-6 overflow-hidden">
+      <div className="absolute w-[400px] h-[400px] rounded-full opacity-15 top-[10%] left-[-8%] animate-orb-drift"
+        style={{ background: "radial-gradient(circle, rgba(212,168,83,0.2) 0%, transparent 70%)", filter: "blur(70px)" }}
+      />
+
+      <div className="max-w-4xl mx-auto relative z-10">
+        <div className="text-center mb-12 gsap-reveal">
+          <h2 className="text-3xl md:text-5xl font-bold text-[var(--charcoal)] mb-4 font-[var(--font-fraunces)]">
+            More for <span className="text-gradient-gold">less.</span>
           </h2>
-          <p className="text-[#635C54] text-lg">
+          <p className="text-[var(--warmgray)] text-lg">
             See how Guardia stacks up against the rest.
           </p>
         </div>
 
-        <div className={`relative transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          {/* Scroll hint for mobile */}
-          <div className="md:hidden text-xs text-[#635C54]/60 text-right mb-2 pr-1">Swipe to compare →</div>
+        <div className="gsap-reveal gradient-border rounded-2xl overflow-hidden bg-[var(--warm-white)] shadow-[var(--shadow-elevated)]">
+          <div className="md:hidden text-xs text-[var(--warmgray)]/60 text-right p-3 pb-0">Swipe to compare →</div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
               <thead>
-                <tr className="border-b-2 border-[#E8DDD3]">
-                  <th className="text-left py-3 px-3 text-[#635C54] font-medium sticky left-0 bg-[#FAF6F1] z-10">Feature</th>
-                  <th className="text-center py-3 px-3 text-[#4338CA] font-bold">Guardia</th>
-                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Linktree</th>
-                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Beacons</th>
-                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Later</th>
-                  <th className="text-center py-3 px-3 text-[#635C54] font-medium">Buffer</th>
+                <tr className="border-b-2 border-[var(--parchment)]">
+                  <th className="text-left py-4 px-4 text-[var(--warmgray)] font-medium sticky left-0 bg-[var(--warm-white)] z-10">Feature</th>
+                  <th className="text-center py-4 px-4 text-[var(--gold-500)] font-bold">Guardia</th>
+                  <th className="text-center py-4 px-4 text-[var(--warmgray)] font-medium">Linktree</th>
+                  <th className="text-center py-4 px-4 text-[var(--warmgray)] font-medium">Beacons</th>
+                  <th className="text-center py-4 px-4 text-[var(--warmgray)] font-medium">Later</th>
+                  <th className="text-center py-4 px-4 text-[var(--warmgray)] font-medium">Buffer</th>
                 </tr>
               </thead>
               <tbody>
                 {competitors.slice(1).map((row, i) => (
-                  <tr key={i} className="border-b border-[#E8DDD3]/60">
-                    <td className="py-3 px-3 text-[#2A2A2A] font-medium sticky left-0 bg-[#FAF6F1] z-10">{row.name}</td>
+                  <tr key={i} className="border-b border-[var(--parchment)]/40 hover:bg-[var(--gold-500)]/[0.03] transition-colors">
+                    <td className="py-3.5 px-4 text-[var(--charcoal)] font-medium sticky left-0 bg-[var(--warm-white)] z-10">{row.name}</td>
                     {[row.guardia, row.linktree, row.beacons, row.later, row.buffer].map((val, j) => (
-                      <td key={j} className="py-3 px-3 text-center whitespace-nowrap">
+                      <td key={j} className="py-3.5 px-4 text-center whitespace-nowrap">
                         {val === true ? (
-                          <Check className="w-5 h-5 text-[#C9A227] mx-auto" />
+                          <Check className="w-5 h-5 text-[var(--gold-500)] mx-auto" />
                         ) : val === false ? (
-                          <span className="text-[#D4D0CC]">—</span>
+                          <span className="text-[var(--parchment)]">—</span>
                         ) : (
-                          <span className={j === 0 ? "font-semibold text-[#4338CA]" : "text-[#635C54]"}>
+                          <span className={j === 0 ? "font-semibold text-[var(--gold-500)]" : "text-[var(--warmgray)]"}>
                             {val as string}
                           </span>
                         )}
@@ -589,26 +749,27 @@ function Comparison() {
 
 function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
-  const { ref, visible } = useScrollReveal();
+  const sectionRef = useRef<HTMLElement>(null);
+  useGsapReveal(sectionRef);
 
   return (
-    <section id="faq" className="py-24 px-6 bg-[#F0E8E0]">
-      <div ref={ref} className="max-w-2xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] text-center mb-12 font-[var(--font-fraunces)]">
-          Frequently asked questions
+    <section id="faq" ref={sectionRef} className="py-28 px-6 bg-[var(--linen)]">
+      <div className="max-w-2xl mx-auto">
+        <h2 className="gsap-reveal text-3xl md:text-5xl font-bold text-[var(--charcoal)] text-center mb-12 font-[var(--font-fraunces)]">
+          Frequently asked <span className="text-gradient-gold">questions</span>
         </h2>
 
-        <div className={`space-y-3 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <div key={i} className="bg-white rounded-xl border border-[#E8DDD3] overflow-hidden shadow-[0_2px_8px_rgba(42,42,42,0.04)]">
+            <div key={i} className="gsap-reveal gradient-border rounded-2xl overflow-hidden bg-[var(--warm-white)] shadow-[var(--shadow-soft)]">
               <button
                 onClick={() => setOpen(open === i ? null : i)}
                 aria-expanded={open === i}
-                className="w-full flex items-center justify-between p-5 text-left hover:bg-[#FAF6F1] transition-colors"
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-[var(--gold-500)]/[0.03] transition-colors"
               >
-                <span className="font-medium text-[#2A2A2A] pr-4">{faq.q}</span>
+                <span className="font-medium text-[var(--charcoal)] pr-4">{faq.q}</span>
                 <ChevronDown
-                  className={`w-5 h-5 text-[#C9A227] flex-shrink-0 transition-transform duration-200 ${
+                  className={`w-5 h-5 text-[var(--gold-500)] flex-shrink-0 transition-transform duration-200 ${
                     open === i ? "rotate-180" : ""
                   }`}
                 />
@@ -618,7 +779,7 @@ function FAQ() {
                   open === i ? "max-h-48" : "max-h-0"
                 }`}
               >
-                <p className="px-5 pb-5 text-[#635C54] leading-relaxed">{faq.a}</p>
+                <p className="px-5 pb-5 text-[var(--warmgray)] leading-relaxed">{faq.a}</p>
               </div>
             </div>
           ))}
@@ -629,28 +790,60 @@ function FAQ() {
 }
 
 function FinalCTA() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const orbs = el.querySelectorAll(".cta-orb");
+    orbs.forEach((orb, i) => {
+      gsap.to(orb, {
+        scrollTrigger: {
+          trigger: el,
+          start: "top 80%",
+          end: "bottom top",
+          scrub: 1,
+        },
+        y: i % 2 === 0 ? -40 : -60,
+      });
+    });
+  }, []);
+
   return (
-    <section className="py-24 px-6">
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4 font-[var(--font-fraunces)]">
-          Start creating. It's free.
+    <section
+      ref={sectionRef}
+      className="relative py-32 px-6 overflow-hidden"
+      style={{ background: "linear-gradient(135deg, var(--warm-black) 0%, var(--warm-charcoal) 50%, var(--warm-black) 100%)" }}
+    >
+      {/* Orbs */}
+      <div className="cta-orb animate-orb-drift-reverse absolute w-[400px] h-[400px] rounded-full opacity-30 -top-[20%] right-[10%]"
+        style={{ background: "radial-gradient(circle, rgba(212,168,83,0.35) 0%, transparent 70%)", filter: "blur(70px)" }}
+      />
+      <div className="cta-orb animate-orb-drift absolute w-[350px] h-[350px] rounded-full opacity-20 bottom-[-15%] left-[5%]"
+        style={{ background: "radial-gradient(circle, rgba(232,200,122,0.3) 0%, transparent 70%)", filter: "blur(60px)" }}
+      />
+
+      <div className="max-w-3xl mx-auto text-center relative z-10">
+        <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 font-[var(--font-fraunces)]">
+          Start creating. <span className="text-gradient-gold">It's free.</span>
         </h2>
-        <p className="text-lg text-[#635C54] mb-2">
+        <p className="text-lg text-white/50 mb-2">
           Your Faro page is live the moment you sign up.
         </p>
-        <p className="text-lg text-[#2A2A2A] font-medium mb-8">
+        <p className="text-lg text-white/80 font-medium mb-8">
           Bio page. Links. Analytics. Email capture. All yours.
         </p>
 
         <a
           href="/signup"
-          className="inline-flex items-center gap-2 bg-[#4338CA] text-white font-semibold px-8 py-4 rounded-xl hover:bg-[#3730A3] transition-all hover:-translate-y-px shadow-[0_4px_14px_rgba(67,56,202,0.3)] text-lg"
+          className="inline-flex items-center gap-2 bg-[var(--gold-500)] text-[var(--warm-black)] font-semibold px-8 py-4 rounded-xl hover:bg-[var(--gold-300)] transition-all hover:-translate-y-px shadow-[0_4px_24px_rgba(212,168,83,0.4)] text-lg"
         >
           Create Your Page
           <ArrowRight className="w-5 h-5" />
         </a>
 
-        <p className="mt-6 text-sm text-[#635C54]">
+        <p className="mt-6 text-sm text-white/30">
           Free forever &middot; No credit card required
         </p>
       </div>
@@ -660,20 +853,20 @@ function FinalCTA() {
 
 function Footer() {
   return (
-    <footer className="border-t border-[#E8DDD3] py-12 px-6 bg-[#FAF6F1]">
+    <footer className="border-t border-white/10 py-12 px-6" style={{ background: "var(--warm-black)" }}>
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2.5">
           <img src="/images/guardia-logo.png" alt="Guardia" className="w-9 h-9 object-contain" />
-          <span className="text-[#2A2A2A] font-semibold font-[var(--font-fraunces)]">Guardia</span>
+          <span className="text-white font-semibold font-[var(--font-fraunces)]">Guardia</span>
         </div>
 
-        <p className="text-sm text-[#635C54]">
+        <p className="text-sm text-white/40">
           &copy; {new Date().getFullYear()} Guardia Content Intelligence &middot; Built in Northumberland, PA
         </p>
 
-        <div className="flex gap-6 text-sm text-[#635C54]">
-          <a href="/privacy" className="hover:text-[#2A2A2A] transition-colors">Privacy</a>
-          <a href="/terms" className="hover:text-[#2A2A2A] transition-colors">Terms</a>
+        <div className="flex gap-6 text-sm text-white/40">
+          <a href="/privacy" className="hover:text-white/70 transition-colors">Privacy</a>
+          <a href="/terms" className="hover:text-white/70 transition-colors">Terms</a>
         </div>
       </div>
     </footer>
@@ -738,7 +931,7 @@ const structuredData = {
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#FAF6F1]">
+    <main className="min-h-screen bg-[var(--cream)]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

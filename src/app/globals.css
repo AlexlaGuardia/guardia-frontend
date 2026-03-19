@@ -46,6 +46,29 @@
   --shadow-soft: 0 4px 20px rgba(42, 42, 42, 0.08);
   --shadow-medium: 0 8px 40px rgba(42, 42, 42, 0.12);
   --shadow-lift: 0 12px 48px rgba(42, 42, 42, 0.16);
+
+  /* Extended warm palette for depth sections */
+  --warm-black:    #1C1915;
+  --warm-charcoal: #2A2318;
+  --linen:         #F5EDE3;
+  --warm-white:    #FFFBF5;
+  --gold-100:      #F5E6C8;
+  --gold-300:      #E8C87A;
+  --gold-500:      #D4A853;
+
+  /* Layered depth shadows (warm-tinted) */
+  --shadow-elevated:
+    0 1px 1px rgba(42, 35, 24, 0.06),
+    0 2px 2px rgba(42, 35, 24, 0.06),
+    0 4px 4px rgba(42, 35, 24, 0.06),
+    0 8px 8px rgba(42, 35, 24, 0.06),
+    0 16px 16px rgba(42, 35, 24, 0.06);
+  --shadow-floating:
+    0 1px 2px rgba(42, 35, 24, 0.08),
+    0 4px 8px rgba(42, 35, 24, 0.08),
+    0 8px 16px rgba(42, 35, 24, 0.08),
+    0 16px 32px rgba(42, 35, 24, 0.06),
+    0 32px 64px rgba(42, 35, 24, 0.04);
 }
 
 /* HQ pages keep dark mode */
@@ -300,4 +323,83 @@ a, button {
 }
 .animate-ticker:hover {
   animation-play-state: paused;
+}
+
+/* ============================================ */
+/* 3D DEPTH UTILITIES                            */
+/* ============================================ */
+
+/* Gradient text */
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-100));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Orb drift animations */
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.97); }
+}
+
+@keyframes orb-drift-reverse {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 20px) scale(0.96); }
+  66% { transform: translate(15px, -25px) scale(1.04); }
+}
+
+.animate-orb-drift {
+  animation: orb-drift 12s ease-in-out infinite;
+}
+
+.animate-orb-drift-reverse {
+  animation: orb-drift-reverse 14s ease-in-out infinite;
+}
+
+/* 3D tilt container */
+.tilt-container {
+  perspective: 1000px;
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+/* Glass card for warm backgrounds */
+.glass-warm {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Glass card for dark backgrounds */
+.glass-dark {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient border via mask (for bento cards) */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(212, 175, 100, 0.4), rgba(255, 255, 255, 0.08));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
