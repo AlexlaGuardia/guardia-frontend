@@ -666,7 +666,8 @@ const ConnectedAccount = ({ platform, icon: Icon, connection, onConnect }: Conne
                 if (!window.confirm(`Disconnect ${platform}? Posts won't publish to this platform until reconnected.`)) return;
                 try {
                   const jwt = localStorage.getItem('guardia_jwt');
-                  await fetch(`${API_BASE}/auth/facebook/disconnect?client_id=${clientId}&platform=${platform.toLowerCase()}`, {
+                  const authBase = platform.toLowerCase() === 'tiktok' ? 'tiktok' : 'facebook';
+                  await fetch(`${API_BASE}/auth/${authBase}/disconnect?client_id=${clientId}&platform=${platform.toLowerCase()}`, {
                     headers: { Authorization: `Bearer ${jwt}` }
                   });
                   window.location.reload();
@@ -808,6 +809,7 @@ const LockedPlatformCard = ({ platform, icon: Icon }: { platform: string; icon: 
 // =============================================================================
 const ConnectedAccountsSection = () => {
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [tiktokConnection, setTiktokConnection] = useState<Connection | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -817,12 +819,28 @@ const ConnectedAccountsSection = () => {
       if (!jwt || !clientId) { setLoading(false); return; }
 
       try {
-        const res = await fetch(`${API_BASE}/auth/facebook/status?client_id=${clientId}`, {
-          headers: { Authorization: `Bearer ${jwt}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const [fbRes, ttRes] = await Promise.all([
+          fetch(`${API_BASE}/auth/facebook/status?client_id=${clientId}`, {
+            headers: { Authorization: `Bearer ${jwt}` }
+          }),
+          fetch(`${API_BASE}/auth/tiktok/status?client_id=${clientId}`, {
+            headers: { Authorization: `Bearer ${jwt}` }
+          }),
+        ]);
+        if (fbRes.ok) {
+          const data = await fbRes.json();
           setConnections(data.connections || []);
+        }
+        if (ttRes.ok) {
+          const ttData = await ttRes.json();
+          if (ttData.connected) {
+            setTiktokConnection({
+              platform: 'tiktok',
+              status: ttData.token_status === 'dead' ? 'needs_refresh' : 'connected',
+              handle: ttData.handle,
+              needs_action: ttData.warning != null,
+            });
+          }
         }
       } catch (err) {
         console.error('Connections fetch error:', err);
@@ -834,12 +852,32 @@ const ConnectedAccountsSection = () => {
 
   const fbConnection = connections.find(c => c.platform === 'facebook');
   const igConnection = connections.find(c => c.platform === 'instagram');
-  const needsAttention = connections.some(c => c.needs_action);
+  const needsAttention = connections.some(c => c.needs_action) || tiktokConnection?.needs_action;
+
+  const handleTikTokConnect = () => {
+    const clientId = localStorage.getItem('guardia_client_id');
+    window.location.href = `${API_BASE}/auth/tiktok/connect?client_id=${clientId}`;
+  };
+
+  const handleTikTokDisconnect = async () => {
+    const clientId = getClientId();
+    if (!clientId) return;
+    if (!window.confirm('Disconnect TikTok? Posts won\'t publish to this platform until reconnected.')) return;
+    try {
+      const jwt = localStorage.getItem('guardia_jwt');
+      await fetch(`${API_BASE}/auth/tiktok/disconnect?client_id=${clientId}`, {
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error('TikTok disconnect error:', err);
+    }
+  };
 
   return (
     <>
       <Section title="Connected Accounts">
-        <div className="p-4">
+        <div className="p-4 space-y-2">
           {loading ? (
             <div className="flex justify-center py-4">
               <div className="w-5 h-5 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
@@ -848,10 +886,14 @@ const ConnectedAccountsSection = () => {
             <>
               <ConnectedAccount platform="Facebook" icon={Icons.Facebook} connection={fbConnection} />
               {igConnection && igConnection.status !== 'disconnected' && (
-                <div className="mt-2">
-                  <ConnectedAccount platform="Instagram" icon={Icons.Instagram} connection={igConnection} />
-                </div>
+                <ConnectedAccount platform="Instagram" icon={Icons.Instagram} connection={igConnection} />
               )}
+              <ConnectedAccount
+                platform="TikTok"
+                icon={Icons.TikTok}
+                connection={tiktokConnection || undefined}
+                onConnect={handleTikTokConnect}
+              />
             </>
           )}
         </div>
@@ -867,7 +909,6 @@ const ConnectedAccountsSection = () => {
           {(!igConnection || igConnection.status === 'disconnected') && (
             <LockedPlatformCard platform="Instagram" icon={Icons.Instagram} />
           )}
-          <LockedPlatformCard platform="TikTok" icon={Icons.TikTok} />
           <LockedPlatformCard platform="LinkedIn" icon={Icons.LinkedIn} />
           <LockedPlatformCard platform="YouTube" icon={Icons.YouTube} />
         </div>

@@ -95,7 +95,7 @@ export default function PostCard({ post, onClick }: PostCardProps) {
             src={post.image_url}
             alt=""
             fill
-            className="object-cover"
+            className="object-contain"
             sizes="(max-width: 768px) 100vw, 560px"
           />
           {badge && (

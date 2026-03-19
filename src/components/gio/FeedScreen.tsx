@@ -416,7 +416,7 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
                     {/* Image */}
                     <div className="relative w-full aspect-[4/3] bg-[var(--bg-surface)] overflow-hidden">
                       {post.image_url ? (
-                        <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+                        <img src={post.image_url} alt="" className="w-full h-full object-contain" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
