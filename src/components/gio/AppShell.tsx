@@ -98,7 +98,7 @@ function AuthScreen({ mode, setupToken, setupData, onSuccess }: AuthScreenProps)
           <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-semibold"
-                style={{ background: "linear-gradient(135deg, #4338CA, #7c3aed)", boxShadow: "0 2px 8px rgba(99,102,241,0.3)" }}>
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-hover))", boxShadow: "0 2px 8px rgba(201,162,39,0.3)" }}>
                 G
               </div>
               <div>
