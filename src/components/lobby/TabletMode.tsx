@@ -11,6 +11,7 @@ import CommentsInbox from "./CommentsInbox";
 import ContentDirectionPanel from "./ContentDirectionPanel";
 import PlanningPreferencesPanel from "./PlanningPreferencesPanel";
 import PostComposerScreen from "../gio/PostComposerScreen";
+import StoreScreen from "../gio/StoreScreen";
 // VideoTab archived - see guardia-core/archive/video_pipeline_jan15/
 
 interface TabletModeProps {
@@ -241,16 +242,8 @@ export default function TabletMode({
             />
           )}
           {activeTab === "store" && (
-            <div className="h-full overflow-y-auto p-6">
-              <div className="max-w-2xl mx-auto text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Add-on Store</h2>
-                <p className="text-[var(--text-secondary)]">Store loading...</p>
-              </div>
+            <div className="h-full">
+              <StoreScreen client={client} jwt={jwt} />
             </div>
           )}
           {activeTab === "account" && (

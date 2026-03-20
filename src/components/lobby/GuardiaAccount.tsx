@@ -916,15 +916,6 @@ const ConnectedAccountsSection = () => {
         )}
       </Section>
 
-      <Section title="Platform Add-ons">
-        <div className="p-4 space-y-2">
-          {(!igConnection || igConnection.status === 'disconnected') && (
-            <LockedPlatformCard platform="Instagram" icon={Icons.Instagram} />
-          )}
-          <LockedPlatformCard platform="LinkedIn" icon={Icons.LinkedIn} />
-          <LockedPlatformCard platform="YouTube" icon={Icons.YouTube} />
-        </div>
-      </Section>
     </>
   );
 };
