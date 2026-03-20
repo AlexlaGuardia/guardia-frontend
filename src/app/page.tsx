@@ -58,7 +58,7 @@ const freeFeatures = [
   },
   {
     icon: Palette,
-    title: "6 clean themes",
+    title: "12 clean themes",
     desc: "From minimal to bold. Pick a theme, customize your page, publish in minutes.",
     span: "col-span-1",
   },
@@ -75,8 +75,6 @@ const addons = {
     { name: "Instagram", price: "$1.99" },
     { name: "Facebook", price: "$1.99" },
     { name: "TikTok", price: "$1.99" },
-    { name: "X / Twitter", price: "$2.99" },
-    { name: "LinkedIn", price: "$1.99" },
     { name: "Pinterest", price: "$1.99" },
   ],
   ai: [
@@ -90,11 +88,7 @@ const addons = {
   ],
 };
 
-const bundles = [
-  { name: "Starter Pack", price: "$8.99/mo", includes: "1 platform + AI Pipeline + Analytics", save: "$1" },
-  { name: "Growth Pack", price: "$16.99/mo", includes: "3 platforms + AI + Scheduling + Analytics", save: "$3" },
-  { name: "Full Stack", price: "$24.99/mo", includes: "Everything", save: "$5+" },
-];
+const bundles: { name: string; price: string; includes: string; save: string }[] = [];
 
 const competitors = [
   { name: "Feature", guardia: "Guardia", linktree: "Linktree", beacons: "Beacons", later: "Later", buffer: "Buffer" },
@@ -637,25 +631,6 @@ function AddOns() {
                   </div>
                   <p className="text-[var(--warmgray)] text-sm">{a.desc}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bundles */}
-          <div className="mt-8 gsap-reveal">
-            <h3 className="text-lg font-semibold text-[var(--charcoal)] mb-4 text-center">Save with bundles</h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              {bundles.map((b, i) => (
-                <TiltCard key={i}>
-                  <div className="gradient-border rounded-2xl p-6 bg-[var(--warm-white)] shadow-[var(--shadow-elevated)] text-center h-full">
-                    <h4 className="font-semibold text-[var(--charcoal)] mb-1">{b.name}</h4>
-                    <p className="text-2xl font-bold text-gradient-gold mb-2">{b.price}</p>
-                    <p className="text-sm text-[var(--warmgray)] mb-2">{b.includes}</p>
-                    <span className="inline-block text-xs font-semibold text-[var(--gold-500)] bg-[var(--gold-500)]/10 px-3 py-1 rounded-full">
-                      Save {b.save}
-                    </span>
-                  </div>
-                </TiltCard>
               ))}
             </div>
           </div>

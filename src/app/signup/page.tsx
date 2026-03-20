@@ -103,10 +103,23 @@ export default function SignupPage() {
     setLoading(false);
   };
 
+  const inputClasses =
+    "w-full px-4 py-3 bg-[var(--warm-black)] border border-[#2a2520] rounded-xl text-white placeholder-[#6b5f52] focus:outline-none focus:border-[var(--gold-500)] focus:ring-2 focus:ring-[var(--gold-500)]/20 transition-all";
+
   return (
-    <main className="min-h-screen bg-[#050506] relative overflow-hidden">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-violet-950/20 via-transparent to-transparent" />
+    <main
+      className="min-h-screen relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg, var(--warm-black) 0%, var(--warm-charcoal) 50%, var(--warm-black) 100%)" }}
+    >
+      {/* Gradient orbs matching landing hero */}
+      <div
+        className="absolute w-[500px] h-[500px] rounded-full opacity-30 -top-[15%] -right-[10%]"
+        style={{ background: "radial-gradient(circle, rgba(212,168,83,0.35) 0%, transparent 70%)", filter: "blur(80px)" }}
+      />
+      <div
+        className="absolute w-[400px] h-[400px] rounded-full opacity-20 -bottom-[10%] -left-[10%]"
+        style={{ background: "radial-gradient(circle, rgba(232,200,122,0.25) 0%, transparent 70%)", filter: "blur(80px)" }}
+      />
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
@@ -114,61 +127,71 @@ export default function SignupPage() {
           <div className="text-center mb-8">
             <a href="/" className="inline-flex items-center gap-2 mb-4">
               <img src="/images/guardia-logo.png" alt="Guardia" className="w-8 h-8 object-contain" />
-              <span className="text-xl font-semibold text-white">Guardia</span>
+              <span className="text-xl font-semibold text-white font-[var(--font-fraunces)]">Guardia</span>
             </a>
-            <h1 className="text-2xl font-bold text-white mt-4">Start creating. It&rsquo;s free.</h1>
-            <p className="text-[#a1a1aa] text-sm mt-2">
-              Your bio page, manual posting, and basic analytics — no credit card, no catch.
+            <h1 className="text-2xl font-bold text-white mt-4 font-[var(--font-fraunces)]">
+              Start creating. <span className="text-[var(--gold-500)]">It&rsquo;s free.</span>
+            </h1>
+            <p className="text-white/50 text-sm mt-2">
+              Your bio page, manual posting, and analytics — no credit card, no catch.
             </p>
           </div>
 
           {/* Card */}
-          <div className="bg-[#0d0d0e] border border-[#1e1e22] rounded-2xl p-8">
+          <div
+            className="rounded-2xl p-8"
+            style={{
+              background: "rgba(28,25,21,0.8)",
+              border: "1px solid rgba(212,168,83,0.12)",
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
+            }}
+          >
             <div className="space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-[#a1a1aa] text-sm mb-2">Your name</label>
+                <label className="block text-white/60 text-sm mb-2">Your name</label>
                 <input
                   type="text"
                   value={form.contact_name}
                   onChange={(e) => updateField("contact_name", e.target.value)}
                   placeholder="Alex Black"
-                  className="w-full px-4 py-3 bg-[#050506] border border-[#1e1e22] rounded-xl text-white placeholder-[#52525b] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all"
+                  className={inputClasses}
                   disabled={loading}
                 />
               </div>
 
               {/* Business name (optional) */}
               <div>
-                <label className="block text-[#a1a1aa] text-sm mb-2">
-                  Business name <span className="text-[#52525b]">(optional)</span>
+                <label className="block text-white/60 text-sm mb-2">
+                  Business name <span className="text-white/25">(optional)</span>
                 </label>
                 <input
                   type="text"
                   value={form.business_name}
                   onChange={(e) => updateField("business_name", e.target.value)}
                   placeholder="Your brand or business"
-                  className="w-full px-4 py-3 bg-[#050506] border border-[#1e1e22] rounded-xl text-white placeholder-[#52525b] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all"
+                  className={inputClasses}
                   disabled={loading}
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-[#a1a1aa] text-sm mb-2">Email address</label>
+                <label className="block text-white/60 text-sm mb-2">Email address</label>
                 <input
                   type="email"
                   value={form.contact_email}
                   onChange={(e) => updateField("contact_email", e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-[#050506] border border-[#1e1e22] rounded-xl text-white placeholder-[#52525b] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all"
+                  className={inputClasses}
                   disabled={loading}
                 />
               </div>
 
               {/* Username */}
               <div>
-                <label className="block text-[#a1a1aa] text-sm mb-2">Pick a username</label>
+                <label className="block text-white/60 text-sm mb-2">Pick a username</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -179,12 +202,12 @@ export default function SignupPage() {
                     }}
                     onBlur={() => form.username.length >= 3 && checkUsername(form.username)}
                     placeholder="yourname"
-                    className="w-full px-4 py-3 bg-[#050506] border border-[#1e1e22] rounded-xl text-white placeholder-[#52525b] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all pr-10"
+                    className={`${inputClasses} pr-10`}
                     disabled={loading}
                   />
                   {usernameStatus === "checking" && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <div className="w-4 h-4 border-2 border-[#52525b] border-t-[#a78bfa] rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-[var(--gold-500)] rounded-full animate-spin" />
                     </div>
                   )}
                   {usernameStatus === "available" && (
@@ -202,8 +225,8 @@ export default function SignupPage() {
                     </div>
                   )}
                 </div>
-                <p className="text-[#52525b] text-xs mt-1.5">
-                  This becomes guardia.page/{form.username || "yourname"}
+                <p className="text-white/25 text-xs mt-1.5">
+                  This becomes guardiacontent.com/faro/{form.username || "yourname"}
                 </p>
                 {usernameStatus === "taken" && (
                   <p className="text-red-400 text-xs mt-1">That username is taken. Try another.</p>
@@ -212,7 +235,7 @@ export default function SignupPage() {
 
               {/* PIN */}
               <div>
-                <label className="block text-[#a1a1aa] text-sm mb-2">Create a 4-digit PIN</label>
+                <label className="block text-white/60 text-sm mb-2">Create a 4-digit PIN</label>
                 <input
                   type="password"
                   inputMode="numeric"
@@ -221,15 +244,15 @@ export default function SignupPage() {
                   value={form.pin}
                   onChange={(e) => updateField("pin", e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="••••"
-                  className="w-full px-4 py-3 bg-[#050506] border border-[#1e1e22] rounded-xl text-white placeholder-[#52525b] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all text-center tracking-[0.5em] text-xl"
+                  className={`${inputClasses} text-center tracking-[0.5em] text-xl`}
                   disabled={loading}
                 />
-                <p className="text-[#52525b] text-xs mt-1.5">You&rsquo;ll use this to log in</p>
+                <p className="text-white/25 text-xs mt-1.5">You&rsquo;ll use this to log in</p>
               </div>
 
               {/* Error */}
               {error && (
-                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2">
+                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2">
                   {error}
                 </div>
               )}
@@ -238,11 +261,16 @@ export default function SignupPage() {
               <button
                 onClick={handleSubmit}
                 disabled={loading || usernameStatus === "taken"}
-                className="w-full py-3 bg-[#a78bfa] text-white font-semibold rounded-xl hover:bg-[#8b5cf6] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-2"
+                className="w-full py-3.5 font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-2 hover:-translate-y-px"
+                style={{
+                  background: "var(--gold-500)",
+                  color: "var(--warm-black)",
+                  boxShadow: "0 4px 20px rgba(212,168,83,0.35)",
+                }}
               >
                 {loading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-[var(--warm-black)]/30 border-t-[var(--warm-black)] rounded-full animate-spin" />
                     Creating your page...
                   </>
                 ) : (
@@ -254,17 +282,17 @@ export default function SignupPage() {
 
           {/* Footer links */}
           <div className="text-center mt-6 space-y-3">
-            <p className="text-[#52525b] text-sm">
+            <p className="text-white/30 text-sm">
               Already have an account?{" "}
-              <a href="/client" className="text-[#a78bfa] hover:underline">
+              <a href="/client" className="text-[var(--gold-500)] hover:text-[var(--gold-300)] transition-colors">
                 Log in
               </a>
             </p>
-            <p className="text-[#3f3f46] text-xs">
+            <p className="text-white/20 text-xs">
               By signing up you agree to our{" "}
-              <a href="/terms" className="hover:text-[#52525b] underline">terms</a>
+              <a href="/terms" className="hover:text-white/40 underline transition-colors">terms</a>
               {" "}and{" "}
-              <a href="/privacy" className="hover:text-[#52525b] underline">privacy policy</a>
+              <a href="/privacy" className="hover:text-white/40 underline transition-colors">privacy policy</a>
             </p>
           </div>
         </div>
