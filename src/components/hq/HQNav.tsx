@@ -10,14 +10,11 @@ const NAV_ITEMS = [
   { label: "Home", href: "/hq", color: "#a78bfa" },
   { label: "Paradise", href: "/hq/paradise", color: "#d4af37" },
   { label: "Factory", href: "/hq/factory", color: "#10b981" },
-  { label: "Flock", href: "/hq/flock", color: "#3b82f6" },
   { label: "Cortex", href: "/hq/cortex", color: "#8b5cf6" },
   { label: "Clients", href: "/hq/clients", color: "#f59e0b" },
   { label: "Atlas", href: "/hq/atlas", color: "#06b6d4" },
-  { label: "Lab", href: "/hq/lab", color: "#14b8a6" },
   { label: "Athernyx", href: "/hq/athernyx", color: "#a855f7" },
   { label: "Console", href: "/hq/console", color: "#ec4899" },
-  { label: "Luna", href: "/hq/luna", color: "#a78bfa" },
 ];
 
 export default function HQNav() {
