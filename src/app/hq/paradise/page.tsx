@@ -12,31 +12,69 @@ const API_BASE = "https://api.guardiacontent.com";
 // TYPES
 // ══════════════════════════════════════════════════════════════════════════════
 
-interface CatPerformance {
-  total_signals: number;
+interface TigerCat {
+  strategy: string;
+  market: string;
+  timeframe: string;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  closed_trades: number;
+  open_trades: number;
   wins: number;
   losses: number;
-  expired: number;
   win_rate: number;
-  total_pips: number;
-  avg_pips: number;
-  shadow_count: number;
+  open_positions: Array<{ market: string; direction: string; entry_price: number; pnl: number; created_at: string }>;
+  last_closed_at: string | null;
 }
 
-interface CatData {
+interface LionPosition {
+  symbol: string;
+  shares: number;
+  entry_price: number;
+  current_price: number;
+  pnl_dollars: number;
+  pnl_pct: number;
+  status: string;
+  stop_price: number;
+}
+
+interface LionCat {
   strategy: string;
+  market: string;
   timeframe: string;
-  last_signal: {
-    pair: string;
-    direction: string;
-    outcome: string;
-    pnl_pips: number;
-    shadow: number;
-    created_at: string;
-  } | null;
-  vulture: { approved: boolean; consecutive_losses: number };
-  performance: CatPerformance;
-  trades: { realized_pnl: number; total: number; wins?: number; losses?: number };
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  positions: LionPosition[];
+}
+
+interface CheetahCat {
+  strategy: string;
+  market: string;
+  timeframe: string;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  closed_trades: number;
+  open_trades: number;
+  wins: number;
+  losses: number;
+  win_rate: number;
+  open_positions: Array<{ market: string; direction: string; entry_price: number; pnl: number; created_at: string }>;
+  last_closed_at: string | null;
+}
+
+interface JaguarCat {
+  strategy: string;
+  market: string;
+  timeframe: string;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_pnl: number;
+  training?: boolean;
+  forex: { realized_pnl: number; closed_trades: number; wins: number; losses: number; total_pips: number };
+  funding: { realized_pnl: number; closed_trades: number; total_funding: number };
 }
 
 interface Position {
@@ -64,8 +102,6 @@ interface Signal {
 
 interface BirdStatus {
   mode: string;
-  daily_pnl?: number;
-  can_trade?: boolean;
   threshold?: number;
 }
 
@@ -78,14 +114,17 @@ interface PriceData {
 
 interface DashboardData {
   account: {
-    balance: number;
-    realized_pnl: number;
-    unrealized_pnl: number;
-    total_trades: number;
-    open_count: number;
+    starting_capital: number;
+    total_realized: number;
+    total_unrealized: number;
+    total_pnl: number;
   };
-  cats: Record<string, CatData>;
-  other_cats: Record<string, { strategy: string; status: string }>;
+  cats: {
+    tiger: TigerCat;
+    lion: LionCat;
+    cheetah: CheetahCat;
+    jaguar: JaguarCat;
+  };
   positions: Position[];
   signals: Signal[];
   birds: Record<string, BirdStatus>;
@@ -230,7 +269,7 @@ function CatAvatar({ name, size = 36 }: { name: string; size?: number }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// COMPONENTS
+// HEADER
 // ══════════════════════════════════════════════════════════════════════════════
 
 function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
@@ -239,7 +278,7 @@ function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
   refreshing: boolean;
   onRefresh: () => void;
 }) {
-  const totalPnl = (data.account.realized_pnl ?? 0) + (data.account.unrealized_pnl ?? 0);
+  const pnl = data.account.total_pnl;
   return (
     <header className="border-b border-[#1a1a1f] bg-gradient-to-b from-[#0c0a08] to-[#080706]">
       <div className="flex justify-between items-center px-6 py-4">
@@ -262,13 +301,21 @@ function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <div className="text-[#555] text-xs tracking-[0.15em]">BALANCE</div>
-            <div className="text-[#d4af37] font-mono text-lg">${data.account.balance.toFixed(2)}</div>
+            <div className="text-[#555] text-xs tracking-[0.15em]">CAPITAL</div>
+            <div className="text-[#d4af37] font-mono text-lg">${data.account.starting_capital.toLocaleString()}</div>
           </div>
           <div className="text-right">
-            <div className="text-[#555] text-xs tracking-[0.15em]">TOTAL P&L</div>
-            <div className={`font-mono text-lg ${totalPnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
-              {formatMoney(totalPnl)}
+            <div className="text-[#555] text-xs tracking-[0.15em]">TOTAL P&amp;L</div>
+            <div className={`font-mono text-lg ${pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+              {formatMoney(pnl)}
+            </div>
+            <div className="flex gap-3 justify-end mt-0.5">
+              <span className="text-[10px] text-[#555] font-mono">
+                R <span className={data.account.total_realized >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}>{formatMoney(data.account.total_realized)}</span>
+              </span>
+              <span className="text-[10px] text-[#555] font-mono">
+                U <span className={data.account.total_unrealized >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}>{formatMoney(data.account.total_unrealized)}</span>
+              </span>
             </div>
           </div>
         </div>
@@ -277,10 +324,13 @@ function ParadiseHeader({ data, lastRefresh, refreshing, onRefresh }: {
   );
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// ACTIVITY TICKER
+// ══════════════════════════════════════════════════════════════════════════════
+
 function ActivityTicker({ data }: { data: DashboardData }) {
   const items: Array<{ key: string; color: string; text: string }> = [];
 
-  // Recent signals (most interesting)
   for (const sig of data.signals.slice(0, 8)) {
     const c = CAT_COLORS[sig.cat] || "#888";
     const dir = sig.direction === "long" ? "\u2191" : sig.direction === "short" ? "\u2193" : "\u2014";
@@ -293,7 +343,6 @@ function ActivityTicker({ data }: { data: DashboardData }) {
     });
   }
 
-  // Open positions
   for (const pos of data.positions) {
     const c = CAT_COLORS[pos.strategy] || "#888";
     const dir = pos.direction === "long" ? "\u2191" : "\u2193";
@@ -305,13 +354,25 @@ function ActivityTicker({ data }: { data: DashboardData }) {
     });
   }
 
-  // Cat scan status for cats with no recent signal
-  for (const [name, cat] of Object.entries(data.cats)) {
-    if (!cat.last_signal || cat.last_signal.direction === "neutral") {
+  // Tiger open positions
+  if (data.cats.tiger?.open_positions?.length > 0) {
+    for (const tp of data.cats.tiger.open_positions) {
       items.push({
-        key: `scan-${name}`,
-        color: CAT_COLORS[name] || "#888",
-        text: `${name.toUpperCase()} scanning...`,
+        key: `tiger-pos-${tp.market}`,
+        color: CAT_COLORS.tiger,
+        text: `TIGER ${tp.direction === "long" ? "\u2191" : "\u2193"} ${tp.market.slice(0, 30)} ${formatMoney(tp.pnl)}`,
+      });
+    }
+  }
+
+  // Jaguar activity
+  if (data.cats.jaguar) {
+    const j = data.cats.jaguar;
+    if (j.funding.total_funding !== 0) {
+      items.push({
+        key: "jaguar-funding",
+        color: CAT_COLORS.jaguar,
+        text: `JAGUAR funding arb ${formatMoney(j.funding.total_funding)} collected \u00b7 ${j.funding.closed_trades} trades`,
       });
     }
   }
@@ -320,19 +381,22 @@ function ActivityTicker({ data }: { data: DashboardData }) {
   items.push({
     key: "account",
     color: "#d4af37",
-    text: `BAL $${data.account.balance.toFixed(2)} \u00b7 ${data.account.open_count} open \u00b7 ${data.account.total_trades} total trades`,
+    text: `CAPITAL $${data.account.starting_capital.toLocaleString()} \u00b7 P&L ${formatMoney(data.account.total_pnl)}`,
   });
 
   if (items.length === 0) return null;
 
   return (
-    <div className="border-b border-[#1a1a1f] bg-[#0a0908] overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)" }}>
+    <div
+      className="border-b border-[#1a1a1f] bg-[#0a0908] overflow-hidden"
+      style={{
+        maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
+        WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
+      }}
+    >
       <div className="flex animate-ticker">
         {[...items, ...items].map((item, i) => (
-          <div
-            key={`${item.key}-${i}`}
-            className="flex items-center gap-2 px-5 py-2 whitespace-nowrap shrink-0"
-          >
+          <div key={`${item.key}-${i}`} className="flex items-center gap-2 px-5 py-2 whitespace-nowrap shrink-0">
             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
             <span className="text-sm text-[#999] font-mono">{item.text}</span>
           </div>
@@ -342,90 +406,335 @@ function ActivityTicker({ data }: { data: DashboardData }) {
   );
 }
 
-function CatStatusCard({ name, cat }: { name: string; cat: CatData }) {
-  const color = CAT_COLORS[name] || "#888";
-  const perf = cat.performance;
-  const v = cat.vulture;
+// ══════════════════════════════════════════════════════════════════════════════
+// CAT CARDS
+// ══════════════════════════════════════════════════════════════════════════════
 
+function CardShell({ name, subtitle, children }: { name: string; subtitle: string; children: React.ReactNode }) {
+  const color = CAT_COLORS[name] || "#888";
   return (
-    <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5 hover:border-[#2a2a2f] transition-colors">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5 hover:border-[#2a2a2f] transition-colors flex flex-col gap-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <CatAvatar name={name} size={108} />
+          <CatAvatar name={name} size={40} />
           <span className="text-lg font-medium tracking-wide" style={{ color }}>{name.toUpperCase()}</span>
         </div>
-        <span className="text-[#555] text-xs">{cat.strategy} &middot; {cat.timeframe}</span>
+        <span className="text-[#444] text-xs font-mono">{subtitle}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function PnlDisplay({ value, label }: { value: number; label?: string }) {
+  return (
+    <div>
+      {label && <div className="text-[#555] text-[10px] tracking-[0.15em] mb-0.5">{label}</div>}
+      <div className={`font-mono text-2xl font-semibold ${value >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+        {formatMoney(value)}
+      </div>
+    </div>
+  );
+}
+
+function TigerCard({ tiger }: { tiger: TigerCat }) {
+  const hasPositions = tiger.open_positions?.length > 0;
+  return (
+    <CardShell name="tiger" subtitle={`${tiger.strategy} \u00b7 ${tiger.market}`}>
+      <div className="flex items-end justify-between">
+        <PnlDisplay value={tiger.total_pnl} label="TOTAL P&L" />
+        <div className="text-right">
+          <div
+            className="inline-flex items-center px-2.5 py-1 rounded text-sm font-mono font-semibold"
+            style={{ backgroundColor: "#FF634715", color: "#FF6347" }}
+          >
+            {tiger.win_rate != null ? tiger.win_rate.toFixed(1) : "—"}% WR
+          </div>
+          <div className="text-[#555] text-xs font-mono mt-1">{tiger.closed_trades} trades</div>
+        </div>
       </div>
 
-      {cat.last_signal ? (
-        <div className="mb-3 px-3 py-2 bg-[#0e0e10] rounded border border-[#1a1a1f]">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[#aaa] font-mono">{cat.last_signal.pair}</span>
-            {cat.last_signal.direction === "neutral" ? (
-              <span className="text-[#555]">SCANNING</span>
-            ) : (
-              <span className={cat.last_signal.direction === "long" ? "text-[#50c878]" : "text-[#e74c3c]"}>
-                {cat.last_signal.direction === "long" ? "\u2191" : "\u2193"} {cat.last_signal.direction.toUpperCase()}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center justify-between mt-1">
-            <span
-              className="text-xs px-1.5 py-0.5 rounded"
-              style={{
-                backgroundColor: (OUTCOME_COLORS[cat.last_signal.outcome] || "#666") + "20",
-                color: OUTCOME_COLORS[cat.last_signal.outcome] || "#666",
-              }}
-            >
-              {cat.last_signal.outcome || (cat.last_signal.direction === "neutral" ? "scan" : "pending")}
-            </span>
-            <span className="text-[#555] text-xs">{timeAgo(cat.last_signal.created_at)}</span>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-[#0e0e10] rounded p-2.5">
+          <div className="text-[#555] text-[10px] tracking-[0.1em]">REALIZED</div>
+          <div className={`font-mono text-sm mt-0.5 ${tiger.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(tiger.realized_pnl)}
           </div>
         </div>
-      ) : (
-        <div className="mb-3 px-3 py-2 bg-[#0e0e10] rounded border border-[#1a1a1f] text-[#444] text-sm">
-          No signals yet
+        <div className="bg-[#0e0e10] rounded p-2.5">
+          <div className="text-[#555] text-[10px] tracking-[0.1em]">UNREALIZED</div>
+          <div className={`font-mono text-sm mt-0.5 ${tiger.unrealized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(tiger.unrealized_pnl)}
+          </div>
+        </div>
+        <div className="bg-[#0e0e10] rounded p-2.5">
+          <div className="text-[#555] text-[10px] tracking-[0.1em]">W / L</div>
+          <div className="font-mono text-sm mt-0.5">
+            <span className="text-[#50c878]">{tiger.wins}W</span>
+            <span className="text-[#555]"> / </span>
+            <span className="text-[#e74c3c]">{tiger.losses}L</span>
+          </div>
+        </div>
+      </div>
+
+      {hasPositions && (
+        <div>
+          <div className="text-[#555] text-[10px] tracking-[0.15em] mb-2">OPEN POSITIONS ({tiger.open_trades})</div>
+          <div className="space-y-1.5">
+            {tiger.open_positions.map((pos, i) => (
+              <div key={i} className="flex items-center justify-between bg-[#0e0e10] rounded px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs ${pos.direction === "long" ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+                    {pos.direction === "long" ? "\u2191" : "\u2193"}
+                  </span>
+                  <span className="text-[#aaa] text-xs font-mono truncate max-w-[140px]">{pos.market}</span>
+                </div>
+                <span className={`font-mono text-xs ${pos.pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+                  {formatMoney(pos.pnl)}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="flex items-center justify-between text-sm">
-        <div className="flex items-center gap-2">
-          <span
-            className={`w-2 h-2 rounded-full ${!v.approved ? "animate-pulse" : ""}`}
-            style={{ backgroundColor: v.approved ? (v.consecutive_losses >= 2 ? "#f59e0b" : "#10b981") : "#ef4444" }}
-          />
-          <span className="text-[#777] text-xs">
-            Vulture: {v.approved ? "CLEAR" : "BLOCKED"} ({v.consecutive_losses}L)
-          </span>
+      {tiger.last_closed_at && (
+        <div className="flex items-center gap-1.5 text-[#444] text-xs">
+          <Clock size={11} />
+          <span>Last closed {timeAgo(tiger.last_closed_at)}</span>
         </div>
-        <span className="text-[#555] text-xs font-mono">
-          {perf.total_signals} sigs &middot; {formatPips(perf.total_pips)}
-        </span>
-      </div>
-    </div>
+      )}
+    </CardShell>
   );
 }
 
-function OtherCatCard({ name, info }: { name: string; info: { strategy: string; status: string } }) {
-  const color = CAT_COLORS[name] || "#888";
+function LionCard({ lion }: { lion: LionCat }) {
+  const hasPositions = lion.positions?.length > 0;
   return (
-    <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-4 hover:border-[#2a2a2f] transition-colors opacity-60">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <CatAvatar name={name} size={84} />
-          <span className="text-sm font-medium" style={{ color }}>{name.toUpperCase()}</span>
+    <CardShell name="lion" subtitle={`${lion.strategy} \u00b7 ${lion.market}`}>
+      <div className="flex items-end justify-between">
+        <PnlDisplay value={lion.total_pnl} label="TOTAL P&L" />
+        <div className="text-right">
+          <div className="text-[#555] text-[10px] tracking-[0.1em]">UNREALIZED</div>
+          <div className={`font-mono text-sm ${lion.unrealized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(lion.unrealized_pnl)}
+          </div>
         </div>
-        <span className="text-[#444] text-xs">{info.strategy}</span>
       </div>
-    </div>
+
+      {hasPositions ? (
+        <div>
+          <div className="text-[#555] text-[10px] tracking-[0.15em] mb-2">POSITIONS ({lion.positions.length})</div>
+          <div className="space-y-2">
+            {lion.positions.map((pos, i) => (
+              <div key={i} className="bg-[#0e0e10] rounded px-3 py-2">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#ccc] font-mono text-sm font-semibold">{pos.symbol}</span>
+                    <span className="text-[#555] text-xs">{pos.shares}sh</span>
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{
+                        backgroundColor: pos.status === "trailing" ? "#f59e0b20" : "#ffffff10",
+                        color: pos.status === "trailing" ? "#f59e0b" : "#777",
+                      }}
+                    >
+                      {pos.status}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className={`font-mono text-sm ${pos.pnl_dollars >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+                      {formatMoney(pos.pnl_dollars)}
+                    </span>
+                    <span className={`font-mono text-xs ml-2 ${pos.pnl_pct >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+                      ({pos.pnl_pct >= 0 ? "+" : ""}{pos.pnl_pct.toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-[10px] text-[#555] font-mono">
+                  <span>Entry ${pos.entry_price.toFixed(2)}</span>
+                  <span>\u2192</span>
+                  <span>Now ${pos.current_price.toFixed(2)}</span>
+                  {pos.status === "trailing" && <span className="text-[#f59e0b]">Stop ${pos.stop_price.toFixed(2)}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-[#444] text-sm text-center py-4">No open positions</div>
+      )}
+
+      <div className="bg-[#0e0e10] rounded px-3 py-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[#555] text-xs">Realized</span>
+          <span className={`font-mono text-sm ${lion.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(lion.realized_pnl)}
+          </span>
+        </div>
+      </div>
+    </CardShell>
   );
 }
+
+function CheetahCard({ cheetah }: { cheetah: CheetahCat }) {
+  const hasPositions = cheetah.open_positions?.length > 0;
+  return (
+    <CardShell name="cheetah" subtitle={`${cheetah.strategy} \u00b7 ${cheetah.market}`}>
+      <div className="flex items-end justify-between">
+        <PnlDisplay value={cheetah.total_pnl} label="TOTAL P&L" />
+        <div className="text-right">
+          <div
+            className="inline-flex items-center px-2.5 py-1 rounded text-sm font-mono font-semibold"
+            style={{ backgroundColor: "#FFD70015", color: "#FFD700" }}
+          >
+            {cheetah.win_rate != null ? cheetah.win_rate.toFixed(1) : "—"}% WR
+          </div>
+          <div className="text-[#555] text-xs font-mono mt-1">{cheetah.closed_trades} trades</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-[#0e0e10] rounded p-2.5">
+          <div className="text-[#555] text-[10px] tracking-[0.1em]">REALIZED</div>
+          <div className={`font-mono text-sm mt-0.5 ${cheetah.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(cheetah.realized_pnl)}
+          </div>
+        </div>
+        <div className="bg-[#0e0e10] rounded p-2.5">
+          <div className="text-[#555] text-[10px] tracking-[0.1em]">UNREALIZED</div>
+          <div className={`font-mono text-sm mt-0.5 ${cheetah.unrealized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(cheetah.unrealized_pnl)}
+          </div>
+        </div>
+        <div className="bg-[#0e0e10] rounded p-2.5">
+          <div className="text-[#555] text-[10px] tracking-[0.1em]">W / L</div>
+          <div className="font-mono text-sm mt-0.5">
+            <span className="text-[#50c878]">{cheetah.wins}W</span>
+            <span className="text-[#555]"> / </span>
+            <span className="text-[#e74c3c]">{cheetah.losses}L</span>
+          </div>
+        </div>
+      </div>
+
+      {hasPositions && (
+        <div>
+          <div className="text-[#555] text-[10px] tracking-[0.15em] mb-2">OPEN POSITIONS ({cheetah.open_trades})</div>
+          <div className="space-y-1.5">
+            {cheetah.open_positions.map((pos, i) => (
+              <div key={i} className="flex items-center justify-between bg-[#0e0e10] rounded px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs ${pos.direction === "long" ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+                    {pos.direction === "long" ? "\u2191" : "\u2193"}
+                  </span>
+                  <span className="text-[#aaa] text-xs font-mono truncate max-w-[140px]">{pos.market}</span>
+                </div>
+                <span className={`font-mono text-xs ${pos.pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+                  {formatMoney(pos.pnl)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {cheetah.last_closed_at && (
+        <div className="flex items-center gap-1.5 text-[#444] text-xs">
+          <Clock size={11} />
+          <span>Last closed {timeAgo(cheetah.last_closed_at)}</span>
+        </div>
+      )}
+    </CardShell>
+  );
+}
+
+function JaguarCard({ jaguar }: { jaguar: JaguarCat }) {
+  return (
+    <CardShell name="jaguar" subtitle={`${jaguar.strategy} \u00b7 ${jaguar.market}`}>
+      {jaguar.training && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs tracking-[0.2em] text-[#f59e0b] font-mono border border-[#f59e0b]/30 px-2 py-0.5 rounded">TRAINING</span>
+        </div>
+      )}
+      <div className="flex items-end justify-between">
+        <div>
+          <PnlDisplay value={jaguar.total_pnl} label="TOTAL P&L" />
+          {jaguar.training && (
+            <span className="text-[10px] text-[#555]">Not included in total P&L</span>
+          )}
+        </div>
+        <div className="text-right">
+          <div className="text-[#555] text-[10px]">REALIZED</div>
+          <div className={`font-mono text-sm ${jaguar.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(jaguar.realized_pnl)}
+          </div>
+        </div>
+      </div>
+
+      {/* Forex section */}
+      <div className="bg-[#0e0e10] rounded p-3">
+        <div className="text-[#d4af37] text-[10px] tracking-[0.2em] font-medium mb-2">FOREX</div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-sm font-mono">
+            <span className="text-[#50c878]">{jaguar.forex.wins}W</span>
+            <span className="text-[#555]">/</span>
+            <span className="text-[#e74c3c]">{jaguar.forex.losses}L</span>
+            <span className="text-[#555] text-xs">({jaguar.forex.closed_trades} trades)</span>
+          </div>
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className={jaguar.forex.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}>
+              {formatMoney(jaguar.forex.realized_pnl)}
+            </span>
+            <span className={jaguar.forex.total_pips >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}>
+              {formatPips(jaguar.forex.total_pips)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Funding Arb section */}
+      <div className="bg-[#0e0e10] rounded p-3">
+        <div className="text-[#d4af37] text-[10px] tracking-[0.2em] font-medium mb-2">FUNDING ARB</div>
+        <div className="flex items-center justify-between">
+          <div className="text-[#555] text-xs">{jaguar.funding.closed_trades} trades</div>
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <div className="text-right">
+              <div className="text-[#555] text-[10px]">Funding Collected</div>
+              <div className={jaguar.funding.total_funding >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}>
+                {formatMoney(jaguar.funding.total_funding)}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[#555] text-[10px]">Realized</div>
+              <div className={jaguar.funding.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}>
+                {formatMoney(jaguar.funding.realized_pnl)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-[#0e0e10] rounded px-3 py-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[#555] text-xs">Unrealized</span>
+          <span className={`font-mono text-sm ${jaguar.unrealized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
+            {formatMoney(jaguar.unrealized_pnl)}
+          </span>
+        </div>
+      </div>
+    </CardShell>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POSITIONS TABLE
+// ══════════════════════════════════════════════════════════════════════════════
 
 function PositionsTable({ positions }: { positions: Position[] }) {
   if (positions.length === 0) {
     return (
       <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-8 text-center">
-        <div className="text-[#444] text-sm">No open positions &mdash; cats are watching</div>
+        <div className="text-[#444] text-sm">No open forex positions &mdash; cats are watching</div>
       </div>
     );
   }
@@ -489,6 +798,10 @@ function PositionsTable({ positions }: { positions: Position[] }) {
   );
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// SIGNAL FEED
+// ══════════════════════════════════════════════════════════════════════════════
+
 function SignalFeed({ signals }: { signals: Signal[] }) {
   if (signals.length === 0) {
     return (
@@ -507,7 +820,7 @@ function SignalFeed({ signals }: { signals: Signal[] }) {
           <div
             key={sig.id}
             className={`flex items-center justify-between px-4 py-2.5 border-b border-[#111] hover:bg-[#0e0e10] transition-colors ${
-              isShadow ? "border-l-2 border-l-dashed border-l-[#555]" : ""
+              isShadow ? "border-l-2 border-l-[#555]" : ""
             }`}
           >
             <div className="flex items-center gap-3">
@@ -545,12 +858,26 @@ function SignalFeed({ signals }: { signals: Signal[] }) {
   );
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// BIRD GATES PANEL
+// ══════════════════════════════════════════════════════════════════════════════
+
 function BirdGatesPanel({ birds }: { birds: Record<string, BirdStatus> }) {
   const birdList = [
     { key: "hawk", label: "Hawk", desc: "Risk Gate" },
     { key: "eagle", label: "Eagle", desc: "Signal Quality" },
     { key: "vulture", label: "Vulture", desc: "Discipline" },
   ];
+
+  function birdColor(mode: string) {
+    if (mode === "normal") return "#10b981";
+    if (mode === "paper") return "#f59e0b";
+    return "#ef4444";
+  }
+
+  function birdPulse(mode: string) {
+    return mode !== "normal" && mode !== "paper";
+  }
 
   return (
     <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5">
@@ -559,13 +886,14 @@ function BirdGatesPanel({ birds }: { birds: Record<string, BirdStatus> }) {
         {birdList.map(({ key, label, desc }) => {
           const bird = birds[key];
           if (!bird) return null;
-          const isNormal = bird.mode === "normal";
+          const color = birdColor(bird.mode);
+          const pulse = birdPulse(bird.mode);
           return (
             <div key={key} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span
-                  className={`w-2 h-2 rounded-full ${!isNormal ? "animate-pulse" : ""}`}
-                  style={{ backgroundColor: isNormal ? "#10b981" : "#ef4444" }}
+                  className={`w-2 h-2 rounded-full ${pulse ? "animate-pulse" : ""}`}
+                  style={{ backgroundColor: color }}
                 />
                 {(() => { const BIcon = BIRD_ICONS[key]; return BIcon ? <BIcon size={14} className="text-[#666]" /> : null; })()}
                 <span className="text-[#aaa] text-sm">{label}</span>
@@ -573,63 +901,10 @@ function BirdGatesPanel({ birds }: { birds: Record<string, BirdStatus> }) {
               </div>
               <span
                 className="text-[10px] px-2 py-0.5 rounded tracking-wider"
-                style={{
-                  backgroundColor: isNormal ? "#10b98120" : "#ef444420",
-                  color: isNormal ? "#10b981" : "#ef4444",
-                }}
+                style={{ backgroundColor: color + "20", color }}
               >
                 {bird.mode.toUpperCase()}
               </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function PerformancePanel({ cats }: { cats: Record<string, CatData> }) {
-  return (
-    <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5">
-      <div className="text-[#555] text-sm tracking-[0.2em] font-medium mb-4">PERFORMANCE</div>
-      <div className="space-y-4">
-        {Object.entries(cats).map(([name, cat]) => {
-          const p = cat.performance;
-          const tradeTotal = (cat.trades.wins ?? 0) + (cat.trades.losses ?? 0);
-          const winPct = tradeTotal > 0 ? ((cat.trades.wins ?? 0) / tradeTotal) * 100 : 0;
-          return (
-            <div key={name}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm flex items-center gap-1.5" style={{ color: CAT_COLORS[name] }}>
-                  <CatAvatar name={name} size={60} />
-                  {name.charAt(0).toUpperCase() + name.slice(1)}
-                </span>
-                <span className={`font-mono text-sm ${p.total_pips >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
-                  {formatPips(p.total_pips)}
-                </span>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-[#666] mb-1.5">
-                <span className="text-[#10b981]">{cat.trades.wins ?? 0}W</span>
-                <span className="text-[#ef4444]">{cat.trades.losses ?? 0}L</span>
-                <span className={`font-mono ${cat.trades.realized_pnl >= 0 ? "text-[#50c878]" : "text-[#e74c3c]"}`}>
-                  ${cat.trades.realized_pnl.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-[#444] mb-1.5">
-                <span>Signals: {p.wins}W / {p.losses}L / {p.expired}E</span>
-                <span>({p.total_pips >= 0 ? "+" : ""}{p.total_pips} pips)</span>
-              </div>
-              {tradeTotal > 0 && (
-                <div className="h-1 bg-[#1a1a1f] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#10b981] rounded-full" style={{ width: `${winPct}%` }} />
-                </div>
-              )}
-              {p.shadow_count > 0 && (
-                <div className="text-[10px] text-[#555] mt-1">Shadow: {p.shadow_count} tracked</div>
-              )}
-              {p.shadow_count === 0 && p.total_signals > 0 && (
-                <div className="text-[10px] text-[#444] mt-1">No shadow data yet</div>
-              )}
             </div>
           );
         })}
@@ -648,8 +923,8 @@ function LoadingSkeleton() {
       <header className="border-b border-[#1a1a1f] bg-gradient-to-b from-[#0c0a08] to-[#080706] h-16" />
       <main className="max-w-[1400px] mx-auto p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2].map((i) => (
-            <div key={i} className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg h-40 animate-pulse" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg h-48 animate-pulse" />
           ))}
         </div>
         <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg h-48 animate-pulse" />
@@ -724,46 +999,36 @@ export default function ParadisePage() {
             </div>
           )}
 
-          {/* Stale signal warning */}
+          {/* Stale activity warning — check cheetah last_closed_at as proxy */}
           {(() => {
-            const allSignals = Object.values(data.cats)
-              .map(c => c.last_signal?.created_at)
-              .filter(Boolean) as string[];
-            if (allSignals.length === 0) return null;
-            const newest = Math.max(...allSignals.map(s => new Date(s + "Z").getTime()));
-            const hoursAgo = (Date.now() - newest) / 3600000;
+            const lastClosed = data.cats.cheetah?.last_closed_at;
+            if (!lastClosed) return null;
+            const hoursAgo = (Date.now() - new Date(lastClosed + "Z").getTime()) / 3600000;
             if (hoursAgo < 12) return null;
             return (
               <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-lg px-4 py-2 text-[#f59e0b] text-sm flex items-center gap-2">
                 <Clock size={14} />
-                Signals stale &mdash; last scan was {Math.floor(hoursAgo)}h ago
+                Cheetah idle &mdash; last trade closed {Math.floor(hoursAgo)}h ago
               </div>
             );
           })()}
 
-          {/* Cat Status Cards */}
+          {/* 2x2 Cat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(data.cats).map(([name, cat]) => (
-              <CatStatusCard key={name} name={name} cat={cat} />
-            ))}
+            <TigerCard tiger={data.cats.tiger} />
+            <LionCard lion={data.cats.lion} />
+            <CheetahCard cheetah={data.cats.cheetah} />
+            <JaguarCard jaguar={data.cats.jaguar} />
           </div>
 
-          {/* Other Cats (Tiger, Jaguar) */}
-          {Object.keys(data.other_cats).length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {Object.entries(data.other_cats).map(([name, info]) => (
-                <OtherCatCard key={name} name={name} info={info} />
-              ))}
-            </div>
-          )}
-
-          {/* Open Positions */}
+          {/* Open Positions (OANDA only) */}
           <div>
             <div className="text-[#9a8e7e] text-sm tracking-[0.2em] font-medium mb-3">
               OPEN POSITIONS
-              {data.account.open_count > 0 && (
-                <span className="ml-2 text-[#888]">({data.account.open_count})</span>
+              {data.positions.length > 0 && (
+                <span className="ml-2 text-[#888]">({data.positions.length})</span>
               )}
+              <span className="ml-2 text-[#444] text-xs normal-case tracking-normal">OANDA forex</span>
             </div>
             <PositionsTable positions={data.positions} />
           </div>
@@ -776,10 +1041,28 @@ export default function ParadisePage() {
             <SignalFeed signals={data.signals} />
           </div>
 
-          {/* Bottom Panels */}
+          {/* Bird Gates (bottom, single col on mobile, half width on desktop) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <BirdGatesPanel birds={data.birds} />
-            <PerformancePanel cats={data.cats} />
+            <div className="bg-[#0a0a0b] border border-[#1a1a1f] rounded-lg p-5">
+              <div className="text-[#555] text-sm tracking-[0.2em] font-medium mb-4">LIVE PRICES</div>
+              {Object.keys(data.prices).length === 0 ? (
+                <div className="text-[#444] text-sm">No price data</div>
+              ) : (
+                <div className="space-y-2">
+                  {Object.entries(data.prices).map(([pair, price]) => (
+                    <div key={pair} className="flex items-center justify-between">
+                      <span className="text-[#aaa] font-mono text-sm">{pair}</span>
+                      <div className="flex items-center gap-4 text-xs font-mono">
+                        <span className="text-[#50c878]">{price.bid}</span>
+                        <span className="text-[#e74c3c]">{price.ask}</span>
+                        <span className="text-[#555]">{price.spread}p</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>

@@ -15,7 +15,7 @@ const RefreshContext = createContext(0);
 // ══════════════════════════════════════════════════════════════════════════════
 
 interface ParadiseDashboard {
-  account: { balance: number; realized_pnl: number; unrealized_pnl: number; total_trades: number; open_count: number };
+  account: { starting_capital: number; total_realized: number; total_unrealized: number; total_pnl: number };
   signals: unknown[];
 }
 
@@ -183,19 +183,18 @@ function ParadiseWidget() {
       .finally(() => setLoading(false));
   }, [refreshKey]);
 
-  const totalPnl = data ? data.account.realized_pnl + data.account.unrealized_pnl : 0;
+  const totalPnl = data?.account.total_pnl ?? 0;
 
   return (
     <Widget title="Paradise" color="#d4af37" href="/hq/paradise" loading={loading} error={error}>
       <div className="space-y-3">
         <div>
-          <span className="text-[#555] text-[10px] tracking-wider">BALANCE</span>
-          <p className="text-[#d4af37] font-mono text-lg">${data?.account.balance.toFixed(2) || "0.00"}</p>
+          <span className="text-[#555] text-[10px] tracking-wider">TOTAL P&amp;L</span>
+          <p className={`font-mono text-lg ${totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>{totalPnl >= 0 ? "+" : ""}{totalPnl.toFixed(2)}</p>
         </div>
         <div className="flex items-center gap-4 text-xs">
-          <span className="text-[#555]">P&L <span className={`ml-1 font-mono ${totalPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>{totalPnl >= 0 ? "+" : ""}{totalPnl.toFixed(2)}</span></span>
-          <span className="text-[#555]">Open <span className="ml-1 text-[#888]">{data?.account.open_count || 0}</span></span>
-          <span className="text-[#555]">Signals <span className="ml-1 text-[#888]">{data?.signals?.length || 0}</span></span>
+          <span className="text-[#555]">Realized <span className={`ml-1 font-mono ${(data?.account.total_realized ?? 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>{(data?.account.total_realized ?? 0) >= 0 ? "+" : ""}{(data?.account.total_realized ?? 0).toFixed(2)}</span></span>
+          <span className="text-[#555]">Unrealized <span className={`ml-1 font-mono ${(data?.account.total_unrealized ?? 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>{(data?.account.total_unrealized ?? 0) >= 0 ? "+" : ""}{(data?.account.total_unrealized ?? 0).toFixed(2)}</span></span>
         </div>
       </div>
     </Widget>
