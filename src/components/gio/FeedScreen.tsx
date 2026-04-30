@@ -609,9 +609,15 @@ export default function FeedScreen({ jwt, clientTier, onPostSelect, onNavigate }
               className="rounded-2xl mb-4"
             />
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">Your Feed</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-6">
-              Upload some photos and we&apos;ll handle the rest — styled, captioned, and posted.
+            <p className="text-sm text-[var(--text-muted)] mb-6 max-w-xs">
+              Upload a photo. We style it, caption it, and post it for you.
             </p>
+            <button
+              onClick={() => onNavigate?.("post")}
+              className="px-6 py-3 rounded-xl bg-[var(--accent)] hover:opacity-90 text-white font-semibold text-sm transition-opacity shadow-lg"
+            >
+              Upload your first photo
+            </button>
           </div>
         )}
       </div>
